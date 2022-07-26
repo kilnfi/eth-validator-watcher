@@ -1,0 +1,50 @@
+{
+    "execution_optimistic": false,
+    "data": [
+        {
+            "index": "0",
+            "balance": "36016469417",
+            "status": "active_ongoing",
+            "validator": {
+                "pubkey": "0x933ad9491b62059dd065b560d256d8957a8c402cc6e8d8ee7290ae11e8f7329267a8811c397529dac52ae1342ba58c95",
+                "withdrawal_credentials": "0x00f50428677c60f997aadeab24aabf7fceaef491c96a52b463ae91f95611cf71",
+                "effective_balance": "32000000000",
+                "slashed": false,
+                "activation_eligibility_epoch": "0",
+                "activation_epoch": "0",
+                "exit_epoch": "18446744073709551615",
+                "withdrawable_epoch": "18446744073709551615"
+            }
+        },
+        {
+            "index": "2",
+            "balance": "36116490189",
+            "status": "active_exiting",
+            "validator": {
+                "pubkey": "0xb2ff4716ed345b05dd1dfc6a5a9fa70856d8c75dcc9e881dd2f766d5f891326f0d10e96f3a444ce6c912b69c22c6754d",
+                "withdrawal_credentials": "0x00d66cf353931500a54cbd0bc59cbaac6690cb0932f42dc8afeddc88feeaad6f",
+                "effective_balance": "32000000000",
+                "slashed": false,
+                "activation_eligibility_epoch": "0",
+                "activation_epoch": "0",
+                "exit_epoch": "18446744073709551615",
+                "withdrawable_epoch": "18446744073709551615"
+            }
+        },
+        {
+            "index": "4",
+            "balance": "36082885671",
+            "status": "active_ongoing",
+            "validator": {
+                "pubkey": "0xa62420543ceef8d77e065c70da15f7b731e56db5457571c465f025e032bbcd263a0990c8749b4ca6ff20d77004454b51",
+                "withdrawal_credentials": "0x0037ca9a1cf2223d8b9f81a14d4937fef94890ae4fcdfbba928a4dc2ff7fcf3b",
+                "effective_balance": "32000000000",
+                "slashed": false,
+                "activation_eligibility_epoch": "0",
+                "activation_epoch": "0",
+                "exit_epoch": "18446744073709551615",
+                "withdrawable_epoch": "18446744073709551615"
+            }
+        }
+    ]
+}
