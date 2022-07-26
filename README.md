@@ -1,10 +1,13 @@
-Validator Watcher
-=================
+Ethereum Validator Watcher
+==========================
 
 Description
 -----------
 
-🚨 Be alerted when you miss a block proposal! 🚨
+```
+Usage: eth-validator-watcher [OPTIONS]
+
+🚨 Be alerted when you miss an Ethereum block proposal! 🚨
 
 This tool watches the 🥓 Ethereum Beacon chain 🥓 and raises and alert when
 a block proposal is missed. It needs to be connected to a beacon node.
@@ -23,7 +26,6 @@ when one of your validators missed a block.
 
 Prometheus server is automatically exposed on port 8000.
 
-```
 Options:
   --beacon-url TEXT               URL of Teku beacon node  [required]
   --pubkeys-file-path FILE        File containing the list of public keys to watch
@@ -36,13 +38,13 @@ Installation
 To install it from PyPI:
 
 ```
-pip install validator-watcher
+pip install eth-validator-watcher
 ```
 
 To install it from source:
 ```
-git clone git@github.com:kilnfi/validator-watcher.git
-cd validator-watcher
+git clone git@github.com:kilnfi/eth-validator-watcher.git
+cd eth-validator-watcher
 pip install .
 ```
 

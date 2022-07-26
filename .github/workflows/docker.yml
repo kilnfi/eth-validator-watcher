@@ -1,0 +1,27 @@
+# name: Docker
+
+# on:
+#   push:
+#     branches:
+#       - initial-commit
+#   pull_request:
+#     branches:
+#       - master
+
+# jobs:
+#   docker:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v2
+
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           role-to-assume: arn:aws:iam::920189201894:role/ethereum-validator-watcher-gh-actions
+#           aws-region: eu-west-1
+#           role-session-name: github-action-cross-account
+
+#       - name: Login to Amazon ECR Private
+#         id: login-ecr
+#         uses: aws-actions/amazon-ecr-login@v1
