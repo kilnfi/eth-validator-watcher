@@ -71,10 +71,24 @@ async def handler_event(
         else previous_slot_number
     )
 
+    # Normally (according to ConsenSys team), if a block is missed, then there is no
+    # event emitted. However, it seems there is some cases where the event is
+    # nevertheless emitted. So we check its state.
+    # Furthermore, it seems sometimes the route `beacon/blocks/{current_slot_number}`
+    # is not ready while the event is triggered, so we wait a little bit.
+
+    await asyncio.sleep(1)
+
+    current_block = await session.get(
+        f"{beacon_url}/eth/v2/beacon/blocks/{current_slot_number}"
+    )
+
+    is_current_block_missed = current_block.status == 404
+
     slots_with_status = [
         SlotWithStatus(number=slot, missed=True)
         for slot in range(previous_slot_number + 1, current_slot_number)
-    ] + [SlotWithStatus(number=current_slot_number, missed=False)]
+    ] + [SlotWithStatus(number=current_slot_number, missed=is_current_block_missed)]
 
     for slot_with_status in slots_with_status:
         # Compute epoch from slot
