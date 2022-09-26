@@ -18,6 +18,28 @@ print = functools.partial(print, flush=True)
 app = typer.Typer()
 
 
+def load_pubkeys_from_file(path: Path) -> set[str]:
+    """Load public keys from a file.
+
+    path: A path to a file containing a list of public keys.
+    Returns the corresponding set of public keys.
+    """
+    # Ideally, this function should be async
+    with path.open() as file_descriptor:
+        return set((f"0x{line.strip()}" for line in file_descriptor))
+
+
+async def load_pubkeys_from_web3signer(session: ClientSession, url: str) -> set[str]:
+    """Load public keys from Web3Signer.
+
+    session: aiohttp client session
+    url: A URL to Web3Signer
+    Returns the corresponding set of public keys.
+    """
+    resp = await session.get(f"{url}/api/v1/eth2/publicKeys")
+    return set(await resp.json())
+
+
 async def handler_event(
     event: client.MessageEvent,
     previous_slot_number: Optional[int],
@@ -39,28 +61,6 @@ async def handler_event(
 
     Returns the latest slot number handled.
     """
-
-    def load_pubkeys_from_file(path: Path) -> set[str]:
-        """Load public keys from a file.
-
-        path: A path to a file containing a list of public keys.
-        Returns the corresponding set of public keys.
-        """
-        # Ideally, this function should be async
-        with path.open() as file_descriptor:
-            return set((f"0x{line.strip()}" for line in file_descriptor))
-
-    async def load_pubkeys_from_web3signer(
-        session: ClientSession, url: str
-    ) -> set[str]:
-        """Load public keys from Web3Signer.
-
-        session: aiohttp client session
-        url: A URL to Web3Signer
-        Returns the corresponding set of public keys.
-        """
-        resp = await session.get(f"{url}/api/v1/eth2/publicKeys")
-        return set(await resp.json())
 
     data_dict = json.loads(event.data)
     current_slot_number = DataBlock(**data_dict).slot
