@@ -1,12 +1,14 @@
 import asyncio
 import functools
 import json
+from itertools import count
 from pathlib import Path
 from typing import List, Optional, Set
 
 import typer
-from aiohttp import ClientSession, ClientTimeout
+from aiohttp import ClientResponse, ClientSession, ClientTimeout
 from aiohttp_sse_client import client
+from async_lru import alru_cache
 from prometheus_client import Counter, start_http_server
 from typer import Option
 
@@ -29,6 +31,21 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
         return set((f"0x{line.strip()}" for line in file_descriptor))
 
 
+@alru_cache(maxsize=100)
+async def get_with_retry(session: ClientSession, url: str) -> ClientResponse:  # type: ignore
+    for counter in count(1):
+        try:
+            return await session.get(
+                url,
+                timeout=ClientTimeout(
+                    total=1, connect=None, sock_connect=None, sock_read=None
+                ),
+            )
+        except asyncio.TimeoutError:
+            if counter > 3:
+                print(f"⚠️      {url} timed out {counter} times")
+
+
 async def load_pubkeys_from_web3signer(session: ClientSession, url: str) -> set[str]:
     """Load public keys from Web3Signer.
 
@@ -36,7 +53,7 @@ async def load_pubkeys_from_web3signer(session: ClientSession, url: str) -> set[
     url: A URL to Web3Signer
     Returns the corresponding set of public keys.
     """
-    resp = await session.get(f"{url}/api/v1/eth2/publicKeys")
+    resp = await get_with_retry(session, f"{url}/api/v1/eth2/publicKeys")
     return set(await resp.json())
 
 
@@ -79,8 +96,8 @@ async def handler_event(
 
     await asyncio.sleep(1)
 
-    current_block = await session.get(
-        f"{beacon_url}/eth/v2/beacon/blocks/{current_slot_number}"
+    current_block = await get_with_retry(
+        session, f"{beacon_url}/eth/v2/beacon/blocks/{current_slot_number}"
     )
 
     is_current_block_missed = current_block.status == 404
@@ -95,8 +112,8 @@ async def handler_event(
         epoch = slot_with_status.number // NB_SLOT_PER_EPOCH
 
         # Get proposer duties
-        resp = await session.get(
-            f"{beacon_url}/eth/v1/validator/duties/proposer/{epoch}"
+        resp = await get_with_retry(
+            session, f"{beacon_url}/eth/v1/validator/duties/proposer/{epoch}"
         )
 
         proposer_duties_dict = await resp.json()
