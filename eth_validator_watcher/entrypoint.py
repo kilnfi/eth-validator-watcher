@@ -35,12 +35,7 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
 async def get_with_retry(session: ClientSession, url: str) -> ClientResponse:  # type: ignore
     for counter in count(1):
         try:
-            return await session.get(
-                url,
-                timeout=ClientTimeout(
-                    total=1, connect=None, sock_connect=None, sock_read=None
-                ),
-            )
+            return await session.get(url)
         except asyncio.TimeoutError:
             if counter > 3:
                 print(f"⚠️      {url} timed out {counter} times")
@@ -60,7 +55,6 @@ async def load_pubkeys_from_web3signer(session: ClientSession, url: str) -> set[
 async def handler_event(
     event: client.MessageEvent,
     previous_slot_number: Optional[int],
-    session: ClientSession,
     beacon_url: str,
     pubkeys_file_path: Optional[Path],
     web3signer_urls: Optional[Set[str]],
@@ -96,84 +90,87 @@ async def handler_event(
 
     await asyncio.sleep(1)
 
-    current_block = await get_with_retry(
-        session, f"{beacon_url}/eth/v2/beacon/blocks/{current_slot_number}"
-    )
-
-    is_current_block_missed = current_block.status == 404
-
-    slots_with_status = [
-        SlotWithStatus(number=slot, missed=True)
-        for slot in range(previous_slot_number + 1, current_slot_number)
-    ] + [SlotWithStatus(number=current_slot_number, missed=is_current_block_missed)]
-
-    for slot_with_status in slots_with_status:
-        # Compute epoch from slot
-        epoch = slot_with_status.number // NB_SLOT_PER_EPOCH
-
-        # Get proposer duties
-        resp = await get_with_retry(
-            session, f"{beacon_url}/eth/v1/validator/duties/proposer/{epoch}"
+    async with ClientSession(
+        timeout=ClientTimeout(total=1, connect=None, sock_connect=None, sock_read=None)
+    ) as session:
+        current_block = await get_with_retry(
+            session, f"{beacon_url}/eth/v2/beacon/blocks/{current_slot_number}"
         )
 
-        proposer_duties_dict = await resp.json()
+        is_current_block_missed = current_block.status == 404
 
-        # Get proposer public key for this slot
-        proposer_duties_data = ProposerDuties(**proposer_duties_dict).data
+        slots_with_status = [
+            SlotWithStatus(number=slot, missed=True)
+            for slot in range(previous_slot_number + 1, current_slot_number)
+        ] + [SlotWithStatus(number=current_slot_number, missed=is_current_block_missed)]
 
-        # In `data` list, items seems to be ordered by slot.
-        # However, there is no specification for that, so it is wiser to
-        # iterate on the list
-        proposer_public_key = next(
-            (
-                proposer_duty_data.pubkey
-                for proposer_duty_data in proposer_duties_data
-                if proposer_duty_data.slot == slot_with_status.number
+        for slot_with_status in slots_with_status:
+            # Compute epoch from slot
+            epoch = slot_with_status.number // NB_SLOT_PER_EPOCH
+
+            # Get proposer duties
+            resp = await get_with_retry(
+                session, f"{beacon_url}/eth/v1/validator/duties/proposer/{epoch}"
             )
-        )
 
-        # Get public keys to watch from file
-        pubkeys_from_file: set[str] = (
-            load_pubkeys_from_file(pubkeys_file_path)
-            if pubkeys_file_path is not None
-            else set()
-        )
+            proposer_duties_dict = await resp.json()
 
-        # Get public keys to watch from Web3Signer
-        pubkeys_from_web3signer: set[str] = (
-            set().union(
-                *[
-                    await load_pubkeys_from_web3signer(session, web3signer_url)
-                    for web3signer_url in web3signer_urls
-                ]
+            # Get proposer public key for this slot
+            proposer_duties_data = ProposerDuties(**proposer_duties_dict).data
+
+            # In `data` list, items seems to be ordered by slot.
+            # However, there is no specification for that, so it is wiser to
+            # iterate on the list
+            proposer_public_key = next(
+                (
+                    proposer_duty_data.pubkey
+                    for proposer_duty_data in proposer_duties_data
+                    if proposer_duty_data.slot == slot_with_status.number
+                )
             )
-            if web3signer_urls is not None
-            else set()
-        )
 
-        pubkeys = pubkeys_from_file | pubkeys_from_web3signer
+            # Get public keys to watch from file
+            pubkeys_from_file: set[str] = (
+                load_pubkeys_from_file(pubkeys_file_path)
+                if pubkeys_file_path is not None
+                else set()
+            )
 
-        # Check if the validator who has to propose is ours
-        is_our_validator = proposer_public_key in pubkeys
-        positive_emoji = "✨" if is_our_validator else "✅"
-        negative_emoji = "❌" if is_our_validator else "💩"
+            # Get public keys to watch from Web3Signer
+            pubkeys_from_web3signer: set[str] = (
+                set().union(
+                    *[
+                        await load_pubkeys_from_web3signer(session, web3signer_url)
+                        for web3signer_url in web3signer_urls
+                    ]
+                )
+                if web3signer_urls is not None
+                else set()
+            )
 
-        emoji, proposed_or_missed = (
-            (negative_emoji, "missed  ")
-            if slot_with_status.missed
-            else (positive_emoji, "proposed")
-        )
+            pubkeys = pubkeys_from_file | pubkeys_from_web3signer
 
-        message = (
-            f"{emoji} {'Our ' if is_our_validator else '    '}validator "
-            f"{proposer_public_key} {proposed_or_missed} block "
-            f"{slot_with_status.number} {emoji} - 🔑 {len(pubkeys)} keys watched"
-        )
+            # Check if the validator who has to propose is ours
+            is_our_validator = proposer_public_key in pubkeys
+            positive_emoji = "✨" if is_our_validator else "✅"
+            negative_emoji = "❌" if is_our_validator else "💩"
 
-        print(message)
+            emoji, proposed_or_missed = (
+                (negative_emoji, "missed  ")
+                if slot_with_status.missed
+                else (positive_emoji, "proposed")
+            )
 
-        if is_our_validator and slot_with_status.missed:
-            missed_block_proposals_counter.inc()
+            message = (
+                f"{emoji} {'Our ' if is_our_validator else '    '}validator "
+                f"{proposer_public_key} {proposed_or_missed} block "
+                f"{slot_with_status.number} {emoji} - 🔑 {len(pubkeys)} keys watched"
+            )
+
+            print(message)
+
+            if is_our_validator and slot_with_status.missed:
+                missed_block_proposals_counter.inc()
 
     return current_slot_number
 
@@ -202,14 +199,16 @@ async def handler_async(
     web3signer_url: A URL to a Web3Signer instance signing for keys to watch (optional)
     liveliness_file: File overwritten at each epoch (optional)
     """
-    timeout = ClientTimeout(total=None, connect=None, sock_connect=None, sock_read=None)
-
     missed_block_proposals_counter = Counter(
         "eth_validator_watcher_missed_block_proposals",
         "Ethereum Validator Watcher Missed block proposals",
     )
 
-    async with ClientSession(timeout=timeout) as session, client.EventSource(
+    async with ClientSession(
+        timeout=ClientTimeout(
+            total=None, connect=None, sock_connect=None, sock_read=None
+        )
+    ) as session, client.EventSource(
         f"{beacon_url}/eth/v1/events",
         params=dict(topics="block"),
         session=session,
@@ -220,7 +219,6 @@ async def handler_async(
             previous_slot_number = await handler_event(
                 event,
                 previous_slot_number,
-                session,
                 beacon_url,
                 pubkeys_file_path,
                 web3signer_urls,
