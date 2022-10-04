@@ -3,7 +3,7 @@ import functools
 import json
 from itertools import count
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import Any, List, Optional, Set
 
 import typer
 from aiohttp import ClientResponse, ClientSession, ClientTimeout
@@ -12,7 +12,7 @@ from async_lru import alru_cache
 from prometheus_client import Counter, start_http_server
 from typer import Option
 
-from .models import DataBlock, ProposerDuties, SlotWithStatus
+from .models import Committees, DataBlock, ProposerDuties, SlotWithStatus
 
 NB_SLOT_PER_EPOCH = 32
 
@@ -31,11 +31,12 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
         return set((f"0x{line.strip()}" for line in file_descriptor))
 
 
-@alru_cache(maxsize=100)
-async def get_with_retry(session: ClientSession, url: str) -> ClientResponse:  # type: ignore
+async def get_with_retry(  # type: ignore
+    session: ClientSession, url: str, *args: list[Any], **kwargs: dict[str, Any]
+) -> ClientResponse:
     for counter in count(1):
         try:
-            return await session.get(url)
+            return await session.get(url, allow_redirects=True, *args, **kwargs)
         except asyncio.TimeoutError:
             if counter > 3:
                 print(f"⚠️      {url} timed out {counter} times")
@@ -52,38 +53,61 @@ async def load_pubkeys_from_web3signer(session: ClientSession, url: str) -> set[
     return set(await resp.json())
 
 
-async def handler_event(
+@alru_cache(maxsize=10)
+async def is_block_missed(
+    session: ClientSession, beacon_url: str, slot_number: int
+) -> bool:
+    current_block = await get_with_retry(
+        session, f"{beacon_url}/eth/v2/beacon/blocks/{slot_number}"
+    )
+
+    return current_block.status == 404
+
+
+@alru_cache(maxsize=10)
+async def get_proposer_duties(
+    session: ClientSession, beacon_url: str, slot_number: int
+) -> ProposerDuties:
+    epoch = slot_number // NB_SLOT_PER_EPOCH
+
+    resp = await get_with_retry(
+        session, f"{beacon_url}/eth/v1/validator/duties/proposer/{epoch}"
+    )
+
+    proposer_duties_dict = await resp.json()
+    return ProposerDuties(**proposer_duties_dict)
+
+
+@alru_cache(maxsize=10)
+async def get_duty_attestation_slot_to_validator_index(
+    session: ClientSession, beacon_url: str, slot_number: int
+) -> dict[int, set[int]]:
+    epoch = slot_number // NB_SLOT_PER_EPOCH
+
+    resp = await get_with_retry(
+        session,
+        f"{beacon_url}/eth/v1/beacon/states/head/committees",
+        params=dict(epoch=epoch),
+    )
+
+    committees_dict = await resp.json()
+    committees = Committees(**committees_dict)
+    data = committees.data
+
+    return {item.slot: set(item.validators) for item in data}
+
+
+async def handle_missed_block_detection(
     session: ClientSession,
-    event: client.MessageEvent,
-    previous_slot_number: Optional[int],
     beacon_url: str,
+    data_block: DataBlock,
+    previous_slot_number: int,
+    initial_sleep_time_sec: int,
+    missed_block_proposals_counter: Counter,
     pubkeys_file_path: Optional[Path],
     web3signer_urls: Optional[Set[str]],
-    missed_block_proposals_counter: Counter,
-    initial_sleep_time_sec: int = 1,
-) -> int:
-    """Handle an event.
-
-    session: A client session
-    event: The event to handle
-    previous_slot_number: The slot number of latest handled event
-    beacon_url: URL of beacon node
-    publeys_file_path: A path to a file containing the list of keys to watch (optional)
-    web3signer_urls: URLs to Web3Signer instance(s) signing for keys to watch (optional)
-    missed_block_proposals_counter: A Prometheus counter for each missed block proposal
-    initial_sleep_time_sec: Initial sleep time in seconds (optional)
-
-    Returns the latest slot number handled.
-    """
-
-    data_dict = json.loads(event.data)
-    current_slot_number = DataBlock(**data_dict).slot
-
-    previous_slot_number = (
-        current_slot_number - 1
-        if previous_slot_number is None
-        else previous_slot_number
-    )
+):
+    current_slot_number = data_block.slot
 
     # Normally (according to ConsenSys team), if a block is missed, then there is no
     # event emitted. However, it seems there is some cases where the event is
@@ -93,11 +117,9 @@ async def handler_event(
 
     await asyncio.sleep(initial_sleep_time_sec)
 
-    current_block = await get_with_retry(
-        session, f"{beacon_url}/eth/v2/beacon/blocks/{current_slot_number}"
+    is_current_block_missed: bool = await is_block_missed(
+        session, beacon_url, current_slot_number
     )
-
-    is_current_block_missed = current_block.status == 404
 
     slots_with_status = [
         SlotWithStatus(number=slot, missed=True)
@@ -105,18 +127,12 @@ async def handler_event(
     ] + [SlotWithStatus(number=current_slot_number, missed=is_current_block_missed)]
 
     for slot_with_status in slots_with_status:
-        # Compute epoch from slot
-        epoch = slot_with_status.number // NB_SLOT_PER_EPOCH
-
-        # Get proposer duties
-        resp = await get_with_retry(
-            session, f"{beacon_url}/eth/v1/validator/duties/proposer/{epoch}"
+        proposer_duties: ProposerDuties = await get_proposer_duties(
+            session, beacon_url, current_slot_number
         )
 
-        proposer_duties_dict = await resp.json()
-
         # Get proposer public key for this slot
-        proposer_duties_data = ProposerDuties(**proposer_duties_dict).data
+        proposer_duties_data = proposer_duties.data
 
         # In `data` list, items seems to be ordered by slot.
         # However, there is no specification for that, so it is wiser to
@@ -171,6 +187,56 @@ async def handler_event(
 
         if is_our_validator and slot_with_status.missed:
             missed_block_proposals_counter.inc()
+
+
+async def handler_event(
+    session: ClientSession,
+    event: client.MessageEvent,
+    previous_slot_number: Optional[int],
+    beacon_url: str,
+    pubkeys_file_path: Optional[Path],
+    web3signer_urls: Optional[Set[str]],
+    missed_block_proposals_counter: Counter,
+    initial_sleep_time_sec: int = 1,
+) -> int:
+    """Handle an event.
+
+    session: A client session
+    event: The event to handle
+    previous_slot_number: The slot number of latest handled event
+    beacon_url: URL of beacon node
+    publeys_file_path: A path to a file containing the list of keys to watch (optional)
+    web3signer_urls: URLs to Web3Signer instance(s) signing for keys to watch (optional)
+    missed_block_proposals_counter: A Prometheus counter for each missed block proposal
+    initial_sleep_time_sec: Initial sleep time in seconds (optional)
+
+    Returns the latest slot number handled.
+    """
+
+    # Bookkeeping
+    # -----------
+    data_dict = json.loads(event.data)
+    data_block = DataBlock(**data_dict)
+    current_slot_number = DataBlock(**data_dict).slot
+
+    previous_slot_number = (
+        current_slot_number - 1
+        if previous_slot_number is None
+        else previous_slot_number
+    )
+
+    # Missed block detection
+    # ----------------------
+    await handle_missed_block_detection(
+        session,
+        beacon_url,
+        data_block,
+        previous_slot_number,
+        initial_sleep_time_sec,
+        missed_block_proposals_counter,
+        pubkeys_file_path,
+        web3signer_urls,
+    )
 
     return current_slot_number
 

@@ -7,6 +7,16 @@ class DataBlock(BaseModel):
     execution_optimistic: bool
 
 
+class Committees(BaseModel):
+    class Data(BaseModel):
+        index: int
+        slot: int
+        validators: list[int]
+
+    execution_optimistic: bool
+    data: list[Data]
+
+
 class ProposerDuties(BaseModel):
     class Data(BaseModel):
         pubkey: str
