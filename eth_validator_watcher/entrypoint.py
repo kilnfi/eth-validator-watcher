@@ -42,40 +42,48 @@ async def get_with_retry(  # type: ignore
                 print(f"⚠️      {url} timed out {counter} times")
 
 
-async def load_pubkeys_from_web3signer(session: ClientSession, url: str) -> set[str]:
-    """Load public keys from Web3Signer.
+class Beacon:
+    def __init__(self, session: ClientSession, url: str) -> None:
+        self.session = session
+        self.__url = url
 
-    session: aiohttp client session
-    url: A URL to Web3Signer
-    Returns the corresponding set of public keys.
-    """
-    resp = await get_with_retry(session, f"{url}/api/v1/eth2/publicKeys")
-    return set(await resp.json())
+    @alru_cache(maxsize=10)
+    async def get_proposer_duties(self, slot_number: int) -> ProposerDuties:
+        epoch = slot_number // NB_SLOT_PER_EPOCH
+
+        resp = await get_with_retry(
+            self.session,
+            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}",
+        )
+
+        proposer_duties_dict = await resp.json()
+        return ProposerDuties(**proposer_duties_dict)
+
+    @alru_cache(maxsize=10)
+    async def is_block_missed(self, slot_number: int) -> bool:
+        current_block = await get_with_retry(
+            self.session, f"{self.__url}/eth/v2/beacon/blocks/{slot_number}"
+        )
+
+        return current_block.status == 404
 
 
-@alru_cache(maxsize=10)
-async def is_block_missed(
-    session: ClientSession, beacon_url: str, slot_number: int
-) -> bool:
-    current_block = await get_with_retry(
-        session, f"{beacon_url}/eth/v2/beacon/blocks/{slot_number}"
-    )
+class Web3Signer:
+    def __init__(self, session: ClientSession, url: str) -> None:
+        self.session = session
+        self.__url = url
 
-    return current_block.status == 404
+    async def load_pubkeys(self) -> set[str]:
+        """Load public keys from Web3Signer.
 
-
-@alru_cache(maxsize=10)
-async def get_proposer_duties(
-    session: ClientSession, beacon_url: str, slot_number: int
-) -> ProposerDuties:
-    epoch = slot_number // NB_SLOT_PER_EPOCH
-
-    resp = await get_with_retry(
-        session, f"{beacon_url}/eth/v1/validator/duties/proposer/{epoch}"
-    )
-
-    proposer_duties_dict = await resp.json()
-    return ProposerDuties(**proposer_duties_dict)
+        session: aiohttp client session
+        url: A URL to Web3Signer
+        Returns the corresponding set of public keys.
+        """
+        resp = await get_with_retry(
+            self.session, f"{self.__url}/api/v1/eth2/publicKeys"
+        )
+        return set(await resp.json())
 
 
 @alru_cache(maxsize=10)
@@ -98,14 +106,13 @@ async def get_duty_attestation_slot_to_validator_index(
 
 
 async def handle_missed_block_detection(
-    session: ClientSession,
-    beacon_url: str,
+    beacon: Beacon,
     data_block: DataBlock,
     previous_slot_number: int,
     initial_sleep_time_sec: int,
     missed_block_proposals_counter: Counter,
     pubkeys_file_path: Optional[Path],
-    web3signer_urls: Optional[Set[str]],
+    web3signers: Set[Web3Signer],
 ):
     current_slot_number = data_block.slot
 
@@ -117,9 +124,7 @@ async def handle_missed_block_detection(
 
     await asyncio.sleep(initial_sleep_time_sec)
 
-    is_current_block_missed: bool = await is_block_missed(
-        session, beacon_url, current_slot_number
-    )
+    is_current_block_missed: bool = await beacon.is_block_missed(current_slot_number)
 
     slots_with_status = [
         SlotWithStatus(number=slot, missed=True)
@@ -127,8 +132,8 @@ async def handle_missed_block_detection(
     ] + [SlotWithStatus(number=current_slot_number, missed=is_current_block_missed)]
 
     for slot_with_status in slots_with_status:
-        proposer_duties: ProposerDuties = await get_proposer_duties(
-            session, beacon_url, current_slot_number
+        proposer_duties: ProposerDuties = await beacon.get_proposer_duties(
+            current_slot_number
         )
 
         # Get proposer public key for this slot
@@ -153,15 +158,8 @@ async def handle_missed_block_detection(
         )
 
         # Get public keys to watch from Web3Signer
-        pubkeys_from_web3signer: set[str] = (
-            set().union(
-                *[
-                    await load_pubkeys_from_web3signer(session, web3signer_url)
-                    for web3signer_url in web3signer_urls
-                ]
-            )
-            if web3signer_urls is not None
-            else set()
+        pubkeys_from_web3signer: set[str] = set().union(
+            *[await web3signer.load_pubkeys() for web3signer in web3signers]
         )
 
         pubkeys = pubkeys_from_file | pubkeys_from_web3signer
@@ -190,12 +188,11 @@ async def handle_missed_block_detection(
 
 
 async def handler_event(
-    session: ClientSession,
+    beacon: Beacon,
     event: client.MessageEvent,
     previous_slot_number: Optional[int],
-    beacon_url: str,
     pubkeys_file_path: Optional[Path],
-    web3signer_urls: Optional[Set[str]],
+    web3signers: Set[Web3Signer],
     missed_block_proposals_counter: Counter,
     initial_sleep_time_sec: int = 1,
 ) -> int:
@@ -228,14 +225,13 @@ async def handler_event(
     # Missed block detection
     # ----------------------
     await handle_missed_block_detection(
-        session,
-        beacon_url,
+        beacon,
         data_block,
         previous_slot_number,
         initial_sleep_time_sec,
         missed_block_proposals_counter,
         pubkeys_file_path,
-        web3signer_urls,
+        web3signers,
     )
 
     return current_slot_number
@@ -252,7 +248,7 @@ def write_liveliness_file(liveliness_file: Path):
 async def handler_async(
     beacon_url: str,
     pubkeys_file_path: Optional[Path],
-    web3signer_urls: Optional[Set[str]],
+    web3signer_urls: Set[str],
     liveliness_file: Optional[Path],
 ):
     """Asynchronous handler
@@ -276,6 +272,12 @@ async def handler_async(
         params=dict(topics="block"),
         session=session,
     ) as event_source:
+        beacon = Beacon(session, beacon_url)
+
+        web3signers = {
+            Web3Signer(session, web3signer_url) for web3signer_url in web3signer_urls
+        }
+
         previous_slot_number: Optional[int] = None
 
         async for event in event_source:
@@ -284,13 +286,17 @@ async def handler_async(
                     total=1, connect=None, sock_connect=None, sock_read=None
                 )
             ) as session:
+                beacon.session = session
+
+                for web3signer in web3signers:
+                    web3signer.session = session
+
                 previous_slot_number = await handler_event(
-                    session,
+                    beacon,
                     event,
                     previous_slot_number,
-                    beacon_url,
                     pubkeys_file_path,
-                    web3signer_urls,
+                    web3signers,
                     missed_block_proposals_counter,
                 )
 
@@ -337,7 +343,9 @@ def handler(
 
     Prometheus server is automatically exposed on port 8000.
     """
-    web3signer_urls = set(web3signer_url) if web3signer_url is not None else None
+    default_set: set[str] = set()
+
+    web3signer_urls = set(web3signer_url) if web3signer_url is not None else default_set
     start_http_server(8000)
 
     asyncio.run(

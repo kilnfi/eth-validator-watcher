@@ -7,7 +7,7 @@ from prometheus_client import Counter
 from pytest import fixture
 from eth_validator_watcher.tests import assets
 
-from ..entrypoint import handler_event, write_liveliness_file
+from ..entrypoint import Beacon, Web3Signer, handler_event, write_liveliness_file
 
 
 @fixture
@@ -76,24 +76,35 @@ async def session(proposer_duties_6542: dict, aiohttp_client) -> ClientSession:
     return await aiohttp_client(app)
 
 
+@fixture
+def beacon(session) -> Beacon:
+    return Beacon(session, "")
+
+
+@fixture
+def web3signer(session) -> Web3Signer:
+    return Web3Signer(session, "")
+
+
 async def test_handler_event(
     event_209349: dict,
     counter: Counter,
-    session: ClientSession,
+    beacon: Beacon,
+    web3signer: Web3Signer,
     pubkeys_file_path: Path,
 ) -> None:
     assert counter.collect()[0].samples[0].value == 0.0  # type: ignore
 
     # Test with no previous event, no pubkey file and no Web3Signer
     assert (
-        await handler_event(session, event_209349, None, "", None, None, counter, 0)
+        await handler_event(beacon, event_209349, None, None, set(), counter, 0)
         == 209349
     )
     assert counter.collect()[0].samples[0].value == 0.0  # type: ignore
 
     # Test with a hole, no pubkey file and no Web3Signer
     assert (
-        await handler_event(session, event_209349, 209347, "", None, None, counter, 0)
+        await handler_event(beacon, event_209349, 209347, None, set(), counter, 0)
         == 209349
     )
     assert counter.collect()[0].samples[0].value == 0.0  # type: ignore
@@ -101,7 +112,7 @@ async def test_handler_event(
     # Test with a hole, pubkey file and no Web3Signer
     assert (
         await handler_event(
-            session, event_209349, 209347, "", pubkeys_file_path, None, counter, 0
+            beacon, event_209349, 209347, pubkeys_file_path, set(), counter, 0
         )
         == 209349
     )
@@ -109,7 +120,9 @@ async def test_handler_event(
 
     # Test with a hole, no pubkey file and Web3Signer
     assert (
-        await handler_event(session, event_209349, 209347, "", None, {""}, counter, 0)
+        await handler_event(
+            beacon, event_209349, 209347, None, {web3signer}, counter, 0
+        )
         == 209349
     )
     assert counter.collect()[0].samples[0].value == 2.0  # type: ignore
