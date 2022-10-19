@@ -1,0 +1,20 @@
+{
+    "dependent_root": "0x6a23256440b627bdb3de50e1bcafa9a5a3efbfcf2976bd3b15139e61f47de8b0",
+    "data": [
+        {
+            "pubkey": "0x951d69f32685615df304c035151bd596d43bc3250f966e0c777544c506e3035d031afa4a3fcca1b85c41a4a041aefc01",
+            "validator_index": "382",
+            "slot": "209344"
+        },
+        {
+            "pubkey": "0xa0b8e0ef0756255edd80938c4e555a3d992953cd43371915d7a7280dc1bd8433933382919d50a98faad918fc9083bc07",
+            "validator_index": "1176",
+            "slot": "209345"
+        },
+        {
+            "pubkey": "0x825aca3d3dfa1d0b914e59fc3eeab6afcc5dc7e30fccd4879c592da4ea9a4e8a7a1057fc5b3faab12086e587126aa443",
+            "validator_index": "965",
+            "slot": "209346"
+        }
+    ]
+}
