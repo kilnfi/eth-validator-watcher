@@ -36,6 +36,9 @@ def handler(
     liveliness_file: Optional[Path] = Option(
         None, help="File overwritten at each epoch"
     ),
+    prometheus_probes_prefix: Optional[str] = Option(
+        None, help="Prometheus probes prefix"
+    ),
 ) -> None:
     """
     🚨 Be alerted when you miss a block proposal! 🚨
@@ -64,18 +67,24 @@ def handler(
     web3signer_urls = set(web3signer_url) if web3signer_url is not None else default_set
     start_http_server(8000)
 
+    prefix = (
+        f"eth_validator_watcher_{prometheus_probes_prefix}"
+        if prometheus_probes_prefix is not None
+        else "eth_validator_watcher"
+    )
+
     missed_block_proposals_counter = Counter(
-        "eth_validator_watcher_missed_block_proposals",
+        f"{prefix}_missed_block_proposals",
         "Ethereum validator watcher missed block proposals",
     )
 
     number_of_two_not_optimal_attestation_inclusion_in_a_raw_gauge = Gauge(
-        "eth_validator_watcher_two_not_optimal_attestation_inclusion_in_a_raw",
+        f"{prefix}_two_not_optimal_attestation_inclusion_in_a_raw",
         "Ethereum validator watcher number of keys with two not optimal attestation inclusion in a raw",
     )
 
     rate_of_not_optimal_attestation_inclusion_gauge = Gauge(
-        "eth_validator_watcher_rate_of_not_optimal_attestation_inclusion",
+        f"{prefix}_rate_of_not_optimal_attestation_inclusion",
         "Ethereum validator watcher rate of not optimal attestation inclusion",
     )
 
