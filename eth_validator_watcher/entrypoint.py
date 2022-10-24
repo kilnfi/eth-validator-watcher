@@ -13,6 +13,7 @@ from .beacon import Beacon
 from .missed_attestations import handle_missed_attestation_detection
 from .missed_blocks import handle_missed_block_detection
 from .models import DataBlock
+from .next_blocks_proposal import handle_next_blocks_proposal
 from .utils import get_our_pubkeys, write_liveliness_file
 from .web3signer import Web3Signer
 
@@ -82,6 +83,7 @@ def handler(
     web3signers = {Web3Signer(web3signer_url) for web3signer_url in web3signer_urls}
 
     previous_slot_number: Optional[int] = None
+    previous_epoch: Optional[int] = None
 
     # Dict containing, for our active validators:
     # - key  : Validator index
@@ -120,6 +122,10 @@ def handler(
             previous_slot_number,
             missed_block_proposals_counter,
             our_pubkeys,
+        )
+
+        previous_epoch = handle_next_blocks_proposal(
+            beacon, our_pubkeys, data_block, previous_epoch
         )
 
         (

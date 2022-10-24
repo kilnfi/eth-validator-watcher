@@ -16,7 +16,7 @@ class Beacon:
     def __init__(self, url: str) -> None:
         self.__url = url
 
-    @lru_cache(maxsize=1)
+    @lru_cache(maxsize=2)
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
         resp = requests.get(f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}")
 
