@@ -56,6 +56,7 @@ def handle_missed_block_detection(
         is_our_validator = proposer_pubkey in our_pubkeys
         positive_emoji = "✨" if is_our_validator else "✅"
         negative_emoji = "❌" if is_our_validator else "💩"
+        birthday = " - 🎂" if current_slot % NB_SLOT_PER_EPOCH == 0 else ""
 
         emoji, proposed_or_missed = (
             (negative_emoji, "missed  ")
@@ -69,7 +70,7 @@ def handle_missed_block_detection(
             f"{emoji} {'Our ' if is_our_validator else '    '}validator "
             f"{short_proposer_pubkey} {proposed_or_missed} block at epoch {epoch} - "
             f"slot {slot_with_status.number} {emoji} - 🔑 {len(our_pubkeys)} keys "
-            "watched"
+            f"watched{birthday}"
         )
 
         print(message)
