@@ -79,10 +79,13 @@ def handle_missed_attestation_detection(
 
     list_of_ok_vals_index = (
         apply_mask(
-            previous_slot_duty_committies_index[committee_index],
-            actual_committee_index_to_validator_attestation_success[committee_index],
+            previous_slot_duty_committies_index[actual_committee_index],
+            validator_attestation_success,
         )
-        for committee_index in previous_slot_duty_committies_index
+        for (
+            actual_committee_index,
+            validator_attestation_success,
+        ) in actual_committee_index_to_validator_attestation_success.items()
     )
 
     # To refactor until here
