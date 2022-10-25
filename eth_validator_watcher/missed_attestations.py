@@ -77,9 +77,6 @@ def handle_missed_attestation_detection(
         beacon.aggregate_attestations_from_previous_slot(data_block.slot)
     )
 
-    actual_committies_index = actual_committee_index_to_validator_attestation_success
-    assert set(previous_slot_duty_committies_index) == set(actual_committies_index)
-
     list_of_ok_vals_index = (
         apply_mask(
             previous_slot_duty_committies_index[committee_index],
