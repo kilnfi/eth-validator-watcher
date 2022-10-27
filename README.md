@@ -68,6 +68,10 @@ Options:
   --help                          Show this message and exit.
 ```
 
+Logs sample
+-----------
+![logs](docs/img/logs.png)
+
 Installation
 ------------
 
