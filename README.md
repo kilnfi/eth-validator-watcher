@@ -72,6 +72,10 @@ Logs sample
 -----------
 ![logs](docs/img/logs.png)
 
+Prometheus sample
+-----------------
+![logs](docs/img/prometheus.png)
+
 Installation
 ------------
 
