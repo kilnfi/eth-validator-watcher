@@ -18,6 +18,19 @@ def handle_missed_block_detection(
     missed_block_proposals_counter: Counter,
     our_pubkeys: set[str],
 ) -> int:
+    """Handle missed block proposals detection
+
+    Print log each time a block is proposed.
+    Update prometheus probe for our public keys which did not proposed a block
+
+    Returns the current slot.
+
+    beacon       : Beacon
+    data_block   : Data value of a beacon chain block
+    previous_slot: Previous slot (Optional)
+    missed_block_proposals_counter: Prometheus counter
+    our_pubkeys: Set of our validators public keys
+    """
     current_slot = data_block.slot
 
     previous_slot = current_slot - 1 if previous_slot is None else previous_slot

@@ -3,6 +3,10 @@ import requests
 
 class Web3Signer:
     def __init__(self, url: str) -> None:
+        """Web3Signer
+
+        url: URL where Web3Signer can be reached
+        """
         self.__url = url
 
     def load_pubkeys(self) -> set[str]:

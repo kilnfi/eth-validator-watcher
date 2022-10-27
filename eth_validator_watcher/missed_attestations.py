@@ -20,6 +20,43 @@ def handle_missed_attestation_detection(
     number_of_two_not_optimal_attestation_inclusion_in_a_raw_gauge: Gauge,
     rate_of_not_optimal_attestation_inclusion_gauge: Gauge,
 ) -> Tuple[dict[int, str], set[int], set[int]]:
+    """Handle missed attestaion detection
+
+    Print log for our public keys which:
+    - Did not attested correctly during the last epoch
+    - Did not attested correctly during the last two epochs
+
+    Update prometheus probes for our public keys which:
+    - Did not attested correctly during the last epoch
+    - Did not attested correctly during the last two epochs
+
+    Returns:
+    - A dictionnary with:
+      - key  : our active validator index
+      - value: our active validator public key
+    - A set containing our validator pubkeys with suboptimal attestation inclusion
+      during the last epoch
+    - A set containing our validator pubkeys with suboptimal attestation inclusion
+      for at least two epochs in a raw
+
+    beacon     : Beacon
+    data_block : Data value of a beacon chain block
+    our_pubkeys: Set of our validators public keys
+
+    our_active_val_index_to_pubkey (Optional): dictionnary with:
+      - key  : index of our active validator
+      - value: public key of our active validator
+
+    cumulated_our_ko_vals_index: A set containing our validator pubkeys with suboptimal
+                                 attestation inclusion during the last epoch
+
+    cumulated_or_2_times_in_a_raw_vals_index: A set containing our validator pubkeys
+                                              with suboptimal attestation inclusion
+                                              for at least two epochs in a raw
+
+    number_of_two_not_optimal_attestation_inclusion_in_a_raw_gauge: Prometheus gauge
+    rate_of_not_optimal_attestation_inclusion_gauge               : Prometheus gauge
+    """
     if our_pubkeys == set():
         return {}, set(), set()
 

@@ -11,6 +11,18 @@ def handle_next_blocks_proposal(
     data_block: DataBlock,
     previous_epoch: Optional[int],
 ) -> int:
+    """Handle next blocks proposal
+
+    Print one log for each of our key which is about to propose a block in the next
+    two epochs.
+
+    Return the current epoch.
+
+    beacon        : Beacon
+    our_pubkeys   : Set of our validators public keys
+    data_block    : Data value of a beacon chain block
+    previous_epoch: Previous epoch
+    """
     slot = data_block.slot
     epoch = slot // NB_SLOT_PER_EPOCH
     next_epoch = epoch + 1

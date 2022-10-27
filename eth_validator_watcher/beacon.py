@@ -14,21 +14,39 @@ from .utils import (
 
 class Beacon:
     def __init__(self, url: str) -> None:
+        """Beacon
+
+        url: URL where the beacon can be reached
+        """
         self.__url = url
 
     @lru_cache(maxsize=2)
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
+        """Get proposer duties
+
+        epoch: Epoch
+        """
         resp = requests.get(f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}")
 
         proposer_duties_dict = resp.json()
         return ProposerDuties(**proposer_duties_dict)
 
     def is_block_missed(self, slot: int) -> bool:
+        """Return True if block is missed at given slot, else False
+
+        slot: Slot
+        """
         current_block = requests.get(f"{self.__url}/eth/v2/beacon/blocks/{slot}")
 
         return current_block.status_code == 404
 
     def get_active_validator_index_to_pubkey(self, pubkeys: set[str]) -> dict[int, str]:
+        """Return a dictionnary with:
+        key  : Index of validator
+        value: Public key for validator
+
+        pubkeys: The list of validators pubkey to use.
+        """
         response = requests.get(
             f"{self.__url}/eth/v1/beacon/states/head/validators",
         )
@@ -51,6 +69,14 @@ class Beacon:
     def get_duty_slot_to_committee_index_to_validators_index(
         self, epoch: int
     ) -> dict[int, dict[int, list[int]]]:
+        """Return a nested dictionnary.
+        outer key               : Slot number
+        outer value (=inner key): Committee index
+        inner value             : Index of validators which have to attest in the
+                                  given committee index at the given slot
+
+        epoch: Epoch
+        """
         resp = requests.get(
             f"{self.__url}/eth/v1/beacon/states/head/committees",
             params=dict(epoch=epoch),
@@ -69,7 +95,19 @@ class Beacon:
 
         return result
 
-    def aggregate_attestations_from_previous_slot(self, slot: int):
+    def aggregate_attestations_from_previous_slot(
+        self, slot: int
+    ) -> dict[int, list[bool]]:
+        """Return a nested dictionnary.
+        key  : Committee index
+        value: A list of boolean
+
+        Each boolean of the list corresponds to a validator in the given committee.
+        If the validator attestation from the previous slot is included in the current
+        slot, the boolean is True. Else, it is False.
+
+        slot: Slot
+        """
         resp = requests.get(f"{self.__url}/eth/v2/beacon/blocks/{slot}")
         block_dict = resp.json()
 
