@@ -33,23 +33,39 @@ def handler(
     web3signer_url: Optional[List[str]] = Option(
         None, help="URL to web3signer managing keys to watch"
     ),
-    liveliness_file: Optional[Path] = Option(
-        None, help="File overwritten at each epoch"
+    liveliness_file: Optional[Path] = Option(None, help="Liveness file"),
+    prometheus_probe_missed_block_proposals: str = Option(
+        "eth_validator_watcher_missed_block_proposals",
+        help="Prometheus probe name for missed block proposals",
     ),
-    prometheus_probes_prefix: Optional[str] = Option(
-        None, help="Prometheus probes prefix"
+    prometheus_probe_rate_of_not_optimal_attestation_inclusion: str = Option(
+        "eth_validator_watcher_rate_of_not_optimal_attestation_inclusion",
+        help="Prometheus probe name for rate of non optimal attestation inclusion",
+    ),
+    prometheus_probe_number_of_two_not_optimal_attestation_inclusion_in_a_raw: str = Option(
+        "eth_validator_watcher_two_not_optimal_attestation_inclusion_in_a_raw",
+        help=(
+            "Prometheus probe name for number of two non optimal attestation "
+            " inclusion in a raw"
+        ),
     ),
 ) -> None:
     """
-    🚨 Be alerted when you miss a block proposal! 🚨
+    🚨 Be alerted when you miss a block proposal / when your attestations are late! 🚨
 
-    This tool watches the 🥓 Ethereum Beacon chain 🥓 and raises and alert when
-    a block proposal is missed. It needs to be connected to a beacon node.
+    \b
+    This tool watches the 🥓 Ethereum Beacon chain 🥓 and tells you:
+    - when you miss a block proposal
+    - when some of your attestations are not optimally included in the next slot
+    - when some of your attestations are not optimally included in the next slot two
+      times in a raw (may indicates there is an issue with this specific key)
+    - if one of your keys are about to propose a block in the next two epochs (useful
+      when you want to reboot one of your validator client without pressure)
 
     \b
     You can specify:
     - the path to a file containing the list of public your keys to watch, or / and
-    - an URL to a Web3Signer instance managing your keys to watch
+    - an URL to a Web3Signer instance managing your keys to watch.
 
     \b
     Pubkeys are load dynamically, at each slot.
@@ -57,8 +73,11 @@ def handler(
     - If you use Web3Signer, a call to Web3Signer will be done at every slot to get the
     latest keys to watch.
 
-    A prometheus counter named `missed_block_proposals` is automatically increased by 1
-    when one of your validators missed a block.
+    \b
+    Three prometheus probes are exposed:
+    - A missed block proposals counter of your keys
+    - The rate of non optimal attestation inclusion of your keys for a given slot
+    - The number of two non optimal attestation inclusion in a raw of your keys
 
     Prometheus server is automatically exposed on port 8000.
     """
@@ -67,25 +86,22 @@ def handler(
     web3signer_urls = set(web3signer_url) if web3signer_url is not None else default_set
     start_http_server(8000)
 
-    prefix = (
-        f"eth_validator_watcher_{prometheus_probes_prefix}"
-        if prometheus_probes_prefix is not None
-        else "eth_validator_watcher"
-    )
-
     missed_block_proposals_counter = Counter(
-        f"{prefix}_missed_block_proposals",
+        prometheus_probe_missed_block_proposals,
         "Ethereum validator watcher missed block proposals",
     )
 
-    number_of_two_not_optimal_attestation_inclusion_in_a_raw_gauge = Gauge(
-        f"{prefix}_two_not_optimal_attestation_inclusion_in_a_raw",
-        "Ethereum validator watcher number of keys with two not optimal attestation inclusion in a raw",
+    rate_of_not_optimal_attestation_inclusion_gauge = Gauge(
+        prometheus_probe_rate_of_not_optimal_attestation_inclusion,
+        "Ethereum validator watcher rate of not optimal attestation inclusion",
     )
 
-    rate_of_not_optimal_attestation_inclusion_gauge = Gauge(
-        f"{prefix}_rate_of_not_optimal_attestation_inclusion",
-        "Ethereum validator watcher rate of not optimal attestation inclusion",
+    number_of_two_not_optimal_attestation_inclusion_in_a_raw_gauge = Gauge(
+        prometheus_probe_number_of_two_not_optimal_attestation_inclusion_in_a_raw,
+        (
+            "Ethereum validator watcher number of keys with two not optimal "
+            "attestation inclusion in a raw"
+        ),
     )
 
     beacon = Beacon(beacon_url)

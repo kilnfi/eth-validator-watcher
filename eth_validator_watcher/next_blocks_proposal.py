@@ -29,7 +29,7 @@ def handle_next_blocks_proposal(
         if item.pubkey in our_pubkeys and item.slot >= slot:
             print(
                 f"💍 Our validator {item.pubkey[:10]} is going to propose a block "
-                f"at  slot {item.slot} (in {item.slot - slot} slots)"
+                f"at   slot {item.slot} (in {item.slot - slot} slots)"
             )
 
     return epoch
