@@ -86,7 +86,7 @@ Developer guide
 ```
 git clone git@github.com:kilnfi/validator-watcher.git
 cd validator-watcher
-pip install .[dev]
+pip install -e .[dev]
 ```
 
 **Running tests:**
