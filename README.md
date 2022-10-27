@@ -79,13 +79,13 @@ Prometheus sample
 Installation
 ------------
 
-To install it from PyPI:
+From PyPI:
 
 ```console
 pip install eth-validator-watcher
 ```
 
-To install it from source:
+From source:
 ```console
 git clone git@github.com:kilnfi/eth-validator-watcher.git
 cd eth-validator-watcher
