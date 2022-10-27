@@ -108,6 +108,19 @@ pip install -e .[dev]
 pytest
 ```
 
+**Example of lineness probe usage on Kubernetes**
+```yaml
+livenessProbe:
+  periodSeconds: 60
+  initialDelaySeconds: 60
+  failureThreshold: 1
+  exec:
+    command: 
+    - /bin/bash
+    - -c
+    - '[[ $(date -d "last minute" +%s) < $(date -r /tmp/liveliness +%s) ]] && exit 0 || exit 1'
+```
+
 ## License
 
 [Apache 2.0 License](LICENSE).
