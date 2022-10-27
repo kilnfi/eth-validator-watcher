@@ -1,6 +1,12 @@
 Ethereum Validator Watcher
 ==========================
 
+![kiln-logo](docs/img/Kiln_Logo-Transparent-Dark.svg)
+
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+The code is provided as-is with no warranties.
+
 Description
 -----------
 
@@ -67,12 +73,12 @@ Installation
 
 To install it from PyPI:
 
-```
+```console
 pip install eth-validator-watcher
 ```
 
 To install it from source:
-```
+```console
 git clone git@github.com:kilnfi/eth-validator-watcher.git
 cd eth-validator-watcher
 pip install .
@@ -83,13 +89,17 @@ Developer guide
 ---------------
 
 **Installation:**
-```
+```console
 git clone git@github.com:kilnfi/validator-watcher.git
 cd validator-watcher
 pip install -e .[dev]
 ```
 
 **Running tests:**
-```
+```console
 pytest
 ```
+
+## License
+
+[Apache 2.0 License](LICENSE).
