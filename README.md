@@ -28,7 +28,7 @@ Usage: eth-validator-watcher [OPTIONS]
   - the path to a file containing the list of public your keys to watch, or / and
   - an URL to a Web3Signer instance managing your keys to watch.
 
-  Pubkeys are load dynamically, at each slot.
+  Pubkeys are load dynamically, on the first slot of each epoch.
   - If you use pubkeys file, you can change it without having to restart the watcher.
   - If you use Web3Signer, a call to Web3Signer will be done at every slot to get the
   latest keys to watch.

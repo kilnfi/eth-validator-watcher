@@ -68,7 +68,7 @@ def handler(
     - an URL to a Web3Signer instance managing your keys to watch.
 
     \b
-    Pubkeys are load dynamically, at each slot.
+    Pubkeys are load dynamically, on the first slot of each epoch.
     - If you use pubkeys file, you can change it without having to restart the watcher.
     - If you use Web3Signer, a call to Web3Signer will be done at every slot to get the
     latest keys to watch.
@@ -109,6 +109,7 @@ def handler(
 
     previous_slot_number: Optional[int] = None
     previous_epoch: Optional[int] = None
+    our_pubkeys: Optional[set[str]] = None
 
     # Dict containing, for our active validators:
     # - key  : Validator index
@@ -139,7 +140,9 @@ def handler(
         time.sleep(1)
 
         # Retrieve our pubkeys from file and/or Web3Signer
-        our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signers)
+        our_pubkeys = get_our_pubkeys(
+            pubkeys_file_path, web3signers, our_pubkeys, data_block.slot
+        )
 
         previous_slot_number = handle_missed_block_detection(
             beacon,

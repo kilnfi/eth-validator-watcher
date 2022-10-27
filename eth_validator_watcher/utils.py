@@ -127,8 +127,25 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
 
 
 def get_our_pubkeys(
-    pubkeys_file_path: Optional[Path], web3signers: set[Web3Signer]
+    pubkeys_file_path: Optional[Path],
+    web3signers: set[Web3Signer],
+    our_pubkeys: Optional[set[str]],
+    slot: int,
 ) -> set[str]:
+    """Get our pubkeys
+
+    Query pubkeys from either file path or Web3Signer instance.
+    If `our_pubkeys` is already set and we are not at the beginning of a new epoch,
+    returns `our_pubkeys`.
+
+    pubkeys_file_path: The path of file containing keys to watch
+    web3signers: A set of Web3Signer instance signing for the keys to watch
+    our_pubkey: The set containing pubkey to watch]
+    slot: Data Slot
+    """
+
+    if our_pubkeys is not None and slot % NB_SLOT_PER_EPOCH != 0:
+        return our_pubkeys
 
     # Get public keys to watch from file
     pubkeys_from_file: set[str] = (
