@@ -111,7 +111,14 @@ class Beacon:
         resp = requests.get(f"{self.__url}/eth/v2/beacon/blocks/{slot}")
         block_dict = resp.json()
 
-        block = Block(**block_dict)
+        # TODO: Remove this try/except block when we now what's going wrong from time
+        #       to time
+        try:
+            block = Block(**block_dict)
+        except Exception as e:
+            print(resp.status_code)
+            raise RuntimeError(block_dict) from e
+
         attestations = block.data.message.body.attestations
 
         attestations_from_previous_block = (
