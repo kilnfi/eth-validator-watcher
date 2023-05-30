@@ -7,8 +7,9 @@ def test_process_missed_attestations_some_dead_indexes() -> None:
     class Beacon:
         @staticmethod
         def get_validators_liveness(
-            epoch: int, validators_index: set[int]
+            lighthouse: bool, epoch: int, validators_index: set[int]
         ) -> dict[int, bool]:
+            assert lighthouse is False
             assert epoch == 0
             assert validators_index == {42, 43, 44}
 
@@ -17,7 +18,10 @@ def test_process_missed_attestations_some_dead_indexes() -> None:
     expected = {42, 44}
 
     actual = process_missed_attestations(
-        Beacon(), {42: "pubkey42", 43: "pubkey43", 44: "pubkey44"}, 1  # type: ignore
+        beacon=Beacon(),  # type: ignore
+        lighthouse=False,
+        our_active_index_to_pubkey={42: "pubkey42", 43: "pubkey43", 44: "pubkey44"},
+        epoch=1,
     )
 
     assert expected == actual
@@ -27,8 +31,9 @@ def test_process_missed_attestations_no_dead_indexes() -> None:
     class Beacon:
         @staticmethod
         def get_validators_liveness(
-            epoch: int, validators_index: set[int]
+            lighthouse: bool, epoch: int, validators_index: set[int]
         ) -> dict[int, bool]:
+            assert lighthouse is False
             assert epoch == 0
             assert validators_index == {42, 43, 44}
 
@@ -37,7 +42,10 @@ def test_process_missed_attestations_no_dead_indexes() -> None:
     expected: Set[int] = set()
 
     actual = process_missed_attestations(
-        Beacon(), {42: "pubkey42", 43: "pubkey43", 44: "pubkey44"}, 1  # type: ignore
+        beacon=Beacon(),  # type: ignore
+        lighthouse=False,
+        our_active_index_to_pubkey={42: "pubkey42", 43: "pubkey43", 44: "pubkey44"},
+        epoch=1,
     )
 
     assert expected == actual

@@ -21,11 +21,14 @@ double_missed_attestations_count = Gauge(
 
 def process_missed_attestations(
     beacon: Beacon,
+    lighthouse: bool,
     our_active_index_to_pubkey: dict[int, str],
     epoch: int,
 ) -> set[int]:
     validators_index = set(our_active_index_to_pubkey)
-    validators_liveness = beacon.get_validators_liveness(epoch - 1, validators_index)
+    validators_liveness = beacon.get_validators_liveness(
+        lighthouse, epoch - 1, validators_index
+    )
 
     dead_indexes = {
         index for index, liveness in validators_liveness.items() if not liveness

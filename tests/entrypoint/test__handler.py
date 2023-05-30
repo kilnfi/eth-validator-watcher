@@ -20,6 +20,7 @@ def test_slack_token_not_defined() -> None:
             pubkeys_file_path=None,
             web3signer_url=None,
             slack_channel="MY SLACK CHANNEL",
+            lighthouse=False,
             liveness_file=None,
         )
 
@@ -82,9 +83,10 @@ def test_nominal() -> None:
         return {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
 
     def process_missed_attestations(
-        beacon: Beacon, index_to_pubkey: dict[int, str], epoch: int
+        beacon: Beacon, lighthouse: bool, index_to_pubkey: dict[int, str], epoch: int
     ) -> set[int]:
         assert isinstance(beacon, Beacon)
+        assert lighthouse is False
         assert index_to_pubkey == {0: "0xaaa", 2: "0xccc", 4: "0xeee"}
         assert epoch == 1
 
@@ -171,6 +173,7 @@ def test_nominal() -> None:
         pubkeys_file_path=Path("/path/to/pubkeys"),
         web3signer_url="http://localhost:9000",
         slack_channel="my slack channel",
+        lighthouse=False,
         liveness_file=Path("/path/to/liveness"),
     )
 
