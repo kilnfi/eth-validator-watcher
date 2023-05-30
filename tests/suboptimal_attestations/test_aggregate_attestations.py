@@ -2,9 +2,10 @@ import json
 from pathlib import Path
 
 import requests_mock
+
+from eth_validator_watcher.models import Block
 from eth_validator_watcher.suboptimal_attestations import aggregate_attestations
 from tests.beacon import assets
-from eth_validator_watcher.models import Block
 
 
 def test_aggregate_attestations():

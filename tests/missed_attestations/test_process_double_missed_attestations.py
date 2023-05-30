@@ -1,7 +1,6 @@
 from typing import Set
-from eth_validator_watcher.missed_attestations import (
-    process_double_missed_attestations,
-)
+
+from eth_validator_watcher.missed_attestations import process_double_missed_attestations
 
 
 def test_process_double_missed_attestations_some_dead_indexes() -> None:

@@ -1,12 +1,13 @@
 from typing import Optional
 
 from prometheus_client import Counter
+
+from eth_validator_watcher import missed_blocks
 from eth_validator_watcher.missed_blocks import (
-    process_missed_blocks,
     missed_block_proposals_count,
+    process_missed_blocks,
 )
 from eth_validator_watcher.models import Block, ProposerDuties
-from eth_validator_watcher import missed_blocks
 
 
 def test_process_missed_blocks_previous_slot_none() -> None:

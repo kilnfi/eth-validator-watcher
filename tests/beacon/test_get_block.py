@@ -1,12 +1,13 @@
+import json
 from pathlib import Path
 
-from requests import Response
-from eth_validator_watcher.beacon import Beacon, NoBlockError
-from requests_mock import Mocker
-from tests.beacon import assets
-import json
-from requests.exceptions import RetryError
 from pytest import raises
+from requests import Response
+from requests.exceptions import RetryError
+from requests_mock import Mocker
+
+from eth_validator_watcher.beacon import Beacon, NoBlockError
+from tests.beacon import assets
 
 
 def test_get_block_exists() -> None:

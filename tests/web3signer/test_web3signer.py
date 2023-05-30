@@ -1,4 +1,5 @@
 import requests_mock
+
 from eth_validator_watcher.web3signer import Web3Signer
 
 

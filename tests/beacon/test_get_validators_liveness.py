@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 
 from requests_mock import Mocker
-from eth_validator_watcher.beacon import Beacon
 
+from eth_validator_watcher.beacon import Beacon
 from tests.beacon import assets
 
 

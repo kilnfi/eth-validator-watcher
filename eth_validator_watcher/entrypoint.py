@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from os import environ
 from pathlib import Path
 from time import sleep
 from typing import List, Optional
@@ -24,13 +25,11 @@ from .utils import (
     BLOCK_NOT_ORPHANED_TIME,
     NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
+    Slack,
     get_our_pubkeys,
     write_liveness_file,
 )
 from .web3signer import Web3Signer
-from .utils import Slack
-from os import environ
-
 
 app = typer.Typer()
 

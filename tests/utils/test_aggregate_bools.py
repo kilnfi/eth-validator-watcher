@@ -1,4 +1,5 @@
 import pytest
+
 from eth_validator_watcher.utils import aggregate_bools
 
 
