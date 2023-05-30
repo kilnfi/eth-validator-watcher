@@ -1,0 +1,26 @@
+name: PyTest
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Set up Poetry
+        uses: abatilo/actions-poetry@v2
+      - name: Install package with dev dependencies
+        run: poetry install --with dev
+      - name: Run tests
+        run: poetry run pytest --cov eth_validator_watcher --cov-report xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
