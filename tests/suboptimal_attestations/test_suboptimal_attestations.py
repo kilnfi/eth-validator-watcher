@@ -1,9 +1,8 @@
+from eth_validator_watcher import suboptimal_attestations
 from eth_validator_watcher.suboptimal_attestations import (
     process_suboptimal_attestations,
     suboptimal_attestations_rate_gauge,
 )
-
-from eth_validator_watcher import suboptimal_attestations
 
 
 def aggregate_attestations(

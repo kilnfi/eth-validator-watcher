@@ -1,4 +1,5 @@
 import pytest
+
 from eth_validator_watcher.utils import remove_all_items_from_last_true
 
 

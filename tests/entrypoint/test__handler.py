@@ -1,14 +1,15 @@
-from pathlib import Path
-from typing import Optional
-from eth_validator_watcher.entrypoint import _handler
-from typer import BadParameter
-from pytest import raises
-from eth_validator_watcher import entrypoint
-from sseclient import Event
 import json
 from os import environ
-from freezegun import freeze_time
+from pathlib import Path
+from typing import Optional
 
+from freezegun import freeze_time
+from pytest import raises
+from sseclient import Event
+from typer import BadParameter
+
+from eth_validator_watcher import entrypoint
+from eth_validator_watcher.entrypoint import _handler
 from eth_validator_watcher.utils import Slack
 
 

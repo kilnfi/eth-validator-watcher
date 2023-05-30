@@ -3,10 +3,9 @@ from typing import Optional
 
 from prometheus_client import Counter
 
-from .utils import NB_SLOT_PER_EPOCH, Slack
-
 from .beacon import Beacon
 from .models import Block, SlotWithStatus
+from .utils import NB_SLOT_PER_EPOCH, Slack
 
 print = functools.partial(print, flush=True)
 

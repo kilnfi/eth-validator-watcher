@@ -1,15 +1,14 @@
-from collections import defaultdict
 import functools
+from collections import defaultdict
 
 from prometheus_client import Gauge
 
-from .models import Block
-
 from .beacon import Beacon
-from .utils import NB_SLOT_PER_EPOCH, apply_mask
-
+from .models import Block
 from .utils import (
+    NB_SLOT_PER_EPOCH,
     aggregate_bools,
+    apply_mask,
     convert_hex_to_bools,
     remove_all_items_from_last_true,
     switch_endianness,

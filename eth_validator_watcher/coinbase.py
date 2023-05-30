@@ -1,6 +1,7 @@
 from prometheus_client import Gauge
-from requests import Session
 from pydantic import parse_obj_as
+from requests import Session
+
 from .models import CoinbaseTrade
 
 URL = "https://api.pro.coinbase.com/products/ETH-USD/trades"

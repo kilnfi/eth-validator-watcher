@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from eth_validator_watcher.utils import get_our_pubkeys
 from tests.utils import assets
 

@@ -1,8 +1,8 @@
 from collections import defaultdict
 from functools import lru_cache
 from typing import Optional
-from prometheus_client import Gauge
 
+from prometheus_client import Gauge
 from requests import Session, codes
 from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import RetryError

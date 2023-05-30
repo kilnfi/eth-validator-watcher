@@ -6,7 +6,6 @@ from more_itertools import chunked
 from prometheus_client import Gauge
 from slack_sdk import WebClient
 
-
 from .web3signer import Web3Signer
 
 NB_SLOT_PER_EPOCH = 32

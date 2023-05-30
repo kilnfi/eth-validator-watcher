@@ -1,13 +1,10 @@
-from typing import Set
 import functools
-from typing import Optional
+from typing import Optional, Set
 
 from prometheus_client import Gauge
 
-from .utils import Slack
-
 from .beacon import Beacon
-
+from .utils import Slack
 
 print = functools.partial(print, flush=True)
 
