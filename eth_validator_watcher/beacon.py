@@ -3,7 +3,7 @@ from functools import lru_cache
 from typing import Optional
 
 from prometheus_client import Gauge
-from requests import Session, codes
+from requests import Response, Session, codes
 from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import RetryError
 
@@ -12,14 +12,9 @@ from .models import (
     Committees,
     ProposerDuties,
     Validators,
-    ValidatorsLivenessRequest,
+    ValidatorsLivenessRequestLighthouse,
+    ValidatorsLivenessRequestBeaconAPI,
     ValidatorsLivenessResponse,
-)
-from .utils import (
-    aggregate_bools,
-    convert_hex_to_bools,
-    remove_all_items_from_last_true,
-    switch_endianness,
 )
 
 our_active_validators_count = Gauge(
@@ -179,13 +174,12 @@ class Beacon:
         return result
 
     def get_validators_liveness(
-        self, epoch: int, validators_index: set[int]
+        self, lighthouse: bool, epoch: int, validators_index: set[int]
     ) -> dict[int, bool]:
-        response = self.__http.post(
-            f"{self.__url}/lighthouse/liveness",
-            json=ValidatorsLivenessRequest(
-                epoch=epoch, indices=sorted(list(validators_index))
-            ).dict(),
+        response = (
+            self.__get_validators_liveness_lighthouse(epoch, validators_index)
+            if lighthouse
+            else self.__get_validators_liveness_beacon_api(epoch, validators_index)
         )
 
         response.raise_for_status()
@@ -202,3 +196,23 @@ class Beacon:
             # The beacon saw the block (that's why we received the event) but it was
             # orphaned before we could fetch it.
             return None
+
+    def __get_validators_liveness_lighthouse(
+        self, epoch: int, validators_index: set[int]
+    ) -> Response:
+        return self.__http.post(
+            f"{self.__url}/lighthouse/liveness",
+            json=ValidatorsLivenessRequestLighthouse(
+                epoch=epoch, indices=sorted(list(validators_index))
+            ).dict(),
+        )
+
+    def __get_validators_liveness_beacon_api(
+        self, epoch: int, validators_index: set[int]
+    ) -> Response:
+        return self.__http.post(
+            f"{self.__url}/eth/v1/validator/liveness/{epoch}",
+            json=ValidatorsLivenessRequestBeaconAPI(
+                indices=sorted(list(validators_index))
+            ).dict(),
+        )

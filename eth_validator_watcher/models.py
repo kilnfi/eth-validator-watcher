@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -105,9 +106,13 @@ class ProposerDuties(BaseModel):
     data: list[Data]
 
 
-class ValidatorsLivenessRequest(BaseModel):
+class ValidatorsLivenessRequestLighthouse(BaseModel):
     indices: list[int]
     epoch: int
+
+
+class ValidatorsLivenessRequestBeaconAPI(BaseModel):
+    indices: list[int]
 
 
 class ValidatorsLivenessResponse(BaseModel):
