@@ -10,6 +10,7 @@ from requests.exceptions import RetryError
 from .models import (
     Block,
     Committees,
+    Genesis,
     ProposerDuties,
     Validators,
     ValidatorsLivenessRequestLighthouse,
@@ -56,6 +57,12 @@ class Beacon:
                 )
             ),
         )
+
+    def get_genesis(self) -> Genesis:
+        response = self.__http.get(f"{self.__url}/eth/v1/beacon/genesis")
+        response.raise_for_status()
+        genesis_dict = response.json()
+        return Genesis(**genesis_dict)
 
     def get_block(self, slot: int) -> Block:
         """Get a block

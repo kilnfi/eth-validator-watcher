@@ -1,14 +1,10 @@
-import json
-from datetime import datetime
 from os import environ
 from pathlib import Path
 from time import sleep
 from typing import List, Optional
-
-import requests
+from time import time
 import typer
 from prometheus_client import Gauge, start_http_server
-from sseclient import SSEClient
 from typer import Option
 
 from .beacon import Beacon
@@ -18,16 +14,16 @@ from .missed_attestations import (
     process_missed_attestations,
 )
 from .missed_blocks import process_missed_blocks
-from .models import EventBlock
 from .next_blocks_proposal import process_future_blocks_proposal
 from .suboptimal_attestations import process_suboptimal_attestations
 from .utils import (
-    BLOCK_NOT_ORPHANED_TIME,
+    BLOCK_NOT_ORPHANED_TIME_SEC,
     NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     Slack,
     get_our_pubkeys,
     write_liveness_file,
+    slots,
 )
 from .web3signer import Web3Signer
 
@@ -138,18 +134,9 @@ def _handler(
 
     last_missed_attestations_process_epoch: Optional[int] = None
 
-    event_response = requests.get(
-        f"{beacon_url}/eth/v1/events",
-        stream=True,
-        params=dict(topics="block"),
-        headers=dict(Accept="text/event-stream"),
-    )
+    genesis = beacon.get_genesis()
 
-    for event in SSEClient(event_response).events():
-        time_slot_start = datetime.now()
-
-        data_dict = json.loads(event.data)
-        slot = EventBlock(**data_dict).slot
+    for slot, slot_start_time_sec in slots(genesis.data.genesis_time):
         epoch = slot // NB_SLOT_PER_EPOCH
         slot_in_epoch = slot % NB_SLOT_PER_EPOCH
 
@@ -167,9 +154,7 @@ def _handler(
         if previous_epoch is not None and previous_epoch != epoch:
             print(f"🎂     Epoch     {epoch}     starts")
 
-        time_now = datetime.now()
-        delta = BLOCK_NOT_ORPHANED_TIME - (time_now - time_slot_start)
-        delta_secs = delta.total_seconds()
+        delta_sec = BLOCK_NOT_ORPHANED_TIME_SEC - (time() - slot_start_time_sec)
 
         should_process_missed_attestations = (
             last_missed_attestations_process_epoch is None
@@ -196,7 +181,7 @@ def _handler(
 
         process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
 
-        sleep(max(0, delta_secs))
+        sleep(max(0, delta_sec))
 
         potential_block = beacon.get_potential_block(slot)
 

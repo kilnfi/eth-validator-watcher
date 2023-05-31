@@ -1,15 +1,15 @@
-from datetime import timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterator, Optional, Tuple
 
 from more_itertools import chunked
 from prometheus_client import Gauge
 from slack_sdk import WebClient
-
+from time import time, sleep
 from .web3signer import Web3Signer
 
 NB_SLOT_PER_EPOCH = 32
-BLOCK_NOT_ORPHANED_TIME = timedelta(seconds=6)
+NB_SECOND_PER_SLOT = 12
+BLOCK_NOT_ORPHANED_TIME_SEC = 6
 SLOT_FOR_MISSED_ATTESTATIONS_PROCESS = 16
 
 keys_count = Gauge(
@@ -183,3 +183,19 @@ class Slack:
 
     def send_message(self, message: str) -> None:
         self.__client.chat_postMessage(channel=self.__channel, text=message)
+
+
+def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
+    next_slot = int((time() - genesis_time_sec) / NB_SECOND_PER_SLOT) + 1
+
+    try:
+        while True:
+            next_slot_time_sec = genesis_time_sec + next_slot * NB_SECOND_PER_SLOT
+            time_to_wait = next_slot_time_sec - time()
+            sleep(max(0, time_to_wait))
+
+            yield next_slot, next_slot_time_sec
+
+            next_slot += 1
+    except KeyboardInterrupt:
+        pass  # pragma: no cover
