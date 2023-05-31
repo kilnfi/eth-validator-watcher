@@ -136,14 +136,12 @@ def test_nominal() -> None:
         beacon: Beacon,
         potential_block: Optional[str],
         slot: int,
-        previous_slot: Optional[int],
         pubkeys: set[str],
         slack: Slack,
     ) -> None:
         assert isinstance(beacon, Beacon)
         assert potential_block == "A BLOCK"
         assert slot in {63, 64}
-        assert previous_slot in {None, 63}
         assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
         assert isinstance(slack, Slack)
 
