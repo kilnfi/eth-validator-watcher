@@ -8,7 +8,7 @@ from typer import BadParameter
 
 from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
-from eth_validator_watcher.models import Genesis
+from eth_validator_watcher.models import BeaconType, Genesis
 from eth_validator_watcher.utils import Slack
 
 
@@ -19,23 +19,13 @@ def test_slack_token_not_defined() -> None:
             pubkeys_file_path=None,
             web3signer_url=None,
             slack_channel="MY SLACK CHANNEL",
-            lighthouse=False,
+            beacon_type=BeaconType.TEKU,
             liveness_file=None,
         )
 
 
 @freeze_time("2023-01-01 00:00:00", auto_tick_seconds=15)
 def test_nominal() -> None:
-    def get(*args, **kwargs) -> str:
-        assert args == ("http://localhost:5052/eth/v1/events",)
-        assert kwargs == dict(
-            stream=True,
-            params=dict(topics="block"),
-            headers=dict(Accept="text/event-stream"),
-        )
-
-        return "OK"
-
     class Beacon:
         def __init__(self, url: str) -> None:
             assert url == "http://localhost:5052"
@@ -85,10 +75,13 @@ def test_nominal() -> None:
         return {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
 
     def process_missed_attestations(
-        beacon: Beacon, lighthouse: bool, index_to_pubkey: dict[int, str], epoch: int
+        beacon: Beacon,
+        beacon_type: BeaconType,
+        index_to_pubkey: dict[int, str],
+        epoch: int,
     ) -> set[int]:
         assert isinstance(beacon, Beacon)
-        assert lighthouse is False
+        assert beacon_type is BeaconType.TEKU
         assert index_to_pubkey == {0: "0xaaa", 2: "0xccc", 4: "0xeee"}
         assert epoch == 1
 
@@ -171,7 +164,7 @@ def test_nominal() -> None:
         pubkeys_file_path=Path("/path/to/pubkeys"),
         web3signer_url="http://localhost:9000",
         slack_channel="my slack channel",
-        lighthouse=False,
+        beacon_type=BeaconType.TEKU,
         liveness_file=Path("/path/to/liveness"),
     )
 

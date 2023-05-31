@@ -116,14 +116,13 @@ class ValidatorsLivenessRequestLighthouse(BaseModel):
     epoch: int
 
 
-class ValidatorsLivenessRequestBeaconAPI(BaseModel):
+class ValidatorsLivenessRequestTeku(BaseModel):
     indices: list[int]
 
 
 class ValidatorsLivenessResponse(BaseModel):
     class Data(BaseModel):
         index: int
-        epoch: int
         is_live: bool
 
     data: list[Data]
@@ -140,3 +139,9 @@ class CoinbaseTrade(BaseModel):
     price: float
     size: float
     side: str
+
+
+class BeaconType(str, Enum):
+    LIGHTHOUSE = "lighthouse"
+    TEKU = "teku"
+    OTHER = "other"
