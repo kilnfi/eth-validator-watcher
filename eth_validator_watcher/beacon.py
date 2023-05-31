@@ -8,13 +8,14 @@ from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import RetryError
 
 from .models import (
+    BeaconType,
     Block,
     Committees,
     Genesis,
     ProposerDuties,
     Validators,
     ValidatorsLivenessRequestLighthouse,
-    ValidatorsLivenessRequestBeaconAPI,
+    ValidatorsLivenessRequestTeku,
     ValidatorsLivenessResponse,
 )
 
@@ -181,13 +182,15 @@ class Beacon:
         return result
 
     def get_validators_liveness(
-        self, lighthouse: bool, epoch: int, validators_index: set[int]
+        self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
     ) -> dict[int, bool]:
-        response = (
-            self.__get_validators_liveness_lighthouse(epoch, validators_index)
-            if lighthouse
-            else self.__get_validators_liveness_beacon_api(epoch, validators_index)
-        )
+        beacon_type_to_function = {
+            BeaconType.LIGHTHOUSE: self.__get_validators_liveness_lighthouse,
+            BeaconType.TEKU: self.__get_validators_liveness_teku,
+            BeaconType.OTHER: self.__get_validators_liveness_beacon_api,
+        }
+
+        response = beacon_type_to_function[beacon_type](epoch, validators_index)
 
         response.raise_for_status()
         validators_liveness_dict = response.json()
@@ -214,12 +217,23 @@ class Beacon:
             ).dict(),
         )
 
+    def __get_validators_liveness_teku(
+        self, epoch: int, validators_index: set[int]
+    ) -> Response:
+        return self.__http.post(
+            f"{self.__url}/eth/v1/validator/liveness/{epoch}",
+            json=ValidatorsLivenessRequestTeku(
+                indices=sorted(list(validators_index))
+            ).dict(),
+        )
+
     def __get_validators_liveness_beacon_api(
         self, epoch: int, validators_index: set[int]
     ) -> Response:
         return self.__http.post(
             f"{self.__url}/eth/v1/validator/liveness/{epoch}",
-            json=ValidatorsLivenessRequestBeaconAPI(
-                indices=sorted(list(validators_index))
-            ).dict(),
+            json=[
+                str(validator_index)
+                for validator_index in sorted(list(validators_index))
+            ],
         )

@@ -3,6 +3,8 @@ from typing import Optional, Set
 
 from prometheus_client import Gauge
 
+from eth_validator_watcher.models import BeaconType
+
 from .beacon import Beacon
 from .utils import Slack
 
@@ -21,13 +23,13 @@ double_missed_attestations_count = Gauge(
 
 def process_missed_attestations(
     beacon: Beacon,
-    lighthouse: bool,
+    beacon_type: BeaconType,
     our_active_index_to_pubkey: dict[int, str],
     epoch: int,
 ) -> set[int]:
     validators_index = set(our_active_index_to_pubkey)
     validators_liveness = beacon.get_validators_liveness(
-        lighthouse, epoch - 1, validators_index
+        beacon_type, epoch - 1, validators_index
     )
 
     dead_indexes = {

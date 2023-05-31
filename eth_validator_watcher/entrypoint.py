@@ -1,3 +1,4 @@
+from enum import Enum
 from os import environ
 from pathlib import Path
 from time import sleep
@@ -26,6 +27,7 @@ from .utils import (
     slots,
 )
 from .web3signer import Web3Signer
+from .models import BeaconType
 
 app = typer.Typer()
 
@@ -49,11 +51,13 @@ def handler(
     slack_channel: Optional[str] = Option(
         None, help="Slack channel to send alerts - SLACK_TOKEN env var must be set"
     ),
-    lighthouse: bool = Option(
-        False,
+    beacon_type: BeaconType = Option(
+        BeaconType.OTHER,
+        case_sensitive=False,
         help=(
-            "Use this flag if connected to a lighthouse beacon node. "
-            "See https://github.com/sigp/lighthouse/issues/4243 for more details."
+            "Use this option if connected to a lighthouse or a teku beacon node. "
+            "See https://github.com/sigp/lighthouse/issues/4243 for lighthouse and "
+            "https://github.com/ConsenSys/teku/issues/7204 for teku."
         ),
     ),
     liveness_file: Optional[Path] = Option(None, help="Liveness file"),
@@ -91,7 +95,7 @@ def handler(
         pubkeys_file_path,
         web3signer_url,
         slack_channel,
-        lighthouse,
+        beacon_type,
         liveness_file,
     )
 
@@ -101,7 +105,7 @@ def _handler(
     pubkeys_file_path: Optional[Path],
     web3signer_url: Optional[str],
     slack_channel: Optional[str],
-    lighthouse: bool,
+    beacon_type: BeaconType,
     liveness_file: Optional[Path],
 ) -> None:
     slack_token = environ.get("SLACK_TOKEN")
@@ -164,7 +168,7 @@ def _handler(
 
         if should_process_missed_attestations:
             our_dead_indexes = process_missed_attestations(
-                beacon, lighthouse, our_active_index_to_pubkey, epoch
+                beacon, beacon_type, our_active_index_to_pubkey, epoch
             )
 
             process_double_missed_attestations(
