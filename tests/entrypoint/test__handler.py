@@ -1,15 +1,14 @@
-import json
 from os import environ
 from pathlib import Path
-from typing import Optional
+from typing import Iterator, Optional, Tuple
 
 from freezegun import freeze_time
 from pytest import raises
-from sseclient import Event
 from typer import BadParameter
 
 from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
+from eth_validator_watcher.models import Genesis
 from eth_validator_watcher.utils import Slack
 
 
@@ -37,19 +36,18 @@ def test_nominal() -> None:
 
         return "OK"
 
-    class SSEClient:
-        def __init__(self, response: str) -> None:
-            assert response == "OK"
-
-        def events(self) -> list[Event]:
-            return [
-                Event(data=json.dumps(dict(slot=63))),
-                Event(data=json.dumps(dict(slot=64))),
-            ]
-
     class Beacon:
         def __init__(self, url: str) -> None:
             assert url == "http://localhost:5052"
+
+        def get_genesis(self) -> Genesis:
+            return Genesis(
+                data=Genesis.Data(
+                    genesis_time=0,
+                    genesis_fork_version="0x123",
+                    genesis_validators_root="0xabc",
+                )
+            )
 
         def get_active_index_to_pubkey(self, pubkeys: set[str]) -> dict[int, str]:
             assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
@@ -75,6 +73,10 @@ def test_nominal() -> None:
         @classmethod
         def emit_eth_usd_conversion_rate(cls) -> None:
             cls.nb_calls += 1
+
+    def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
+        yield 63, 1664
+        yield 64, 1676
 
     def get_our_pubkeys(pubkeys_file_path: Path, web3signer: Web3Signer) -> set[str]:
         assert pubkeys_file_path == Path("/path/to/pubkeys")
@@ -148,9 +150,6 @@ def test_nominal() -> None:
     def write_liveness_file(liveness_file: Path) -> None:
         assert liveness_file == Path("/path/to/liveness")
 
-    original_get = entrypoint.requests.get
-    entrypoint.requests.get = get  # type: ignore
-    entrypoint.SSEClient = SSEClient
     entrypoint.Beacon = Beacon  # type: ignore
     entrypoint.Coinbase = Coinbase  # type: ignore
     entrypoint.Web3Signer = Web3Signer  # type: ignore
@@ -161,6 +160,7 @@ def test_nominal() -> None:
         process_double_missed_attestations  # type:ignore
     )
 
+    entrypoint.slots = slots  # type: ignore
     entrypoint.process_future_blocks_proposal = process_future_blocks_proposal  # type: ignore
     entrypoint.process_suboptimal_attestations = process_suboptimal_attestations  # type: ignore
     entrypoint.process_missed_blocks = process_missed_blocks  # type: ignore
@@ -176,7 +176,5 @@ def test_nominal() -> None:
         lighthouse=False,
         liveness_file=Path("/path/to/liveness"),
     )
-
-    entrypoint.requests.get = original_get
 
     assert Coinbase.nb_calls == 2

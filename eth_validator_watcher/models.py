@@ -33,6 +33,15 @@ class Validators(BaseModel):
     data: list[DataItem]
 
 
+class Genesis(BaseModel):
+    class Data(BaseModel):
+        genesis_time: int
+        genesis_validators_root: str
+        genesis_fork_version: str
+
+    data: Data
+
+
 class Block(BaseModel):
     class Data(BaseModel):
         class Message(BaseModel):
@@ -80,10 +89,6 @@ class Block(BaseModel):
     version: str
     execution_optimistic: bool
     data: Data
-
-
-class EventBlock(BaseModel):
-    slot: int
 
 
 class Committees(BaseModel):
