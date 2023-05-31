@@ -128,8 +128,6 @@ def _handler(
     our_active_index_to_pubkey: dict[int, str] = {}
     our_dead_indexes: set[int] = set()
     previous_dead_indexes: set[int] = set()
-
-    previous_slot: Optional[int] = None
     previous_epoch: Optional[int] = None
 
     last_missed_attestations_process_epoch: Optional[int] = None
@@ -197,13 +195,11 @@ def _handler(
             beacon,
             potential_block,
             slot,
-            previous_slot,
             our_pubkeys,
             slack,
         )
 
         previous_dead_indexes = our_dead_indexes
-        previous_slot = slot
         previous_epoch = epoch
 
         if slot_in_epoch >= SLOT_FOR_MISSED_ATTESTATIONS_PROCESS:
