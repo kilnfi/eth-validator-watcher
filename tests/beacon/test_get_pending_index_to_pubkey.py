@@ -27,9 +27,9 @@ def test_get_pending_index_to_pubkey():
 
     with requests_mock.Mocker() as mock:
         mock.get(
-            f"{beacon_url}/eth/v1/beacon/states/head/validators?status=pending",
+            f"{beacon_url}/eth/v1/beacon/states/head/validators?status=pending_queued",
             json=validators,
         )
         beacon = Beacon(beacon_url)
 
-        assert beacon.get_pending_index_to_pubkey(input) == expected
+        assert beacon.get_pending_queued_index_to_pubkey(input) == expected

@@ -124,7 +124,7 @@ class Beacon:
 
         return our_active_index_to_pubkey
 
-    def get_pending_index_to_pubkey(self, pubkeys: set[str]) -> dict[int, str]:
+    def get_pending_queued_index_to_pubkey(self, pubkeys: set[str]) -> dict[int, str]:
         """Return a dictionnary with:
         key  : Index of validator
         value: Public key for validator
@@ -133,7 +133,7 @@ class Beacon:
         """
         response = self.__http.get(
             f"{self.__url}/eth/v1/beacon/states/head/validators",
-            params=dict(status=Validators.DataItem.StatusEnum.pending),
+            params=dict(status=Validators.DataItem.StatusEnum.pendingQueued),
         )
 
         response.raise_for_status()
