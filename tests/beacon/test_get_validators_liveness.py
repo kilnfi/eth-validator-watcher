@@ -4,8 +4,8 @@ from pathlib import Path
 from requests_mock import Mocker
 
 from eth_validator_watcher.beacon import Beacon
-from tests.beacon import assets
 from eth_validator_watcher.models import BeaconType
+from tests.beacon import assets
 
 
 def test_get_proposer_duties_lighthouse():

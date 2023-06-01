@@ -1,6 +1,7 @@
-from eth_validator_watcher.utils import slots
 from freezegun import freeze_time
+
 from eth_validator_watcher import utils
+from eth_validator_watcher.utils import slots
 
 
 def sleep(seconds: int) -> None:
