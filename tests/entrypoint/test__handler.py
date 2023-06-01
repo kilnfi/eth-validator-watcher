@@ -44,7 +44,9 @@ def test_nominal() -> None:
 
             return {0: "0xaaa", 2: "0xccc", 4: "0xeee"}
 
-        def get_pending_index_to_pubkey(self, pubkeys: set[str]) -> dict[int, str]:
+        def get_pending_queued_index_to_pubkey(
+            self, pubkeys: set[str]
+        ) -> dict[int, str]:
             assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
 
             return {1: "0xbbb", 3: "0xddd"}
@@ -65,6 +67,7 @@ def test_nominal() -> None:
             cls.nb_calls += 1
 
     def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
+        assert genesis_time == 0
         yield 63, 1664
         yield 64, 1676
 
