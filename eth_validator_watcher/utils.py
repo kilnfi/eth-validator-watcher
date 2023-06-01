@@ -1,10 +1,11 @@
 from pathlib import Path
+from time import sleep, time
 from typing import Any, Iterator, Optional, Tuple
 
 from more_itertools import chunked
 from prometheus_client import Gauge
 from slack_sdk import WebClient
-from time import time, sleep
+
 from .web3signer import Web3Signer
 
 NB_SLOT_PER_EPOCH = 32

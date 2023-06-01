@@ -1,9 +1,9 @@
 from enum import Enum
 from os import environ
 from pathlib import Path
-from time import sleep
+from time import sleep, time
 from typing import List, Optional
-from time import time
+
 import typer
 from prometheus_client import Gauge, start_http_server
 from typer import Option
@@ -15,6 +15,7 @@ from .missed_attestations import (
     process_missed_attestations,
 )
 from .missed_blocks import process_missed_blocks
+from .models import BeaconType
 from .next_blocks_proposal import process_future_blocks_proposal
 from .suboptimal_attestations import process_suboptimal_attestations
 from .utils import (
@@ -23,11 +24,10 @@ from .utils import (
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     Slack,
     get_our_pubkeys,
-    write_liveness_file,
     slots,
+    write_liveness_file,
 )
 from .web3signer import Web3Signer
-from .models import BeaconType
 
 app = typer.Typer()
 
