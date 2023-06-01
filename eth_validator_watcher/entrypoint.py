@@ -130,8 +130,8 @@ def _handler(
 
     our_pubkeys: set[str] = set()
     our_active_index_to_pubkey: dict[int, str] = {}
-    our_dead_indexes: set[int] = set()
-    previous_dead_indexes: set[int] = set()
+    our_validators_indexes_that_missed_attestation: set[int] = set()
+    our_validators_indexes_that_missed_previous_attestation: set[int] = set()
     previous_epoch: Optional[int] = None
 
     last_missed_attestations_process_epoch: Optional[int] = None
@@ -167,13 +167,15 @@ def _handler(
         )
 
         if should_process_missed_attestations:
-            our_dead_indexes = process_missed_attestations(
-                beacon, beacon_type, our_active_index_to_pubkey, epoch
+            our_validators_indexes_that_missed_attestation = (
+                process_missed_attestations(
+                    beacon, beacon_type, our_active_index_to_pubkey, epoch
+                )
             )
 
             process_double_missed_attestations(
-                our_dead_indexes,
-                previous_dead_indexes,
+                our_validators_indexes_that_missed_attestation,
+                our_validators_indexes_that_missed_previous_attestation,
                 our_active_index_to_pubkey,
                 epoch,
                 slack,
@@ -203,7 +205,9 @@ def _handler(
             slack,
         )
 
-        previous_dead_indexes = our_dead_indexes
+        our_validators_indexes_that_missed_previous_attestation = (
+            our_validators_indexes_that_missed_attestation
+        )
         previous_epoch = epoch
 
         if slot_in_epoch >= SLOT_FOR_MISSED_ATTESTATIONS_PROCESS:
