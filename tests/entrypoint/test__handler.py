@@ -10,6 +10,9 @@ from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
 from eth_validator_watcher.models import BeaconType, Genesis
 from eth_validator_watcher.utils import Slack
+from eth_validator_watcher.models import Validators
+
+StatusEnum = Validators.DataItem.StatusEnum
 
 
 def test_slack_token_not_defined() -> None:
@@ -39,17 +42,22 @@ def test_nominal() -> None:
                 )
             )
 
-        def get_active_index_to_pubkey(self, pubkeys: set[str]) -> dict[int, str]:
-            assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
-
-            return {0: "0xaaa", 2: "0xccc", 4: "0xeee"}
-
-        def get_pending_queued_index_to_pubkey(
-            self, pubkeys: set[str]
-        ) -> dict[int, str]:
-            assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
-
-            return {1: "0xbbb", 3: "0xddd"}
+        def get_status_to_index_to_pubkey(self) -> dict[StatusEnum, dict[int, str]]:
+            return {
+                StatusEnum.activeOngoing: {
+                    0: "0xaaa",
+                    2: "0xccc",
+                    4: "0xeee",
+                },
+                StatusEnum.pendingQueued: {
+                    1: "0xbbb",
+                    3: "0xddd",
+                },
+                StatusEnum.exitedSlashed: {
+                    5: "0xfff",
+                    6: "0xggg",
+                },
+            }
 
         def get_potential_block(self, slot: int) -> Optional[str]:
             assert slot in {63, 64}
@@ -66,6 +74,18 @@ def test_nominal() -> None:
         def emit_eth_usd_conversion_rate(cls) -> None:
             cls.nb_calls += 1
 
+    class SlashedValidators:
+        def __init__(self, slack: Optional[Slack]) -> None:
+            assert isinstance(slack, Slack)
+
+        def process(
+            self,
+            total_exited_slashed_index_to_pubkey: dict[int, str],
+            our_exited_slashed_index_to_pubkey: dict[int, str],
+        ) -> None:
+            assert total_exited_slashed_index_to_pubkey == {5: "0xfff", 6: "0xggg"}
+            assert our_exited_slashed_index_to_pubkey == {5: "0xfff"}
+
     def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
         assert genesis_time == 0
         yield 63, 1664
@@ -75,7 +95,7 @@ def test_nominal() -> None:
         assert pubkeys_file_path == Path("/path/to/pubkeys")
         assert isinstance(web3signer, Web3Signer)
 
-        return {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
+        return {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
 
     def process_missed_attestations(
         beacon: Beacon,
@@ -109,7 +129,7 @@ def test_nominal() -> None:
         beacon: Beacon, pubkeys: set[str], slot: int, is_new_epoch: bool
     ) -> int:
         assert isinstance(beacon, Beacon)
-        assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
+        assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
         assert slot in {63, 64}
         assert is_new_epoch is True
 
@@ -138,7 +158,7 @@ def test_nominal() -> None:
         assert isinstance(beacon, Beacon)
         assert potential_block == "A BLOCK"
         assert slot in {63, 64}
-        assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee"}
+        assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
         assert isinstance(slack, Slack)
 
     def write_liveness_file(liveness_file: Path) -> None:
@@ -147,6 +167,7 @@ def test_nominal() -> None:
     entrypoint.Beacon = Beacon  # type: ignore
     entrypoint.Coinbase = Coinbase  # type: ignore
     entrypoint.Web3Signer = Web3Signer  # type: ignore
+    entrypoint.SlashedValidators = SlashedValidators  # type: ignore
     entrypoint.get_our_pubkeys = get_our_pubkeys  # type: ignore
     entrypoint.process_missed_attestations = process_missed_attestations  # type: ignore
 

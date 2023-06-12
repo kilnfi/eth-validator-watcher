@@ -2,10 +2,10 @@ from collections import defaultdict
 from functools import lru_cache
 from typing import Optional
 
-from prometheus_client import Gauge
 from requests import Response, Session, codes
 from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import RetryError
+from .models import Validators
 
 from .models import (
     BeaconType,
@@ -19,20 +19,7 @@ from .models import (
     ValidatorsLivenessResponse,
 )
 
-our_active_validators_count = Gauge(
-    "our_active_validators_count",
-    "Our active validators count",
-)
-
-our_pending_validators_count = Gauge(
-    "our_pending_validators_count",
-    "Our pending validators count",
-)
-
-total_active_validators_count = Gauge(
-    "total_active_validators_count",
-    "Total active validators count",
-)
+StatusEnum = Validators.DataItem.StatusEnum
 
 
 class NoBlockError(Exception):
@@ -96,59 +83,33 @@ class Beacon:
         proposer_duties_dict = response.json()
         return ProposerDuties(**proposer_duties_dict)
 
-    def get_active_index_to_pubkey(self, pubkeys: set[str]) -> dict[int, str]:
-        """Return a dictionnary with:
-        key  : Index of validator
-        value: Public key for validator
-
-        pubkeys: The set of validators pubkey to use.
+    def get_status_to_index_to_pubkey(self) -> dict[StatusEnum, dict[int, str]]:
+        """Return a nested dictionnary with:
+        outer key               : Status
+        outer value (=inner key): Index of validator
+        inner value             : Public key for validator
         """
         response = self.__http.get(
             f"{self.__url}/eth/v1/beacon/states/head/validators",
-            params=dict(status=Validators.DataItem.StatusEnum.active),
+            params=dict(
+                status=[
+                    StatusEnum.pendingQueued,
+                    StatusEnum.active,
+                    StatusEnum.exitedSlashed,
+                ]
+            ),
         )
 
         response.raise_for_status()
         validators_dict = response.json()
+
         validators = Validators(**validators_dict)
+        result: dict[StatusEnum, dict[int, str]] = defaultdict(dict)
 
-        total_active_validators_count.set(len(validators.data))
+        for item in validators.data:
+            result[item.status][item.index] = item.validator.pubkey
 
-        our_active_index_to_pubkey = {
-            item.index: item.validator.pubkey
-            for item in validators.data
-            if item.validator.pubkey in pubkeys
-        }
-
-        our_active_validators_count.set(len(our_active_index_to_pubkey))
-
-        return our_active_index_to_pubkey
-
-    def get_pending_queued_index_to_pubkey(self, pubkeys: set[str]) -> dict[int, str]:
-        """Return a dictionnary with:
-        key  : Index of validator
-        value: Public key for validator
-
-        pubkeys: The set of validators pubkey to use.
-        """
-        response = self.__http.get(
-            f"{self.__url}/eth/v1/beacon/states/head/validators",
-            params=dict(status=Validators.DataItem.StatusEnum.pendingQueued),
-        )
-
-        response.raise_for_status()
-        validators_dict = response.json()
-        validators = Validators(**validators_dict)
-
-        our_pending_index_to_pubkey = {
-            item.index: item.validator.pubkey
-            for item in validators.data
-            if item.validator.pubkey in pubkeys
-        }
-
-        our_pending_validators_count.set(len(our_pending_index_to_pubkey))
-
-        return our_pending_index_to_pubkey
+        return result
 
     @lru_cache(maxsize=1)
     def get_duty_slot_to_committee_index_to_validators_index(

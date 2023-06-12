@@ -1,4 +1,3 @@
-from enum import Enum
 from os import environ
 from pathlib import Path
 from time import sleep, time
@@ -7,6 +6,8 @@ from typing import List, Optional
 import typer
 from prometheus_client import Gauge, start_http_server
 from typer import Option
+
+from eth_validator_watcher.slashed_validators import SlashedValidators
 
 from .beacon import Beacon
 from .coinbase import Coinbase
@@ -28,11 +29,35 @@ from .utils import (
     write_liveness_file,
 )
 from .web3signer import Web3Signer
+from .models import Validators
+
+StatusEnum = Validators.DataItem.StatusEnum
+
 
 app = typer.Typer()
 
 slot_gauge = Gauge("slot", "Slot")
 epoch_gauge = Gauge("epoch", "Epoch")
+
+our_pending_queued_validators_gauge = Gauge(
+    "our_pending_queued_validators_count",
+    "Our pending queued validators count",
+)
+
+total_pending_queued_validators_gauge = Gauge(
+    "total_pending_queued_validators_count",
+    "Total pending queued validators count",
+)
+
+our_active_validators_gauge = Gauge(
+    "our_active_validators_count",
+    "Our active validators count",
+)
+
+total_active_validators_gauge = Gauge(
+    "total_active_validators_count",
+    "Total active validators count",
+)
 
 
 @app.command()
@@ -134,6 +159,8 @@ def _handler(
     our_validators_indexes_that_missed_previous_attestation: set[int] = set()
     previous_epoch: Optional[int] = None
 
+    slashed_validators = SlashedValidators(slack)
+
     last_missed_attestations_process_epoch: Optional[int] = None
 
     genesis = beacon.get_genesis()
@@ -149,8 +176,61 @@ def _handler(
 
         if is_new_epoch:
             our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
-            our_active_index_to_pubkey = beacon.get_active_index_to_pubkey(our_pubkeys)
-            beacon.get_pending_queued_index_to_pubkey(our_pubkeys)
+            total_status_to_index_to_pubkey = beacon.get_status_to_index_to_pubkey()
+
+            our_status_to_index_to_pubkey = {
+                status: {
+                    index: pubkey
+                    for index, pubkey in index_to_pubkey.items()
+                    if pubkey in our_pubkeys
+                }
+                for status, index_to_pubkey in total_status_to_index_to_pubkey.items()
+            }
+
+            our_pending_queued_index_to_pubkey = our_status_to_index_to_pubkey.get(
+                StatusEnum.pendingQueued, {}
+            )
+
+            our_pending_queued_validators_gauge.set(
+                len(our_pending_queued_index_to_pubkey)
+            )
+
+            our_active_index_to_pubkey = (
+                our_status_to_index_to_pubkey.get(StatusEnum.activeOngoing, {})
+                | our_status_to_index_to_pubkey.get(StatusEnum.activeExiting, {})
+                | our_status_to_index_to_pubkey.get(StatusEnum.activeSlashed, {})
+            )
+
+            our_active_validators_gauge.set(len(our_active_index_to_pubkey))
+
+            our_exited_slashed_index_to_pubkey = our_status_to_index_to_pubkey.get(
+                StatusEnum.exitedSlashed, {}
+            )
+
+            total_pending_queued_index_to_pubkey = total_status_to_index_to_pubkey.get(
+                StatusEnum.pendingQueued, {}
+            )
+
+            total_pending_queued_validators_gauge.set(
+                len(total_pending_queued_index_to_pubkey)
+            )
+
+            total_active_index_to_pubkey = (
+                total_status_to_index_to_pubkey.get(StatusEnum.activeOngoing, {})
+                | total_status_to_index_to_pubkey.get(StatusEnum.activeExiting, {})
+                | total_status_to_index_to_pubkey.get(StatusEnum.activeSlashed, {})
+            )
+
+            total_active_validators_gauge.set(len(total_active_index_to_pubkey))
+
+            total_exited_slashed_index_to_pubkey = total_status_to_index_to_pubkey.get(
+                StatusEnum.exitedSlashed, {}
+            )
+
+            slashed_validators.process(
+                total_exited_slashed_index_to_pubkey, our_exited_slashed_index_to_pubkey
+            )
+
             coinbase.emit_eth_usd_conversion_rate()
 
         if previous_epoch is not None and previous_epoch != epoch:
@@ -208,6 +288,7 @@ def _handler(
         our_validators_indexes_that_missed_previous_attestation = (
             our_validators_indexes_that_missed_attestation
         )
+
         previous_epoch = epoch
 
         if slot_in_epoch >= SLOT_FOR_MISSED_ATTESTATIONS_PROCESS:
