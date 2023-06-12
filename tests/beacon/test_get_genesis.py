@@ -8,7 +8,7 @@ from eth_validator_watcher.models import Genesis
 from tests.beacon import assets
 
 
-def test_get_pending_index_to_pubkey():
+def test_get_genesis():
     beacon_url = "http://beacon:5052"
     genesis_path = Path(assets.__file__).parent / "genesis.json"
 
