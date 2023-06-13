@@ -30,6 +30,7 @@ from .utils import (
 )
 from .web3signer import Web3Signer
 from .models import Validators
+from .entry_queue import export_duration_sec as export_entry_queue_duration_sec
 
 StatusEnum = Validators.DataItem.StatusEnum
 
@@ -211,8 +212,12 @@ def _handler(
                 StatusEnum.pendingQueued, {}
             )
 
+            nb_total_pending_queued_validators = len(
+                total_pending_queued_index_to_pubkey
+            )
+
             total_pending_queued_validators_gauge.set(
-                len(total_pending_queued_index_to_pubkey)
+                nb_total_pending_queued_validators
             )
 
             total_active_index_to_pubkey = (
@@ -221,7 +226,8 @@ def _handler(
                 | total_status_to_index_to_pubkey.get(StatusEnum.activeSlashed, {})
             )
 
-            total_active_validators_gauge.set(len(total_active_index_to_pubkey))
+            nb_total_active_validators = len(total_active_index_to_pubkey)
+            total_active_validators_gauge.set(nb_total_active_validators)
 
             total_exited_slashed_index_to_pubkey = total_status_to_index_to_pubkey.get(
                 StatusEnum.exitedSlashed, {}
@@ -229,6 +235,10 @@ def _handler(
 
             slashed_validators.process(
                 total_exited_slashed_index_to_pubkey, our_exited_slashed_index_to_pubkey
+            )
+
+            export_entry_queue_duration_sec(
+                nb_total_active_validators, nb_total_pending_queued_validators
             )
 
             coinbase.emit_eth_usd_conversion_rate()
