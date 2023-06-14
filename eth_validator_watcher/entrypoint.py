@@ -7,7 +7,10 @@ import typer
 from prometheus_client import Gauge, start_http_server
 from typer import Option
 
-from eth_validator_watcher.slashed_validators import SlashedValidators
+from .fee_recipient import process_fee_recipient
+from .execution import Execution
+
+from .slashed_validators import SlashedValidators
 
 from .beacon import Beacon
 from .coinbase import Coinbase
@@ -25,6 +28,7 @@ from .utils import (
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     Slack,
     get_our_pubkeys,
+    is_eth1_address,
     slots,
     write_liveness_file,
 )
@@ -64,6 +68,7 @@ total_active_validators_gauge = Gauge(
 @app.command()
 def handler(
     beacon_url: str = Option(..., help="URL of beacon node"),
+    execution_url: str = Option(None, help="URL of execution node"),
     pubkeys_file_path: Optional[Path] = Option(
         None,
         help="File containing the list of public keys to watch",
@@ -74,6 +79,7 @@ def handler(
     web3signer_url: Optional[str] = Option(
         None, help="URL to web3signer managing keys to watch"
     ),
+    fee_recipient: Optional[str] = Option(None, help="Fee recipient address"),
     slack_channel: Optional[str] = Option(
         None, help="Slack channel to send alerts - SLACK_TOKEN env var must be set"
     ),
@@ -118,8 +124,10 @@ def handler(
     """
     _handler(  # pragma: no cover
         beacon_url,
+        execution_url,
         pubkeys_file_path,
         web3signer_url,
+        fee_recipient,
         slack_channel,
         beacon_type,
         liveness_file,
@@ -128,17 +136,29 @@ def handler(
 
 def _handler(
     beacon_url: str,
+    execution_url: Optional[str],
     pubkeys_file_path: Optional[Path],
     web3signer_url: Optional[str],
+    fee_recipient: Optional[str],
     slack_channel: Optional[str],
     beacon_type: BeaconType,
     liveness_file: Optional[Path],
 ) -> None:
     slack_token = environ.get("SLACK_TOKEN")
 
+    if fee_recipient is not None and execution_url is None:
+        raise typer.BadParameter(
+            "`execution-url` must be set if you want to use `fee-recipient`"
+        )
+
+    if fee_recipient is not None and not is_eth1_address(fee_recipient):
+        raise typer.BadParameter(
+            "`fee-recipient` should be a valid, 0x prefixed, eth1 address"
+        )
+
     if slack_channel is not None and slack_token is None:
         raise typer.BadParameter(
-            "SLACK_TOKEN env var must be set if you want to use slack_channel"
+            "SLACK_TOKEN env var must be set if you want to use `slack-channel`"
         )
 
     slack = (
@@ -150,6 +170,7 @@ def _handler(
     start_http_server(8000)
 
     beacon = Beacon(beacon_url)
+    execution = Execution(execution_url) if execution_url is not None else None
     coinbase = Coinbase()
 
     web3signer = Web3Signer(web3signer_url) if web3signer_url is not None else None
@@ -279,11 +300,17 @@ def _handler(
         potential_block = beacon.get_potential_block(slot)
 
         if potential_block is not None:
+            block = potential_block
+
             process_suboptimal_attestations(
                 beacon,
-                potential_block,
+                block,
                 slot,
                 our_active_index_to_pubkey,
+            )
+
+            process_fee_recipient(
+                block, our_active_index_to_pubkey, execution, fee_recipient, slack
             )
 
         process_missed_blocks(

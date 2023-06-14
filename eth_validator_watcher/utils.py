@@ -200,3 +200,7 @@ def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
             next_slot += 1
     except KeyboardInterrupt:
         pass  # pragma: no cover
+
+
+def is_eth1_address(address: str) -> bool:
+    return address[:2] == "0x" and len(address) == 42

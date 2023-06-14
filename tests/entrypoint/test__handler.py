@@ -15,12 +15,42 @@ from eth_validator_watcher.models import Validators
 StatusEnum = Validators.DataItem.StatusEnum
 
 
+def test_fee_recipient_set_while_execution_url_not_set() -> None:
+    with raises(BadParameter):
+        _handler(
+            beacon_url="",
+            execution_url=None,
+            pubkeys_file_path=None,
+            web3signer_url=None,
+            fee_recipient="something",
+            slack_channel="MY SLACK CHANNEL",
+            beacon_type=BeaconType.TEKU,
+            liveness_file=None,
+        )
+
+
+def test_fee_recipient_not_valid() -> None:
+    with raises(BadParameter):
+        _handler(
+            beacon_url="",
+            execution_url="http://localhost:8545",
+            pubkeys_file_path=None,
+            web3signer_url=None,
+            fee_recipient="something",
+            slack_channel="MY SLACK CHANNEL",
+            beacon_type=BeaconType.TEKU,
+            liveness_file=None,
+        )
+
+
 def test_slack_token_not_defined() -> None:
     with raises(BadParameter):
         _handler(
             beacon_url="",
+            execution_url=None,
             pubkeys_file_path=None,
             web3signer_url=None,
+            fee_recipient=None,
             slack_channel="MY SLACK CHANNEL",
             beacon_type=BeaconType.TEKU,
             liveness_file=None,
@@ -185,8 +215,10 @@ def test_nominal() -> None:
 
     _handler(
         beacon_url="http://localhost:5052",
+        execution_url=None,
         pubkeys_file_path=Path("/path/to/pubkeys"),
         web3signer_url="http://localhost:9000",
+        fee_recipient=None,
         slack_channel="my slack channel",
         beacon_type=BeaconType.TEKU,
         liveness_file=Path("/path/to/liveness"),
