@@ -246,8 +246,6 @@ def _handler(
         if previous_epoch is not None and previous_epoch != epoch:
             print(f"🎂     Epoch     {epoch}     starts")
 
-        delta_sec = BLOCK_NOT_ORPHANED_TIME_SEC - (time() - slot_start_time_sec)
-
         should_process_missed_attestations = (
             last_missed_attestations_process_epoch is None
             or (
@@ -275,6 +273,7 @@ def _handler(
 
         process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
 
+        delta_sec = BLOCK_NOT_ORPHANED_TIME_SEC - (time() - slot_start_time_sec)
         sleep(max(0, delta_sec))
 
         potential_block = beacon.get_potential_block(slot)
