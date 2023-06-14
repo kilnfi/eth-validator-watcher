@@ -70,12 +70,28 @@ class Block(BaseModel):
                     data: Data
                     signature: str
 
+                class ExecutionPayload(BaseModel):
+                    parent_hash: str
+                    fee_recipient: str
+                    state_root: str
+                    receipts_root: str
+                    logs_bloom: str
+                    prev_randao: str
+                    block_number: int
+                    gas_limit: int
+                    timestamp: int
+                    extra_data: str
+                    base_fee_per_gas: int
+                    block_hash: str
+                    transactions: list[str]
+
                 randao_reveal: str
                 eth1_data: Eth1Data
                 graffiti: str
                 proposer_slashings: list[int]
                 attester_slashings: list[int]
                 attestations: list[Attestation]
+                execution_payload: ExecutionPayload
 
             slot: int
             proposer_index: int
@@ -144,3 +160,22 @@ class BeaconType(str, Enum):
     LIGHTHOUSE = "lighthouse"
     TEKU = "teku"
     OTHER = "other"
+
+
+class EthGetBlockByHashRequest(BaseModel):
+    jsonrpc = "2.0"
+    method = "eth_getBlockByHash"
+    params: list
+    id = "1"
+
+
+class ExecutionBlock(BaseModel):
+    class Result(BaseModel):
+        class Transaction(BaseModel):
+            to: str
+
+        transactions: list[Transaction]
+
+    jsonrpc: str
+    id: int
+    result: Result
