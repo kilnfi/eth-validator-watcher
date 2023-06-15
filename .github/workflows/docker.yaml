@@ -1,6 +1,16 @@
 name: Docker
 
 on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'eth_validator_watcher/*.py'
+      - 'Dockerfile'
+      - 'liveness_check.py'
+      - 'pyproject.toml'
+      - ".github/workflows/docker.yaml"
+    tags:
+      - "v*"
   pull_request:
     branches:  ["main"]
     paths:
