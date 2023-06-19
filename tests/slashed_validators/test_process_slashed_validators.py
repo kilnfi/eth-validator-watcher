@@ -4,6 +4,10 @@ from eth_validator_watcher.slashed_validators import (
     total_exited_slashed_validators_count,
 )
 
+from eth_validator_watcher.models import Validators
+
+Validator = Validators.DataItem.Validator
+
 
 def test_process_slashed_validators():
     class Slack:
@@ -15,26 +19,32 @@ def test_process_slashed_validators():
 
     slack = Slack()
 
-    total_exited_slashed_index_to_pubkey = {42: "0x1234", 43: "0x5678"}
-    our_exited_slashed_index_to_pubkey = {44: "0x9012", 45: "0x3456"}
+    total_exited_slashed_index_to_validator = {
+        42: Validator(pubkey="0x1234"),
+        43: Validator(pubkey="0x5678"),
+    }
+    our_exited_slashed_index_to_validator = {
+        44: Validator(pubkey="0x9012"),
+        45: Validator(pubkey="0x3456"),
+    }
 
     slashed_validators = SlashedValidators(slack)  # type: ignore
 
-    total_exited_slashed_index_to_pubkey = {
-        42: "0x1234",
-        43: "0x5678",
-        44: "0x9012",
-        45: "0x3456",
-        46: "0xabcd",
+    total_exited_slashed_index_to_validator = {
+        42: Validator(pubkey="0x1234"),
+        43: Validator(pubkey="0x5678"),
+        44: Validator(pubkey="0x9012"),
+        45: Validator(pubkey="0x3456"),
+        46: Validator(pubkey="0xabcd"),
     }
 
-    our_exited_slashed_index_to_pubkey = {
-        44: "0x9012",
-        45: "0x3456",
+    our_exited_slashed_index_to_validator = {
+        44: Validator(pubkey="0x9012"),
+        45: Validator(pubkey="0x3456"),
     }
 
     slashed_validators.process(
-        total_exited_slashed_index_to_pubkey, our_exited_slashed_index_to_pubkey
+        total_exited_slashed_index_to_validator, our_exited_slashed_index_to_validator
     )
 
     assert total_exited_slashed_validators_count.collect()[0].samples[0].value == 5  # type: ignore
@@ -57,19 +67,23 @@ def test_process_slashed_validators():
         == {44, 45}
     )
 
-    total_exited_slashed_index_to_pubkey = {
-        42: "0x1234",
-        43: "0x5678",
-        44: "0x9012",
-        45: "0x3456",
-        46: "0xabcd",
-        47: "0xefgh",
+    total_exited_slashed_index_to_validator = {
+        42: Validator(pubkey="0x1234"),
+        43: Validator(pubkey="0x5678"),
+        44: Validator(pubkey="0x9012"),
+        45: Validator(pubkey="0x3456"),
+        46: Validator(pubkey="0xabcd"),
+        47: Validator(pubkey="0xefgh"),
     }
 
-    our_exited_slashed_index_to_pubkey = {44: "0x9012", 45: "0x3456", 48: "0x5432"}
+    our_exited_slashed_index_to_validator = {
+        44: Validator(pubkey="0x9012"),
+        45: Validator(pubkey="0x3456"),
+        48: Validator(pubkey="0x5432"),
+    }
 
     slashed_validators.process(
-        total_exited_slashed_index_to_pubkey, our_exited_slashed_index_to_pubkey
+        total_exited_slashed_index_to_validator, our_exited_slashed_index_to_validator
     )
 
     assert total_exited_slashed_validators_count.collect()[0].samples[0].value == 6  # type: ignore

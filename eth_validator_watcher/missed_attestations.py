@@ -1,6 +1,6 @@
 import functools
 from typing import Optional, Set
-
+from .models import Validators
 from prometheus_client import Gauge
 
 from eth_validator_watcher.models import BeaconType
@@ -24,10 +24,10 @@ double_missed_attestations_count = Gauge(
 def process_missed_attestations(
     beacon: Beacon,
     beacon_type: BeaconType,
-    our_active_index_to_pubkey: dict[int, str],
+    our_active_index_to_validator: dict[int, Validators.DataItem.Validator],
     epoch: int,
 ) -> set[int]:
-    validators_index = set(our_active_index_to_pubkey)
+    validators_index = set(our_active_index_to_validator)
     validators_liveness = beacon.get_validators_liveness(
         beacon_type, epoch - 1, validators_index
     )
@@ -44,7 +44,8 @@ def process_missed_attestations(
     first_indexes = list(dead_indexes)[:5]
 
     first_pubkeys = (
-        our_active_index_to_pubkey[first_index] for first_index in first_indexes
+        our_active_index_to_validator[first_index].pubkey
+        for first_index in first_indexes
     )
 
     short_first_pubkeys = [pubkey[:10] for pubkey in first_pubkeys]
@@ -62,7 +63,7 @@ def process_missed_attestations(
 def process_double_missed_attestations(
     dead_indexes: set[int],
     previous_dead_indexes: set[int],
-    our_active_index_to_pubkey: dict[int, str],
+    our_active_index_to_validator: dict[int, Validators.DataItem.Validator],
     epoch: int,
     slack: Optional[Slack],
 ) -> Set[int]:
@@ -76,7 +77,8 @@ def process_double_missed_attestations(
     first_indexes = list(double_dead_indexes)[:5]
 
     first_pubkeys = (
-        our_active_index_to_pubkey[first_index] for first_index in first_indexes
+        our_active_index_to_validator[first_index].pubkey
+        for first_index in first_indexes
     )
 
     short_first_pubkeys = [pubkey[:10] for pubkey in first_pubkeys]

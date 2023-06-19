@@ -2,7 +2,6 @@ import functools
 from collections import defaultdict
 
 from prometheus_client import Gauge
-
 from .beacon import Beacon
 from .models import Block
 from .utils import (
@@ -13,6 +12,8 @@ from .utils import (
     remove_all_items_from_last_true,
     switch_endianness,
 )
+
+from .models import Validators
 
 print = functools.partial(print, flush=True)
 
@@ -26,7 +27,7 @@ def process_suboptimal_attestations(
     beacon: Beacon,
     block: Block,
     slot: int,
-    our_active_validators_index_to_pubkey: dict[int, str],
+    our_active_validators_index_to_validator: dict[int, Validators.DataItem.Validator],
 ) -> set[int]:
     """Process sub-optimal attestations
 
@@ -47,7 +48,7 @@ def process_suboptimal_attestations(
     epoch_of_previous_slot = previous_slot // NB_SLOT_PER_EPOCH
 
     # All our active validators index
-    our_active_validators_index = set(our_active_validators_index_to_pubkey)
+    our_active_validators_index = set(our_active_validators_index_to_validator)
 
     # Nested dictionary
     # - Key of the outer dict is the slot
@@ -141,7 +142,7 @@ def process_suboptimal_attestations(
         )[:5]
 
         first_pubkeys = (
-            our_active_validators_index_to_pubkey[first_index]
+            our_active_validators_index_to_validator[first_index].pubkey
             for first_index in first_indexes
         )
 

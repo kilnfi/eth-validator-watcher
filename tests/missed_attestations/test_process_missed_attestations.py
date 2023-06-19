@@ -2,6 +2,9 @@ from typing import Set
 
 from eth_validator_watcher.missed_attestations import process_missed_attestations
 from eth_validator_watcher.models import BeaconType
+from eth_validator_watcher.models import Validators
+
+Validator = Validators.DataItem.Validator
 
 
 def test_process_missed_attestations_some_dead_indexes() -> None:
@@ -21,7 +24,11 @@ def test_process_missed_attestations_some_dead_indexes() -> None:
     actual = process_missed_attestations(
         beacon=Beacon(),  # type: ignore
         beacon_type=BeaconType.TEKU,
-        our_active_index_to_pubkey={42: "pubkey42", 43: "pubkey43", 44: "pubkey44"},
+        our_active_index_to_validator={
+            42: Validator(pubkey="pubkey42"),
+            43: Validator(pubkey="pubkey43"),
+            44: Validator(pubkey="pubkey44"),
+        },
         epoch=1,
     )
 
@@ -45,7 +52,11 @@ def test_process_missed_attestations_no_dead_indexes() -> None:
     actual = process_missed_attestations(
         beacon=Beacon(),  # type: ignore
         beacon_type=BeaconType.TEKU,
-        our_active_index_to_pubkey={42: "pubkey42", 43: "pubkey43", 44: "pubkey44"},
+        our_active_index_to_validator={
+            42: Validator(pubkey="pubkey42"),
+            43: Validator(pubkey="pubkey43"),
+            44: Validator(pubkey="pubkey44"),
+        },
         epoch=1,
     )
 
