@@ -108,23 +108,6 @@ def test_nominal() -> None:
         def emit_eth_usd_conversion_rate(cls) -> None:
             cls.nb_calls += 1
 
-    class SlashedValidators:
-        def __init__(self, slack: Optional[Slack]) -> None:
-            assert isinstance(slack, Slack)
-
-        def process(
-            self,
-            total_exited_slashed_index_to_validator: dict[int, Validator],
-            our_exited_slashed_index_to_validator: dict[int, Validator],
-        ) -> None:
-            assert total_exited_slashed_index_to_validator == {
-                5: Validator(pubkey="0xfff", slashed=False),
-                6: Validator(pubkey="0xggg", slashed=False),
-            }
-            assert our_exited_slashed_index_to_validator == {
-                5: Validator(pubkey="0xfff", slashed=False)
-            }
-
     def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
         assert genesis_time == 0
         yield 63, 1664
@@ -218,7 +201,6 @@ def test_nominal() -> None:
     entrypoint.Beacon = Beacon  # type: ignore
     entrypoint.Coinbase = Coinbase  # type: ignore
     entrypoint.Web3Signer = Web3Signer  # type: ignore
-    entrypoint.SlashedValidators = SlashedValidators  # type: ignore
     entrypoint.get_our_pubkeys = get_our_pubkeys  # type: ignore
     entrypoint.process_missed_attestations = process_missed_attestations  # type: ignore
 

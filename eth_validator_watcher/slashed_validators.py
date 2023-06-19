@@ -5,14 +5,14 @@ from .models import Validators
 
 from .utils import Slack
 
-our_exited_slashed_validators_count = Gauge(
-    "our_exited_slashed_validators_count",
-    "Our exited slashed validators count",
+our_slashed_validators_count = Gauge(
+    "our_slashed_validators_count",
+    "Our slashed validators count",
 )
 
-total_exited_slashed_validators_count = Gauge(
-    "total_exited_slashed_validators_count",
-    "Total exited slashed validators count",
+total_slashed_validators_count = Gauge(
+    "total_slashed_validators_count",
+    "Total slashed validators count",
 )
 
 
@@ -28,12 +28,34 @@ class SlashedValidators:
             int, Validators.DataItem.Validator
         ],
         our_exited_slashed_index_to_validator: dict[int, Validators.DataItem.Validator],
+        total_withdrawal_index_to_validator: dict[int, Validators.DataItem.Validator],
+        our_withdrawal_index_to_validator: dict[int, Validators.DataItem.Validator],
     ) -> None:
+        total_slashed_withdrawal_index_to_validator = {
+            index
+            for index, validator in total_withdrawal_index_to_validator.items()
+            if validator.slashed
+        }
+
+        our_slashed_withdrawal_index_to_validator = {
+            index
+            for index, validator in our_withdrawal_index_to_validator.items()
+            if validator.slashed
+        }
+
+        total_slashed_indexes = set(total_exited_slashed_index_to_validator) | set(
+            total_slashed_withdrawal_index_to_validator
+        )
+
+        our_slashed_indexes = set(our_exited_slashed_index_to_validator) | set(
+            our_slashed_withdrawal_index_to_validator
+        )
+
+        total_slashed_validators_count.set(len(total_slashed_indexes))
+        our_slashed_validators_count.set(len(our_slashed_indexes))
+
         total_exited_slashed_indexes = set(total_exited_slashed_index_to_validator)
         our_exited_slashed_indexes = set(our_exited_slashed_index_to_validator)
-
-        total_exited_slashed_validators_count.set(len(total_exited_slashed_indexes))
-        our_exited_slashed_validators_count.set(len(our_exited_slashed_indexes))
 
         if (
             self.__total_exited_slashed_indexes is None
