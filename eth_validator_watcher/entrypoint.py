@@ -237,6 +237,10 @@ def _handler(
                 our_status_to_index_to_validator.get(StatusEnum.exitedSlashed, {})
             )
 
+            our_withdrawable_index_to_validator = our_status_to_index_to_validator.get(
+                StatusEnum.withdrawalPossible, {}
+            ) | our_status_to_index_to_validator.get(StatusEnum.withdrawalDone, {})
+
             total_pending_queued_index_to_validator = (
                 total_status_to_index_to_validator.get(StatusEnum.pendingQueued, {})
             )
@@ -262,11 +266,23 @@ def _handler(
                 total_status_to_index_to_validator.get(StatusEnum.exitedSlashed, {})
             )
 
-            exited_validators.process(our_exited_unslashed_index_to_validator)
+            total_withdrawable_index_to_validator = (
+                total_status_to_index_to_validator.get(
+                    StatusEnum.withdrawalPossible, {}
+                )
+                | total_status_to_index_to_validator.get(StatusEnum.withdrawalDone, {})
+            )
+
+            exited_validators.process(
+                our_exited_unslashed_index_to_validator,
+                our_withdrawable_index_to_validator,
+            )
 
             slashed_validators.process(
                 total_exited_slashed_index_to_validator,
                 our_exited_slashed_index_to_validator,
+                total_withdrawable_index_to_validator,
+                our_withdrawable_index_to_validator,
             )
 
             export_entry_queue_duration_sec(

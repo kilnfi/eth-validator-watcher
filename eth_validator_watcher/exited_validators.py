@@ -5,9 +5,9 @@ from .models import Validators
 
 from .utils import Slack
 
-our_exited_unslashed_validators_count = Gauge(
-    "our_exited_unslashed_validators_count",
-    "Our exited (unslashed) validators count",
+our_exited_validators_count = Gauge(
+    "our_exited_validators_count",
+    "Our exited validators count",
 )
 
 
@@ -21,9 +21,21 @@ class ExitedValidators:
         our_exited_unslashed_index_to_validator: dict[
             int, Validators.DataItem.Validator
         ],
+        our_withdrawal_index_to_validator: dict[int, Validators.DataItem.Validator],
     ) -> None:
         our_exited_unslashed_indexes = set(our_exited_unslashed_index_to_validator)
-        our_exited_unslashed_validators_count.set(len(our_exited_unslashed_indexes))
+
+        our_unslashed_withdrawal_index_to_validator = {
+            index
+            for index, validator in our_withdrawal_index_to_validator.items()
+            if not validator.slashed
+        }
+
+        our_exited_indexes = set(our_exited_unslashed_index_to_validator) | set(
+            our_unslashed_withdrawal_index_to_validator
+        )
+
+        our_exited_validators_count.set(len(our_exited_indexes))
 
         if self.__our_exited_unslashed_indexes is None:
             self.__our_exited_unslashed_indexes = our_exited_unslashed_indexes

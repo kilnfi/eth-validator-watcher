@@ -1,6 +1,6 @@
 from eth_validator_watcher.exited_validators import (
     ExitedValidators,
-    our_exited_unslashed_validators_count,
+    our_exited_validators_count,
 )
 
 from eth_validator_watcher.models import Validators
@@ -23,16 +23,18 @@ def test_process_exited_validators():
         45: Validator(pubkey="0x3456", slashed=False),
     }
 
-    exited_validators = ExitedValidators(slack)  # type: ignore
-
-    our_exited_unslashed_index_to_validator = {
-        44: Validator(pubkey="0x9012", slashed=False),
-        45: Validator(pubkey="0x3456", slashed=False),
+    our_withdrawal_index_to_validator = {
+        46: Validator(pubkey="0x1234", slashed=False),
+        47: Validator(pubkey="0x5678", slashed=True),
     }
 
-    exited_validators.process(our_exited_unslashed_index_to_validator)
+    exited_validators = ExitedValidators(slack)  # type: ignore
 
-    assert our_exited_unslashed_validators_count.collect()[0].samples[0].value == 2  # type: ignore
+    exited_validators.process(
+        our_exited_unslashed_index_to_validator, our_withdrawal_index_to_validator
+    )
+
+    assert our_exited_validators_count.collect()[0].samples[0].value == 3  # type: ignore
     assert slack.counter == 0
 
     assert (
@@ -45,9 +47,11 @@ def test_process_exited_validators():
         45: Validator(pubkey="0x3456", slashed=False),
         48: Validator(pubkey="0x5432", slashed=False),
     }
-    exited_validators.process(our_exited_unslashed_index_to_validator)
+    exited_validators.process(
+        our_exited_unslashed_index_to_validator, our_withdrawal_index_to_validator
+    )
 
-    assert our_exited_unslashed_validators_count.collect()[0].samples[0].value == 3  # type: ignore
+    assert our_exited_validators_count.collect()[0].samples[0].value == 4  # type: ignore
     assert slack.counter == 1
 
     assert (
