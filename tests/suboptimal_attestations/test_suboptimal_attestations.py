@@ -129,10 +129,10 @@ def test_our_pubkeys():
         block="A dummy block",  # type: ignore
         slot=42,
         our_active_validators_index_to_validator={
-            10: Validator(pubkey="0xaaa"),
-            30: Validator(pubkey="0xccc"),
-            50: Validator(pubkey="0xeee"),
-            70: Validator(pubkey="0xggg"),
+            10: Validator(pubkey="0xaaa", slashed=False),
+            30: Validator(pubkey="0xccc", slashed=False),
+            50: Validator(pubkey="0xeee", slashed=False),
+            70: Validator(pubkey="0xggg", slashed=False),
         },
     ) == {10, 70}
 

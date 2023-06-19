@@ -23,6 +23,7 @@ class Validators(BaseModel):
 
         class Validator(BaseModel):
             pubkey: str
+            slashed: bool
 
         index: int
         status: StatusEnum
