@@ -11,6 +11,7 @@ from .fee_recipient import process_fee_recipient
 from .execution import Execution
 
 from .slashed_validators import SlashedValidators
+from .exited_validators import ExitedValidators
 
 from .beacon import Beacon
 from .coinbase import Coinbase
@@ -181,6 +182,7 @@ def _handler(
     our_validators_indexes_that_missed_previous_attestation: set[int] = set()
     previous_epoch: Optional[int] = None
 
+    exited_validators = ExitedValidators(slack)
     slashed_validators = SlashedValidators(slack)
 
     last_missed_attestations_process_epoch: Optional[int] = None
@@ -225,6 +227,10 @@ def _handler(
 
             our_active_validators_gauge.set(len(our_active_index_to_pubkey))
 
+            our_exited_unslashed_index_to_pubkey = our_status_to_index_to_pubkey.get(
+                StatusEnum.exitedUnslashed, {}
+            )
+
             our_exited_slashed_index_to_pubkey = our_status_to_index_to_pubkey.get(
                 StatusEnum.exitedSlashed, {}
             )
@@ -253,6 +259,8 @@ def _handler(
             total_exited_slashed_index_to_pubkey = total_status_to_index_to_pubkey.get(
                 StatusEnum.exitedSlashed, {}
             )
+
+            exited_validators.process(our_exited_unslashed_index_to_pubkey)
 
             slashed_validators.process(
                 total_exited_slashed_index_to_pubkey, our_exited_slashed_index_to_pubkey

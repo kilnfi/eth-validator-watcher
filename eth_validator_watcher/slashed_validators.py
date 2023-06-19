@@ -58,7 +58,7 @@ class SlashedValidators:
             )
 
         for index in our_new_exited_slashed_indexes:
-            message = f"🔕 Our validator {our_exited_slashed_index_to_pubkey[index]} is slashed"
+            message = f"🔕 Our validator {our_exited_slashed_index_to_pubkey[index][:10]} is slashed"
             print(message)
 
             if self.__slack is not None:
