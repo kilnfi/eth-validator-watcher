@@ -12,6 +12,7 @@ print = functools.partial(print, flush=True)
 missed_block_proposals_count = Counter(
     "missed_block_proposals_count",
     "Missed block proposals_count",
+    ["slot", "epoch"],
 )
 
 
@@ -83,4 +84,5 @@ def process_missed_blocks(
         slack.send_message(message_slack)
 
     if is_our_validator and missed:
-        missed_block_proposals_count.inc()
+        missed_block_proposals_count.labels(slot="", epoch="").inc()
+        missed_block_proposals_count.labels(slot=slot, epoch=epoch).inc()
