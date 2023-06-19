@@ -95,6 +95,7 @@ class Beacon:
                 status=[
                     StatusEnum.pendingQueued,
                     StatusEnum.active,
+                    StatusEnum.exitedUnslashed,
                     StatusEnum.exitedSlashed,
                 ]
             ),
