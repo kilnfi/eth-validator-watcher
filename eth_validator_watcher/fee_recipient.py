@@ -3,7 +3,7 @@ from typing import Optional
 from prometheus_client import Counter
 
 from .utils import NB_SLOT_PER_EPOCH, Slack
-from .models import Block
+from .models import Block, Validators
 from .execution import Execution
 
 wrong_fee_recipient_proposed_block_count = Counter(
@@ -14,7 +14,7 @@ wrong_fee_recipient_proposed_block_count = Counter(
 
 def process_fee_recipient(
     block: Block,
-    index_to_pubkey: dict[int, str],
+    index_to_validator: dict[int, Validators.DataItem.Validator],
     execution: Optional[Execution],
     expected_fee_recipient: Optional[str],
     slack: Optional[Slack],
@@ -25,10 +25,10 @@ def process_fee_recipient(
 
     # Not our validator, nothing to do
     proposer_index = block.data.message.proposer_index
-    if proposer_index not in index_to_pubkey:
+    if proposer_index not in index_to_validator:
         return
 
-    short_proposer_pubkey = index_to_pubkey[proposer_index][:10]
+    short_proposer_pubkey = index_to_validator[proposer_index].pubkey[:10]
     slot = block.data.message.slot
     epoch = slot // NB_SLOT_PER_EPOCH
 

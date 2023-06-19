@@ -3,6 +3,10 @@ from eth_validator_watcher.exited_validators import (
     our_exited_unslashed_validators_count,
 )
 
+from eth_validator_watcher.models import Validators
+
+Validator = Validators.DataItem.Validator
+
 
 def test_process_exited_validators():
     class Slack:
@@ -14,16 +18,19 @@ def test_process_exited_validators():
 
     slack = Slack()
 
-    our_exited_unslashed_index_to_pubkey = {44: "0x9012", 45: "0x3456"}
+    our_exited_unslashed_index_to_validator = {
+        44: Validator(pubkey="0x9012"),
+        45: Validator(pubkey="0x3456"),
+    }
 
     exited_validators = ExitedValidators(slack)  # type: ignore
 
-    our_exited_unslashed_index_to_pubkey = {
-        44: "0x9012",
-        45: "0x3456",
+    our_exited_unslashed_index_to_validator = {
+        44: Validator(pubkey="0x9012"),
+        45: Validator(pubkey="0x3456"),
     }
 
-    exited_validators.process(our_exited_unslashed_index_to_pubkey)
+    exited_validators.process(our_exited_unslashed_index_to_validator)
 
     assert our_exited_unslashed_validators_count.collect()[0].samples[0].value == 2  # type: ignore
     assert slack.counter == 0
@@ -33,8 +40,12 @@ def test_process_exited_validators():
         == {44, 45}
     )
 
-    our_exited_unslashed_index_to_pubkey = {44: "0x9012", 45: "0x3456", 48: "0x5432"}
-    exited_validators.process(our_exited_unslashed_index_to_pubkey)
+    our_exited_unslashed_index_to_validator = {
+        44: Validator(pubkey="0x9012"),
+        45: Validator(pubkey="0x3456"),
+        48: Validator(pubkey="0x5432"),
+    }
+    exited_validators.process(our_exited_unslashed_index_to_validator)
 
     assert our_exited_unslashed_validators_count.collect()[0].samples[0].value == 3  # type: ignore
     assert slack.counter == 1

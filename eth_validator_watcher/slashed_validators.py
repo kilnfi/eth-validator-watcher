@@ -1,6 +1,7 @@
 from typing import Optional
 
 from prometheus_client import Gauge
+from .models import Validators
 
 from .utils import Slack
 
@@ -23,11 +24,13 @@ class SlashedValidators:
 
     def process(
         self,
-        total_exited_slashed_index_to_pubkey: dict[int, str],
-        our_exited_slashed_index_to_pubkey: dict[int, str],
+        total_exited_slashed_index_to_validator: dict[
+            int, Validators.DataItem.Validator
+        ],
+        our_exited_slashed_index_to_validator: dict[int, Validators.DataItem.Validator],
     ) -> None:
-        total_exited_slashed_indexes = set(total_exited_slashed_index_to_pubkey)
-        our_exited_slashed_indexes = set(our_exited_slashed_index_to_pubkey)
+        total_exited_slashed_indexes = set(total_exited_slashed_index_to_validator)
+        our_exited_slashed_indexes = set(our_exited_slashed_index_to_validator)
 
         total_exited_slashed_validators_count.set(len(total_exited_slashed_indexes))
         our_exited_slashed_validators_count.set(len(our_exited_slashed_indexes))
@@ -54,11 +57,11 @@ class SlashedValidators:
 
         for index in not_our_new_exited_slashed_indexes:
             print(
-                f"✂️      validator {total_exited_slashed_index_to_pubkey[index][:10]} is slashed"
+                f"✂️      validator {total_exited_slashed_index_to_validator[index].pubkey[:10]} is slashed"
             )
 
         for index in our_new_exited_slashed_indexes:
-            message = f"🔕 Our validator {our_exited_slashed_index_to_pubkey[index][:10]} is slashed"
+            message = f"🔕 Our validator {our_exited_slashed_index_to_validator[index].pubkey[:10]} is slashed"
             print(message)
 
             if self.__slack is not None:

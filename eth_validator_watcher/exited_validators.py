@@ -1,6 +1,7 @@
 from typing import Optional
 
 from prometheus_client import Gauge
+from .models import Validators
 
 from .utils import Slack
 
@@ -17,9 +18,11 @@ class ExitedValidators:
 
     def process(
         self,
-        our_exited_unslashed_index_to_pubkey: dict[int, str],
+        our_exited_unslashed_index_to_validator: dict[
+            int, Validators.DataItem.Validator
+        ],
     ) -> None:
-        our_exited_unslashed_indexes = set(our_exited_unslashed_index_to_pubkey)
+        our_exited_unslashed_indexes = set(our_exited_unslashed_index_to_validator)
         our_exited_unslashed_validators_count.set(len(our_exited_unslashed_indexes))
 
         if self.__our_exited_unslashed_indexes is None:
@@ -31,7 +34,7 @@ class ExitedValidators:
         )
 
         for index in our_new_exited_unslashed_indexes:
-            message = f"🚶 Our validator {our_exited_unslashed_index_to_pubkey[index][:10]} is exited"
+            message = f"🚶 Our validator {our_exited_unslashed_index_to_validator[index].pubkey[:10]} is exited"
             print(message)
 
             if self.__slack is not None:

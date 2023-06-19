@@ -9,6 +9,9 @@ from eth_validator_watcher.models import Block, ExecutionBlock
 from pytest import fixture
 from tests.fee_recipient import assets
 from pathlib import Path
+from eth_validator_watcher.models import Validators
+
+Validator = Validators.DataItem.Validator
 
 
 class Slack:
@@ -58,7 +61,7 @@ def test_execution_is_none():
 
     process_fee_recipient(
         block="A block",  # type: ignore
-        index_to_pubkey={},
+        index_to_validator={},
         execution=None,
         expected_fee_recipient="0x1234",
         slack=slack,  # type: ignore
@@ -76,7 +79,7 @@ def test_fee_recipient_is_none():
 
     process_fee_recipient(
         block="A block",  # type: ignore
-        index_to_pubkey={},
+        index_to_validator={},
         execution="execution",  # type: ignore
         expected_fee_recipient=None,
         slack=slack,  # type: ignore
@@ -91,7 +94,7 @@ def test_not_our_validator(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_pubkey={},
+        index_to_validator={},
         execution="execution",  # type: ignore
         expected_fee_recipient="0x1234",
         slack=slack,  # type: ignore
@@ -109,7 +112,7 @@ def test_our_validator_allright(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_pubkey={365100: "0xabcd"},
+        index_to_validator={365100: Validator(pubkey="0xabcd")},
         execution="execution",  # type: ignore
         expected_fee_recipient="0xebec795c9c8bbd61ffc14a6662944748f299cacf",
         slack=slack,  # type: ignore
@@ -127,7 +130,7 @@ def test_our_validator_ok_in_last_tx(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_pubkey={365100: "0xabcd"},
+        index_to_validator={365100: Validator(pubkey="0xabcd")},
         execution=Execution(),  # type: ignore
         expected_fee_recipient="0x760a6314a1d207377271917075f88e520141d55f",
         slack=slack,  # type: ignore
@@ -145,7 +148,7 @@ def test_our_validator_not_ok_empty_block(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_pubkey={365100: "0xabcd"},
+        index_to_validator={365100: Validator(pubkey="0xabcd")},
         execution=ExecutionEmptyBlock(),  # type: ignore
         expected_fee_recipient="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         slack=slack,  # type: ignore
@@ -163,7 +166,7 @@ def test_our_validator_not_ok(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_pubkey={365100: "0xabcd"},
+        index_to_validator={365100: Validator(pubkey="0xabcd")},
         execution=Execution(),  # type: ignore
         expected_fee_recipient="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         slack=slack,  # type: ignore

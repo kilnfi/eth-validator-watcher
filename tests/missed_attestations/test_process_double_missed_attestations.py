@@ -1,6 +1,9 @@
 from typing import Set
 
 from eth_validator_watcher.missed_attestations import process_double_missed_attestations
+from eth_validator_watcher.models import Validators
+
+Validator = Validators.DataItem.Validator
 
 
 def test_process_double_missed_attestations_some_dead_indexes() -> None:
@@ -17,12 +20,12 @@ def test_process_double_missed_attestations_some_dead_indexes() -> None:
         {42, 43, 44, 45},
         {40, 41, 42, 43},
         {
-            40: "pubkey40",
-            41: "pubkey41",
-            42: "pubkey42",
-            43: "pubkey43",
-            44: "pubkey44",
-            45: "pubkey45",
+            40: Validator(pubkey="pubkey40"),
+            41: Validator(pubkey="pubkey41"),
+            42: Validator(pubkey="pubkey42"),
+            43: Validator(pubkey="pubkey43"),
+            44: Validator(pubkey="pubkey44"),
+            45: Validator(pubkey="pubkey45"),
         },
         1664,
         slack,  # type: ignore
@@ -38,12 +41,12 @@ def test_process_double_missed_attestations_no_dead_indexes() -> None:
         {44, 45},
         {40, 41},
         {
-            40: "pubkey40",
-            41: "pubkey41",
-            42: "pubkey42",
-            43: "pubkey43",
-            44: "pubkey44",
-            45: "pubkey45",
+            40: Validator(pubkey="pubkey40"),
+            41: Validator(pubkey="pubkey41"),
+            42: Validator(pubkey="pubkey42"),
+            43: Validator(pubkey="pubkey43"),
+            44: Validator(pubkey="pubkey44"),
+            45: Validator(pubkey="pubkey45"),
         },
         1664,
         None,

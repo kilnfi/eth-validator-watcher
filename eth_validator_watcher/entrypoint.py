@@ -177,7 +177,7 @@ def _handler(
     web3signer = Web3Signer(web3signer_url) if web3signer_url is not None else None
 
     our_pubkeys: set[str] = set()
-    our_active_index_to_pubkey: dict[int, str] = {}
+    our_active_index_to_validator: dict[int, Validators.DataItem.Validator] = {}
     our_validators_indexes_that_missed_attestation: set[int] = set()
     our_validators_indexes_that_missed_previous_attestation: set[int] = set()
     previous_epoch: Optional[int] = None
@@ -200,70 +200,73 @@ def _handler(
 
         if is_new_epoch:
             our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
-            total_status_to_index_to_pubkey = beacon.get_status_to_index_to_pubkey()
+            total_status_to_index_to_validator = (
+                beacon.get_status_to_index_to_validator()
+            )
 
-            our_status_to_index_to_pubkey = {
+            our_status_to_index_to_validator = {
                 status: {
-                    index: pubkey
-                    for index, pubkey in index_to_pubkey.items()
-                    if pubkey in our_pubkeys
+                    index: validator
+                    for index, validator in validator.items()
+                    if validator.pubkey in our_pubkeys
                 }
-                for status, index_to_pubkey in total_status_to_index_to_pubkey.items()
+                for status, validator in total_status_to_index_to_validator.items()
             }
 
-            our_pending_queued_index_to_pubkey = our_status_to_index_to_pubkey.get(
-                StatusEnum.pendingQueued, {}
+            our_pending_queued_index_to_validator = (
+                our_status_to_index_to_validator.get(StatusEnum.pendingQueued, {})
             )
 
             our_pending_queued_validators_gauge.set(
-                len(our_pending_queued_index_to_pubkey)
+                len(our_pending_queued_index_to_validator)
             )
 
-            our_active_index_to_pubkey = (
-                our_status_to_index_to_pubkey.get(StatusEnum.activeOngoing, {})
-                | our_status_to_index_to_pubkey.get(StatusEnum.activeExiting, {})
-                | our_status_to_index_to_pubkey.get(StatusEnum.activeSlashed, {})
+            our_active_index_to_validator = (
+                our_status_to_index_to_validator.get(StatusEnum.activeOngoing, {})
+                | our_status_to_index_to_validator.get(StatusEnum.activeExiting, {})
+                | our_status_to_index_to_validator.get(StatusEnum.activeSlashed, {})
             )
 
-            our_active_validators_gauge.set(len(our_active_index_to_pubkey))
+            our_active_validators_gauge.set(len(our_active_index_to_validator))
 
-            our_exited_unslashed_index_to_pubkey = our_status_to_index_to_pubkey.get(
-                StatusEnum.exitedUnslashed, {}
+            our_exited_unslashed_index_to_validator = (
+                our_status_to_index_to_validator.get(StatusEnum.exitedUnslashed, {})
             )
 
-            our_exited_slashed_index_to_pubkey = our_status_to_index_to_pubkey.get(
-                StatusEnum.exitedSlashed, {}
+            our_exited_slashed_index_to_validator = (
+                our_status_to_index_to_validator.get(StatusEnum.exitedSlashed, {})
             )
 
-            total_pending_queued_index_to_pubkey = total_status_to_index_to_pubkey.get(
-                StatusEnum.pendingQueued, {}
+            total_pending_queued_index_to_validator = (
+                total_status_to_index_to_validator.get(StatusEnum.pendingQueued, {})
             )
 
             nb_total_pending_queued_validators = len(
-                total_pending_queued_index_to_pubkey
+                total_pending_queued_index_to_validator
             )
 
             total_pending_queued_validators_gauge.set(
                 nb_total_pending_queued_validators
             )
 
-            total_active_index_to_pubkey = (
-                total_status_to_index_to_pubkey.get(StatusEnum.activeOngoing, {})
-                | total_status_to_index_to_pubkey.get(StatusEnum.activeExiting, {})
-                | total_status_to_index_to_pubkey.get(StatusEnum.activeSlashed, {})
+            total_active_index_to_validator = (
+                total_status_to_index_to_validator.get(StatusEnum.activeOngoing, {})
+                | total_status_to_index_to_validator.get(StatusEnum.activeExiting, {})
+                | total_status_to_index_to_validator.get(StatusEnum.activeSlashed, {})
             )
 
-            nb_total_active_validators = len(total_active_index_to_pubkey)
+            nb_total_active_validators = len(total_active_index_to_validator)
             total_active_validators_gauge.set(nb_total_active_validators)
 
-            total_exited_slashed_index_to_pubkey = total_status_to_index_to_pubkey.get(
-                StatusEnum.exitedSlashed, {}
+            total_exited_slashed_index_to_validator = (
+                total_status_to_index_to_validator.get(StatusEnum.exitedSlashed, {})
             )
 
-            exited_validators.process(our_exited_unslashed_index_to_pubkey)
+            exited_validators.process(our_exited_unslashed_index_to_validator)
 
             slashed_validators.process(
-                total_exited_slashed_index_to_pubkey, our_exited_slashed_index_to_pubkey
+                total_exited_slashed_index_to_validator,
+                our_exited_slashed_index_to_validator,
             )
 
             export_entry_queue_duration_sec(
@@ -286,14 +289,14 @@ def _handler(
         if should_process_missed_attestations:
             our_validators_indexes_that_missed_attestation = (
                 process_missed_attestations(
-                    beacon, beacon_type, our_active_index_to_pubkey, epoch
+                    beacon, beacon_type, our_active_index_to_validator, epoch
                 )
             )
 
             process_double_missed_attestations(
                 our_validators_indexes_that_missed_attestation,
                 our_validators_indexes_that_missed_previous_attestation,
-                our_active_index_to_pubkey,
+                our_active_index_to_validator,
                 epoch,
                 slack,
             )
@@ -314,11 +317,11 @@ def _handler(
                 beacon,
                 block,
                 slot,
-                our_active_index_to_pubkey,
+                our_active_index_to_validator,
             )
 
             process_fee_recipient(
-                block, our_active_index_to_pubkey, execution, fee_recipient, slack
+                block, our_active_index_to_validator, execution, fee_recipient, slack
             )
 
         process_missed_blocks(

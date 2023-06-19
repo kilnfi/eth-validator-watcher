@@ -4,6 +4,10 @@ from eth_validator_watcher.suboptimal_attestations import (
     suboptimal_attestations_rate_gauge,
 )
 
+from eth_validator_watcher import models
+
+Validator = models.Validators.DataItem.Validator
+
 
 def aggregate_attestations(
     block: str,
@@ -124,11 +128,11 @@ def test_our_pubkeys():
         beacon=Beacon(),  # type: ignore
         block="A dummy block",  # type: ignore
         slot=42,
-        our_active_validators_index_to_pubkey={
-            10: "0xaaa",
-            30: "0xccc",
-            50: "0xeee",
-            70: "0xggg",
+        our_active_validators_index_to_validator={
+            10: Validator(pubkey="0xaaa"),
+            30: Validator(pubkey="0xccc"),
+            50: Validator(pubkey="0xeee"),
+            70: Validator(pubkey="0xggg"),
         },
     ) == {10, 70}
 

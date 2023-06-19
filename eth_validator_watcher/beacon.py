@@ -83,32 +83,29 @@ class Beacon:
         proposer_duties_dict = response.json()
         return ProposerDuties(**proposer_duties_dict)
 
-    def get_status_to_index_to_pubkey(self) -> dict[StatusEnum, dict[int, str]]:
+    def get_status_to_index_to_validator(
+        self,
+    ) -> dict[StatusEnum, dict[int, Validators.DataItem.Validator]]:
         """Return a nested dictionnary with:
         outer key               : Status
         outer value (=inner key): Index of validator
-        inner value             : Public key for validator
+        inner value             : validator
         """
         response = self.__http.get(
             f"{self.__url}/eth/v1/beacon/states/head/validators",
-            params=dict(
-                status=[
-                    StatusEnum.pendingQueued,
-                    StatusEnum.active,
-                    StatusEnum.exitedUnslashed,
-                    StatusEnum.exitedSlashed,
-                ]
-            ),
         )
 
         response.raise_for_status()
         validators_dict = response.json()
 
         validators = Validators(**validators_dict)
-        result: dict[StatusEnum, dict[int, str]] = defaultdict(dict)
+
+        result: dict[
+            StatusEnum, dict[int, Validators.DataItem.Validator]
+        ] = defaultdict(dict)
 
         for item in validators.data:
-            result[item.status][item.index] = item.validator.pubkey
+            result[item.status][item.index] = item.validator
 
         return result
 
