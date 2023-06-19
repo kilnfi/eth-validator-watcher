@@ -20,27 +20,27 @@ def test_process_slashed_validators():
     slack = Slack()
 
     total_exited_slashed_index_to_validator = {
-        42: Validator(pubkey="0x1234"),
-        43: Validator(pubkey="0x5678"),
+        42: Validator(pubkey="0x1234", slashed=False),
+        43: Validator(pubkey="0x5678", slashed=False),
     }
     our_exited_slashed_index_to_validator = {
-        44: Validator(pubkey="0x9012"),
-        45: Validator(pubkey="0x3456"),
+        44: Validator(pubkey="0x9012", slashed=False),
+        45: Validator(pubkey="0x3456", slashed=False),
     }
 
     slashed_validators = SlashedValidators(slack)  # type: ignore
 
     total_exited_slashed_index_to_validator = {
-        42: Validator(pubkey="0x1234"),
-        43: Validator(pubkey="0x5678"),
-        44: Validator(pubkey="0x9012"),
-        45: Validator(pubkey="0x3456"),
-        46: Validator(pubkey="0xabcd"),
+        42: Validator(pubkey="0x1234", slashed=False),
+        43: Validator(pubkey="0x5678", slashed=False),
+        44: Validator(pubkey="0x9012", slashed=False),
+        45: Validator(pubkey="0x3456", slashed=False),
+        46: Validator(pubkey="0xabcd", slashed=False),
     }
 
     our_exited_slashed_index_to_validator = {
-        44: Validator(pubkey="0x9012"),
-        45: Validator(pubkey="0x3456"),
+        44: Validator(pubkey="0x9012", slashed=False),
+        45: Validator(pubkey="0x3456", slashed=False),
     }
 
     slashed_validators.process(
@@ -68,18 +68,18 @@ def test_process_slashed_validators():
     )
 
     total_exited_slashed_index_to_validator = {
-        42: Validator(pubkey="0x1234"),
-        43: Validator(pubkey="0x5678"),
-        44: Validator(pubkey="0x9012"),
-        45: Validator(pubkey="0x3456"),
-        46: Validator(pubkey="0xabcd"),
-        47: Validator(pubkey="0xefgh"),
+        42: Validator(pubkey="0x1234", slashed=False),
+        43: Validator(pubkey="0x5678", slashed=False),
+        44: Validator(pubkey="0x9012", slashed=False),
+        45: Validator(pubkey="0x3456", slashed=False),
+        46: Validator(pubkey="0xabcd", slashed=False),
+        47: Validator(pubkey="0xefgh", slashed=False),
     }
 
     our_exited_slashed_index_to_validator = {
-        44: Validator(pubkey="0x9012"),
-        45: Validator(pubkey="0x3456"),
-        48: Validator(pubkey="0x5432"),
+        44: Validator(pubkey="0x9012", slashed=False),
+        45: Validator(pubkey="0x3456", slashed=False),
+        48: Validator(pubkey="0x5432", slashed=False),
     }
 
     slashed_validators.process(

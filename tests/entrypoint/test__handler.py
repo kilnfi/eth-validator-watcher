@@ -79,17 +79,17 @@ def test_nominal() -> None:
         ) -> dict[StatusEnum, dict[int, Validator]]:
             return {
                 StatusEnum.activeOngoing: {
-                    0: Validator(pubkey="0xaaa"),
-                    2: Validator(pubkey="0xccc"),
-                    4: Validator(pubkey="0xeee"),
+                    0: Validator(pubkey="0xaaa", slashed=False),
+                    2: Validator(pubkey="0xccc", slashed=False),
+                    4: Validator(pubkey="0xeee", slashed=False),
                 },
                 StatusEnum.pendingQueued: {
-                    1: Validator(pubkey="0xbbb"),
-                    3: Validator(pubkey="0xddd"),
+                    1: Validator(pubkey="0xbbb", slashed=False),
+                    3: Validator(pubkey="0xddd", slashed=False),
                 },
                 StatusEnum.exitedSlashed: {
-                    5: Validator(pubkey="0xfff"),
-                    6: Validator(pubkey="0xggg"),
+                    5: Validator(pubkey="0xfff", slashed=False),
+                    6: Validator(pubkey="0xggg", slashed=False),
                 },
             }
 
@@ -118,11 +118,11 @@ def test_nominal() -> None:
             our_exited_slashed_index_to_validator: dict[int, Validator],
         ) -> None:
             assert total_exited_slashed_index_to_validator == {
-                5: Validator(pubkey="0xfff"),
-                6: Validator(pubkey="0xggg"),
+                5: Validator(pubkey="0xfff", slashed=False),
+                6: Validator(pubkey="0xggg", slashed=False),
             }
             assert our_exited_slashed_index_to_validator == {
-                5: Validator(pubkey="0xfff")
+                5: Validator(pubkey="0xfff", slashed=False)
             }
 
     def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
@@ -145,9 +145,9 @@ def test_nominal() -> None:
         assert isinstance(beacon, Beacon)
         assert beacon_type is BeaconType.TEKU
         assert index_to_validator == {
-            0: Validator(pubkey="0xaaa"),
-            2: Validator(pubkey="0xccc"),
-            4: Validator(pubkey="0xeee"),
+            0: Validator(pubkey="0xaaa", slashed=False),
+            2: Validator(pubkey="0xccc", slashed=False),
+            4: Validator(pubkey="0xeee", slashed=False),
         }
         assert epoch == 1
 
@@ -163,9 +163,9 @@ def test_nominal() -> None:
         assert indexes_that_missed_attestation == {0, 4}
         assert indexes_that_previously_missed_attestation == set()
         assert index_to_validator == {
-            0: Validator(pubkey="0xaaa"),
-            2: Validator(pubkey="0xccc"),
-            4: Validator(pubkey="0xeee"),
+            0: Validator(pubkey="0xaaa", slashed=False),
+            2: Validator(pubkey="0xccc", slashed=False),
+            4: Validator(pubkey="0xeee", slashed=False),
         }
         assert epoch == 1
         assert isinstance(slack, Slack)
@@ -192,9 +192,9 @@ def test_nominal() -> None:
         assert potential_block == "A BLOCK"
         assert slot in {63, 64}
         assert index_to_validator == {
-            0: Validator(pubkey="0xaaa"),
-            2: Validator(pubkey="0xccc"),
-            4: Validator(pubkey="0xeee"),
+            0: Validator(pubkey="0xaaa", slashed=False),
+            2: Validator(pubkey="0xccc", slashed=False),
+            4: Validator(pubkey="0xeee", slashed=False),
         }
 
         return {0}
