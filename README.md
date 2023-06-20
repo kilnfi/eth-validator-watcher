@@ -71,6 +71,29 @@ Description
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
+Export Prometheus mertrics
+--------------------------
+
+name                                       | description
+-------------------------------------------|------------
+`eth_usd`                                  | ETH/USD conversion rate
+`entry_queue_duration_sec`                 | Entry queue duration in seconds
+`our_pending_queued_validators_count`      | Our pending queued validators count
+`total_pending_queued_validators_count`    | Total pending queued validators count
+`our_active_validators_count`              | Our active validators count
+`total_active_validators_count`            | Total active validators count
+`our_exited_validators_count`              | Our exited validators count
+`wrong_fee_recipient_proposed_block_count` | Wrong fee recipient proposed block count
+`missed_attestations_count`                | Missed attestations count
+`double_missed_attestations_count`         | Double missed attestations count
+`missed_block_proposals_count`             | Missed block proposals count
+`future_block_proposals_count`             | Future block proposals count
+`our_slashed_validators_count`             | Our slashed validators count
+`total_slashed_validators_count`           | Total slashed validators count
+`suboptimal_attestations_rate`             | Suboptimal attestations rate
+`keys_count`                               | Keys count
+
+
 Installation
 ------------
 
