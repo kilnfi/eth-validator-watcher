@@ -1,3 +1,5 @@
+"""Contains the logic to compute the duration of the entry queue."""
+
 from prometheus_client import Gauge
 
 MIN_PER_EPOCH_CHURN_LIMIT = 4
@@ -34,18 +36,34 @@ entry_queue_duration_sec = Gauge(
 
 
 def compute_validators_churn(nb_active_validators: int) -> int:
+    """Compute the number of validators that can exit the entry queue per epoch.
+
+    Parameters:
+    nb_active_validators: The number of currently active validators
+    """
     return max(MIN_PER_EPOCH_CHURN_LIMIT, nb_active_validators // CHURN_LIMIT_QUOTIENT)
 
 
 def compute_pessimistic_duration_sec(
     nb_active_validators: int, position_in_entry_queue: int
 ) -> int:
+    """Compute a pessimistic estimation of when a validator will exit the entry queue.
+
+    Parameters:
+    nb_active_validators: The number of currently active validators
+    position_in_entry_queue: The position of the validator in the entry queue
+    """
     return (
         position_in_entry_queue // compute_validators_churn(nb_active_validators)
     ) * NB_SECONDS_PER_EPOCH
 
 
 def get_bucket_index(validator_index: int) -> int:
+    """Get the bucket index of a validator.
+
+    Parameters:
+    validator_index: The index of the validator
+    """
     for index, (bucket_start, _) in enumerate(BUCKETS):
         if validator_index < bucket_start:
             return index - 1
@@ -56,6 +74,12 @@ def get_bucket_index(validator_index: int) -> int:
 def compute_optimistic_duration_sec(
     nb_active_validators: int, position_in_entry_queue: int
 ) -> int:
+    """Compute an optimistic estimation of when a validator will exit the entry queue.
+
+    Parameters:
+    nb_active_validators: The number of currently active validators
+    position_in_entry_queue: The position of the validator in the entry queue
+    """
     start_bucket_index = get_bucket_index(nb_active_validators)
     stop_bucket_index = get_bucket_index(nb_active_validators + position_in_entry_queue)
 
@@ -100,6 +124,15 @@ def compute_optimistic_duration_sec(
 def export_duration_sec(
     nb_active_validators: int, position_in_entry_queue: int
 ) -> None:
+    """Export the duration of the entry queue.
+
+    This function does the average of the pessimistic and optimistic duration
+    estimations.
+
+    Parameters:
+    nb_active_validators: The number of currently active validators
+    position_in_entry_queue: The position of the validator in the entry queue
+    """
     result = (
         compute_optimistic_duration_sec(nb_active_validators, position_in_entry_queue)
         + compute_pessimistic_duration_sec(
