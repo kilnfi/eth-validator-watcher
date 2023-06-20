@@ -1,6 +1,6 @@
 from eth_validator_watcher.entry_queue import (
-    export_duration_sec,
     entry_queue_duration_sec,
+    export_duration_sec,
 )
 
 

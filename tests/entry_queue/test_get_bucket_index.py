@@ -1,5 +1,6 @@
-from eth_validator_watcher.entry_queue import get_bucket_index
 from pytest import raises
+
+from eth_validator_watcher.entry_queue import get_bucket_index
 
 
 def test_get_bucket_index_nominal() -> None:

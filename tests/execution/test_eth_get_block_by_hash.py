@@ -2,9 +2,10 @@ import json
 from pathlib import Path
 
 from requests_mock import Mocker
+
 from eth_validator_watcher.execution import Execution
-from tests.execution import assets
 from eth_validator_watcher.models import ExecutionBlock
+from tests.execution import assets
 
 
 def test_eth_get_block_by_hash() -> None:

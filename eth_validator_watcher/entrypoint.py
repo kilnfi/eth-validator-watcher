@@ -7,21 +7,20 @@ import typer
 from prometheus_client import Gauge, start_http_server
 from typer import Option
 
-from .fee_recipient import process_fee_recipient
-from .execution import Execution
-
-from .slashed_validators import SlashedValidators
-from .exited_validators import ExitedValidators
-
 from .beacon import Beacon
 from .coinbase import Coinbase
+from .entry_queue import export_duration_sec as export_entry_queue_duration_sec
+from .execution import Execution
+from .exited_validators import ExitedValidators
+from .fee_recipient import process_fee_recipient
 from .missed_attestations import (
     process_double_missed_attestations,
     process_missed_attestations,
 )
 from .missed_blocks import process_missed_blocks
-from .models import BeaconType
+from .models import BeaconType, Validators
 from .next_blocks_proposal import process_future_blocks_proposal
+from .slashed_validators import SlashedValidators
 from .suboptimal_attestations import process_suboptimal_attestations
 from .utils import (
     BLOCK_NOT_ORPHANED_TIME_SEC,
@@ -34,8 +33,6 @@ from .utils import (
     write_liveness_file,
 )
 from .web3signer import Web3Signer
-from .models import Validators
-from .entry_queue import export_duration_sec as export_entry_queue_duration_sec
 
 StatusEnum = Validators.DataItem.StatusEnum
 

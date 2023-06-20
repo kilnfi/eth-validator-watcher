@@ -1,9 +1,11 @@
 import json
-from eth_validator_watcher.beacon import Beacon
-from tests.beacon import assets
 from pathlib import Path
+
 from requests_mock import Mocker
+
+from eth_validator_watcher.beacon import Beacon
 from eth_validator_watcher.models import Validators
+from tests.beacon import assets
 
 StatusEnum = Validators.DataItem.StatusEnum
 Validator = Validators.DataItem.Validator

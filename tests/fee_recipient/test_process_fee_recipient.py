@@ -1,15 +1,14 @@
 import json
+from pathlib import Path
+
+from pytest import fixture
 
 from eth_validator_watcher.fee_recipient import (
     process_fee_recipient,
     wrong_fee_recipient_proposed_block_count,
 )
-
-from eth_validator_watcher.models import Block, ExecutionBlock
-from pytest import fixture
+from eth_validator_watcher.models import Block, ExecutionBlock, Validators
 from tests.fee_recipient import assets
-from pathlib import Path
-from eth_validator_watcher.models import Validators
 
 Validator = Validators.DataItem.Validator
 

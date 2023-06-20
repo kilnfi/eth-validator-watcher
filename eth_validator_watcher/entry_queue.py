@@ -1,6 +1,5 @@
 from prometheus_client import Gauge
 
-
 MIN_PER_EPOCH_CHURN_LIMIT = 4
 CHURN_LIMIT_QUOTIENT = 65536
 NB_SECONDS_PER_SLOT = 12

@@ -8,10 +8,8 @@ from typer import BadParameter
 
 from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
-from eth_validator_watcher.models import BeaconType, Genesis
+from eth_validator_watcher.models import BeaconType, Genesis, Validators
 from eth_validator_watcher.utils import Slack
-from eth_validator_watcher.models import Validators
-from eth_validator_watcher.models import Validators
 
 StatusEnum = Validators.DataItem.StatusEnum
 Validator = Validators.DataItem.Validator

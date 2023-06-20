@@ -1,6 +1,6 @@
 from eth_validator_watcher.entry_queue import (
-    compute_optimistic_duration_sec,
     NB_SECONDS_PER_EPOCH,
+    compute_optimistic_duration_sec,
 )
 
 
