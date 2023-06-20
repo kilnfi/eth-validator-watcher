@@ -1,10 +1,9 @@
+from eth_validator_watcher.models import Validators
 from eth_validator_watcher.slashed_validators import (
     SlashedValidators,
     our_slashed_validators_count,
     total_slashed_validators_count,
 )
-
-from eth_validator_watcher.models import Validators
 
 Validator = Validators.DataItem.Validator
 

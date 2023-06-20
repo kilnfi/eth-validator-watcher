@@ -2,9 +2,9 @@ from typing import Optional
 
 from prometheus_client import Counter
 
-from .utils import NB_SLOT_PER_EPOCH, Slack
-from .models import Block, Validators
 from .execution import Execution
+from .models import Block, Validators
+from .utils import NB_SLOT_PER_EPOCH, Slack
 
 wrong_fee_recipient_proposed_block_count = Counter(
     "wrong_fee_recipient_proposed_block_count",

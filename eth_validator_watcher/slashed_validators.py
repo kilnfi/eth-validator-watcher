@@ -1,8 +1,8 @@
 from typing import Optional
 
 from prometheus_client import Gauge
-from .models import Validators
 
+from .models import Validators
 from .utils import Slack
 
 our_slashed_validators_count = Gauge(

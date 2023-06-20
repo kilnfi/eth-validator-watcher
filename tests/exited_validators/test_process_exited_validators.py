@@ -2,7 +2,6 @@ from eth_validator_watcher.exited_validators import (
     ExitedValidators,
     our_exited_validators_count,
 )
-
 from eth_validator_watcher.models import Validators
 
 Validator = Validators.DataItem.Validator

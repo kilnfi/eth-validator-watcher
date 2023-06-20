@@ -1,11 +1,12 @@
 import functools
 from typing import Optional, Set
-from .models import Validators
+
 from prometheus_client import Gauge
 
 from eth_validator_watcher.models import BeaconType
 
 from .beacon import Beacon
+from .models import Validators
 from .utils import Slack
 
 print = functools.partial(print, flush=True)

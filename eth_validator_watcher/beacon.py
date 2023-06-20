@@ -5,7 +5,6 @@ from typing import Optional
 from requests import Response, Session, codes
 from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import RetryError
-from .models import Validators
 
 from .models import (
     BeaconType,

@@ -1,10 +1,6 @@
-from eth_validator_watcher import suboptimal_attestations
+from eth_validator_watcher import models, suboptimal_attestations
 from eth_validator_watcher.suboptimal_attestations import (
-    process_suboptimal_attestations,
-    suboptimal_attestations_rate_gauge,
-)
-
-from eth_validator_watcher import models
+    process_suboptimal_attestations, suboptimal_attestations_rate_gauge)
 
 Validator = models.Validators.DataItem.Validator
 

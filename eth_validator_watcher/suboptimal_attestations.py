@@ -2,8 +2,9 @@ import functools
 from collections import defaultdict
 
 from prometheus_client import Gauge
+
 from .beacon import Beacon
-from .models import Block
+from .models import Block, Validators
 from .utils import (
     NB_SLOT_PER_EPOCH,
     aggregate_bools,
@@ -12,8 +13,6 @@ from .utils import (
     remove_all_items_from_last_true,
     switch_endianness,
 )
-
-from .models import Validators
 
 print = functools.partial(print, flush=True)
 

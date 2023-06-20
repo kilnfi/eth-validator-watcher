@@ -1,9 +1,7 @@
 from requests import Session, codes
 from requests.adapters import HTTPAdapter, Retry
-from eth_validator_watcher.models import (
-    EthGetBlockByHashRequest,
-    ExecutionBlock,
-)
+
+from eth_validator_watcher.models import EthGetBlockByHashRequest, ExecutionBlock
 
 
 class Execution:
