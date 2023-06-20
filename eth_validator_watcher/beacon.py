@@ -1,3 +1,6 @@
+"""Contains the Beacon class which is used to interact with the consensus layer node."""
+
+
 from collections import defaultdict
 from functools import lru_cache
 from typing import Optional
@@ -26,9 +29,12 @@ class NoBlockError(Exception):
 
 
 class Beacon:
+    """Beacon node abstraction."""
+
     def __init__(self, url: str) -> None:
         """Beacon
 
+        Parameters:
         url: URL where the beacon can be reached
         """
         self.__url = url
@@ -46,15 +52,17 @@ class Beacon:
         )
 
     def get_genesis(self) -> Genesis:
+        """Get genesis data."""
         response = self.__http.get(f"{self.__url}/eth/v1/beacon/genesis")
         response.raise_for_status()
         genesis_dict = response.json()
         return Genesis(**genesis_dict)
 
     def get_block(self, slot: int) -> Block:
-        """Get a block
+        """Get a block.
 
-        slot: Slot
+        Parameters
+        slot: Slot corresponding to the block to retrieve
         """
         try:
             response = self.__http.get(f"{self.__url}/eth/v2/beacon/blocks/{slot}")
@@ -71,7 +79,7 @@ class Beacon:
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
         """Get proposer duties
 
-        epoch: Epoch
+        epoch: Epoch corresponding to the proposer duties to retrieve
         """
         response = self.__http.get(
             f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}"
@@ -85,10 +93,10 @@ class Beacon:
     def get_status_to_index_to_validator(
         self,
     ) -> dict[StatusEnum, dict[int, Validators.DataItem.Validator]]:
-        """Return a nested dictionnary with:
+        """Get a nested dictionnary with:
         outer key               : Status
         outer value (=inner key): Index of validator
-        inner value             : validator
+        inner value             : Validator
         """
         response = self.__http.get(
             f"{self.__url}/eth/v1/beacon/states/head/validators",
@@ -112,12 +120,13 @@ class Beacon:
     def get_duty_slot_to_committee_index_to_validators_index(
         self, epoch: int
     ) -> dict[int, dict[int, list[int]]]:
-        """Return a nested dictionnary.
+        """Get a nested dictionnary.
         outer key               : Slot number
         outer value (=inner key): Committee index
-        inner value             : Index of validators which have to attest in the
+        inner value             : Index of validators that have to attest in the
                                   given committee index at the given slot
 
+        Parameters:
         epoch: Epoch
         """
         response = self.__http.get(
@@ -142,6 +151,14 @@ class Beacon:
     def get_validators_liveness(
         self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
     ) -> dict[int, bool]:
+        """Get validators liveness.
+
+        Parameters      :
+        beacon_type     : Type of beacon node (Teku, Lighthouse or other)
+        epoch           : Epoch corresponding to the validators liveness to retrieve
+        validators_index: Set of validator indexs corresponding to the liveness to
+                          retrieve
+        """
         beacon_type_to_function = {
             BeaconType.LIGHTHOUSE: self.__get_validators_liveness_lighthouse,
             BeaconType.TEKU: self.__get_validators_liveness_teku,
@@ -157,6 +174,11 @@ class Beacon:
         return {item.index: item.is_live for item in validators_liveness.data}
 
     def get_potential_block(self, slot) -> Optional[Block]:
+        """Get a block if it exists, otherwise return None.
+
+        Parameters:
+        slot: Slot corresponding to the block to retrieve
+        """
         try:
             return self.get_block(slot)
         except NoBlockError:
@@ -168,6 +190,15 @@ class Beacon:
     def __get_validators_liveness_lighthouse(
         self, epoch: int, validators_index: set[int]
     ) -> Response:
+        """Get validators liveness from Lighthouse.
+
+        https://github.com/sigp/lighthouse/issues/4243
+
+        Parameters:
+        epoch           : Epoch corresponding to the validators liveness to retrieve
+        validators_index: Set of validator indexs corresponding to the liveness to
+                          retrieve
+        """
         return self.__http.post(
             f"{self.__url}/lighthouse/liveness",
             json=ValidatorsLivenessRequestLighthouse(
@@ -178,6 +209,15 @@ class Beacon:
     def __get_validators_liveness_teku(
         self, epoch: int, validators_index: set[int]
     ) -> Response:
+        """Get validators liveness from Teku.
+
+        https://github.com/ConsenSys/teku/issues/7204
+
+        Parameters:
+        epoch           : Epoch corresponding to the validators liveness to retrieve
+        validators_index: Set of validator indexs corresponding to the liveness to
+                          retrieve
+        """
         return self.__http.post(
             f"{self.__url}/eth/v1/validator/liveness/{epoch}",
             json=ValidatorsLivenessRequestTeku(
@@ -188,6 +228,15 @@ class Beacon:
     def __get_validators_liveness_beacon_api(
         self, epoch: int, validators_index: set[int]
     ) -> Response:
+        """Get validators liveness from neither Lighthouse nor Teku.
+
+        https://github.com/ConsenSys/teku/issues/7204
+
+        Parameters:
+        epoch           : Epoch corresponding to the validators liveness to retrieve
+        validators_index: Set of validator indexs corresponding to the liveness to
+                          retrieve
+        """
         return self.__http.post(
             f"{self.__url}/eth/v1/validator/liveness/{epoch}",
             json=[

@@ -1,3 +1,5 @@
+"""Entrypoint for the eth-validator-watcher CLI."""
+
 from os import environ
 from pathlib import Path
 from time import sleep, time
@@ -77,7 +79,9 @@ def handler(
     web3signer_url: Optional[str] = Option(
         None, help="URL to web3signer managing keys to watch"
     ),
-    fee_recipient: Optional[str] = Option(None, help="Fee recipient address"),
+    fee_recipient: Optional[str] = Option(
+        None, help="Fee recipient address - --execution-url must be set"
+    ),
     slack_channel: Optional[str] = Option(
         None, help="Slack channel to send alerts - SLACK_TOKEN env var must be set"
     ),
@@ -86,8 +90,8 @@ def handler(
         case_sensitive=False,
         help=(
             "Use this option if connected to a lighthouse or a teku beacon node. "
-            "See https://github.com/sigp/lighthouse/issues/4243 for lighthouse and "
-            "https://github.com/ConsenSys/teku/issues/7204 for teku."
+            "See https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and "
+            "https://github.com/ConsenSys/teku/issues/7204 for Teku."
         ),
     ),
     liveness_file: Optional[Path] = Option(None, help="Liveness file"),
@@ -98,14 +102,28 @@ def handler(
     \b
     This tool watches the 🥓 Ethereum Beacon chain 🥓 and tells you when some of your
     validators:
-    - missed a block proposal
     - are going to propose a block in the next two epochs
+    - missed a block proposal
     - did not attest optimally
     - missed an attestation
     - missed two attestations in a raw
+    - proposed a block with the wrong fee recipient
+    - exited
+    - got slashed
 
     \b
-    This tool also exposes extra data as how many validators are active, pending, etc...
+    It also exports some general metrics like:
+    - your USD assets under management
+    - the total staking market cap
+    - epoch and slot
+    - the number or total slashed validators
+    - ETH/USD conversion rate
+    - the number of your queued validators
+    - the number of your active validators
+    - the number of your exited validators
+    - the number of network queued validators
+    - the number of network active validators
+    - the entry queue duration estimation
 
     \b
     You can specify:
@@ -117,6 +135,12 @@ def handler(
     - If you use pubkeys file, you can change it without having to restart the watcher.
     - If you use Web3Signer, a call to Web3Signer will be done at every epoch to get the
     latest set of keys to watch.
+
+    \b
+    This program exports data on:
+    - Prometheus (so you can use Grafana to monitor your validators)
+    - Slack (so you can receive alerts on your phone)
+    - Logs
 
     Prometheus server is automatically exposed on port 8000.
     """
@@ -142,6 +166,7 @@ def _handler(
     beacon_type: BeaconType,
     liveness_file: Optional[Path],
 ) -> None:
+    """Just a wrapper to be able to test the handler function"""
     slack_token = environ.get("SLACK_TOKEN")
 
     if fee_recipient is not None and execution_url is None:
