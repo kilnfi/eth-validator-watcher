@@ -1,3 +1,5 @@
+"""Contains functions to process sub-optimal attestations"""
+
 import functools
 from collections import defaultdict
 
@@ -30,12 +32,11 @@ def process_suboptimal_attestations(
 ) -> set[int]:
     """Process sub-optimal attestations
 
-    Print a log and update a prometheus probe for our public keys that did not attested
-    optimally during the last epoch.
-
-    beacon     : Beacon
-    slot       : Slot
-
+    Parameters:
+    beacon                               : Beacon instance
+    block                                : Block to check sub-optimal attestations
+                                           against
+    slot                                 : Slot of the block
     our_active_validators_index_to_pubkey: dictionnary with:
       - key  : index of our active validator
       - value: public key of our active validator
@@ -161,15 +162,15 @@ def process_suboptimal_attestations(
 def aggregate_attestations(block: Block, slot: int) -> dict[int, list[bool]]:
     """Aggregates all attestations for the slot `slot` that are presient
     in block `block`.
-    key  : Committee index
-    value: A list of boolean
 
+    Parameters:
+    block: Block
+    slot: Slot
+
+    Returns:
     Each boolean of the list corresponds to a validator in the given committee.
     If the validator attestation from the previous slot is included in the current
     slot, the boolean is True. Else, it is False.
-
-    block: Block
-    slot: Slot
     """
     filtered_attestations = (
         attestation

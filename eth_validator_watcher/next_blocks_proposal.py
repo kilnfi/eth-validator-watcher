@@ -1,3 +1,5 @@
+"""Contains function to handle next blocks proposal"""
+
 import functools
 
 from prometheus_client import Gauge
@@ -9,7 +11,7 @@ print = functools.partial(print, flush=True)
 
 future_block_proposals_count = Gauge(
     "future_block_proposals_count",
-    "Future block proposals_count",
+    "Future block proposals count",
 )
 
 
@@ -21,14 +23,11 @@ def process_future_blocks_proposal(
 ) -> int:
     """Handle next blocks proposal
 
-    Print one log for each of our key which is about to propose a block in the next
-    two epochs.
-
-    Return the current epoch.
-
-    beacon     : Beacon
-    our_pubkeys: Set of our validators public keys
-    slot       : Slot
+    Parameters:
+    beacon      : Beacon
+    our_pubkeys : Set of our validators public keys
+    slot        : Slot
+    is_new_epoch: Is new epoch
     """
     epoch = slot // NB_SLOT_PER_EPOCH
     proposers_duties_current_epoch = beacon.get_proposer_duties(epoch)

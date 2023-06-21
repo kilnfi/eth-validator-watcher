@@ -1,3 +1,5 @@
+"""Contains functions to handle missed block proposals detection"""
+
 import functools
 from typing import Optional
 
@@ -11,7 +13,7 @@ print = functools.partial(print, flush=True)
 
 missed_block_proposals_count = Counter(
     "missed_block_proposals_count",
-    "Missed block proposals_count",
+    "Missed block proposals count",
     ["slot", "epoch"],
 )
 
@@ -23,18 +25,14 @@ def process_missed_blocks(
     our_pubkeys: set[str],
     slack: Optional[Slack],
 ) -> None:
-    """Handle missed block proposals detection
+    """Process missed block proposals detection
 
-    Print log each time a block is proposed.
-    Update prometheus probe for our public keys which did not proposed a block
-
-    Returns the current slot.
-
-    beacon                        : Beacon
-    slot                          : Slot
-    previous_slot                 : Previous slot (Optional)
-    missed_block_proposals_counter: Prometheus counter
-    our_pubkeys                   : Set of our validators public keys
+    Parameters:
+    beacon         : Beacon
+    potential_block: Potential block
+    slot           : Slot
+    our_pubkeys    : Set of our validators public keys
+    slack          : Slack instance
     """
     missed = potential_block is None
     epoch = slot // NB_SLOT_PER_EPOCH

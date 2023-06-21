@@ -1,3 +1,5 @@
+"""Contains the models for the validator watcher."""
+
 from enum import Enum
 
 from pydantic import BaseModel

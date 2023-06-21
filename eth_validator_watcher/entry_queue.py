@@ -77,7 +77,7 @@ def compute_optimistic_duration_sec(
     """Compute an optimistic estimation of when a validator will exit the entry queue.
 
     Parameters:
-    nb_active_validators: The number of currently active validators
+    nb_active_validators   : The number of currently active validators
     position_in_entry_queue: The position of the validator in the entry queue
     """
     start_bucket_index = get_bucket_index(nb_active_validators)
@@ -130,7 +130,7 @@ def export_duration_sec(
     estimations.
 
     Parameters:
-    nb_active_validators: The number of currently active validators
+    nb_active_validators   : The number of currently active validators
     position_in_entry_queue: The position of the validator in the entry queue
     """
     result = (

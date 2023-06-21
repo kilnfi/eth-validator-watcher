@@ -1,3 +1,5 @@
+"""Contains the logic to check if the validators missed attestations."""
+
 import functools
 from typing import Optional, Set
 
@@ -28,6 +30,16 @@ def process_missed_attestations(
     our_active_index_to_validator: dict[int, Validators.DataItem.Validator],
     epoch: int,
 ) -> set[int]:
+    """Process missed attestations.
+
+    Parameters:
+    beacon                       : Beacon instance
+    beacon_type                  : Beacon type
+    our_active_index_to_validator: Dictionary with:
+        key  : our active validator index
+        value: validator data corresponding to the validator index
+    epoch                        : Epoch where the missed attestations are checked
+    """
     validators_index = set(our_active_index_to_validator)
     validators_liveness = beacon.get_validators_liveness(
         beacon_type, epoch - 1, validators_index
@@ -68,6 +80,19 @@ def process_double_missed_attestations(
     epoch: int,
     slack: Optional[Slack],
 ) -> Set[int]:
+    """Process double missed attestations.
+
+    Parameters:
+    dead_indexes                 : Set of indexes of the validators that missed
+                                   attestations
+    previous_dead_indexes        : Set of indexes of the validators that missed
+                                   attestations in the previous epoch
+    our_active_index_to_validator: Dictionary with:
+        key  : our active validator index
+        value: validator data corresponding to the validator index
+    epoch                        : Epoch where the missed attestations are checked
+    slack                        : Slack instance
+    """
     double_dead_indexes = dead_indexes & previous_dead_indexes
 
     double_missed_attestations_count.set(len(double_dead_indexes))

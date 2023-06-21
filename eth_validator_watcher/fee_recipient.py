@@ -1,3 +1,5 @@
+"""Contains the logic to check if the fee recipient is the one expected."""
+
 from typing import Optional
 
 from prometheus_client import Counter
@@ -19,6 +21,18 @@ def process_fee_recipient(
     expected_fee_recipient: Optional[str],
     slack: Optional[Slack],
 ) -> None:
+    """Check if the fee recipient is the one expected.
+
+    Parameters:
+    block                 : The block to check against the fee recipient
+    index_to_validator    : Dictionary with:
+        key  : validator index
+        value: validator data corresponding to the validator index
+    execution             : Optional execution client
+    expected_fee_recipient: The expected fee recipient
+    slack                 : Optional slack client
+    """
+
     # No expected fee recipient set, nothing to do
     if execution is None or expected_fee_recipient is None:
         return
