@@ -21,7 +21,9 @@ keys_count = Gauge(
 
 def convert_hex_to_bools(hex: str) -> list[bool]:
     """Convert an hexadecimal number into list of booleans
-    `hex` can contain `0x` prefix
+
+    Parameters:
+    hex: can contain `0x` prefix
 
     Example:
     --------
@@ -43,6 +45,9 @@ def convert_hex_to_bools(hex: str) -> list[bool]:
 
 def switch_endianness(bits: list[bool]) -> list[bool]:
     """Revert bits by 8 groups
+
+    Paremeters:
+    bits: list of booleans representing bits
 
     Example:
     -------
@@ -66,6 +71,9 @@ def switch_endianness(bits: list[bool]) -> list[bool]:
 def remove_all_items_from_last_true(bits: list[bool]) -> list[bool]:
     """Remove all items after last True
 
+    Paremeters:
+    bits: list of booleans representing bits
+
     If no True is found in the list, StopIteration is raised
 
     Example:
@@ -84,6 +92,9 @@ def remove_all_items_from_last_true(bits: list[bool]) -> list[bool]:
 
 def aggregate_bools(list_of_bools: list[list[bool]]) -> list[bool]:
     """Aggregate bools
+
+    Parameters:
+    list_of_bools: A list of list of booleans
 
     If the length of each list is not the same, `ValueError` is raised.
 
@@ -115,6 +126,10 @@ def aggregate_bools(list_of_bools: list[list[bool]]) -> list[bool]:
 def apply_mask(items: list[Any], mask: list[bool]) -> set[Any]:
     """Apply mask
 
+    Parameters:
+    items: A list of items
+    mask: A list of booleans representing a mask
+
     Example:
     --------
 
@@ -130,8 +145,10 @@ def apply_mask(items: list[Any], mask: list[bool]) -> set[Any]:
 def load_pubkeys_from_file(path: Path) -> set[str]:
     """Load public keys from a file.
 
+    Parameters:
     path: A path to a file containing a list of public keys.
-    Returns the corresponding set of public keys.
+
+        Returns the corresponding set of public keys.
     """
     with path.open() as file_descriptor:
         return set((f"0x{line.strip()}" for line in file_descriptor))
@@ -143,14 +160,13 @@ def get_our_pubkeys(
 ) -> set[str]:
     """Get our pubkeys
 
+    Parameters:
+    pubkeys_file_path: The path of file containing keys to watch
+    web3signer       : Web3Signer instance signing for the keys to watch
+
     Query pubkeys from either file path or Web3Signer instance.
     If `our_pubkeys` is already set and we are not at the beginning of a new epoch,
     returns `our_pubkeys`.
-
-    pubkeys_file_path: The path of file containing keys to watch
-    web3signers: A set of Web3Signer instance signing for the keys to watch
-    our_pubkey: The set containing pubkey to watch]
-    slot: Data Slot
     """
 
     # Get public keys to watch from file

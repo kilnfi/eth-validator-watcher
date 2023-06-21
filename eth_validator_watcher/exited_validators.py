@@ -37,7 +37,7 @@ class ExitedValidators:
 
         Parameters:
         our_exited_unslashed_index_to_validator: Dictionary with:
-            key: our exited validator index
+            key  : our exited validator index
             value: validator data corresponding to the validator index
         """
 

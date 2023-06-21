@@ -1,10 +1,15 @@
+""""Contains the Web3Signer class, which is used to interact with Web3Signer."""
+
 import requests
 
 
 class Web3Signer:
+    """Web3Signer abstraction."""
+
     def __init__(self, url: str) -> None:
         """Web3Signer
 
+        Parameters:
         url: URL where Web3Signer can be reached
         """
         self.__url = url

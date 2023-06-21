@@ -1,3 +1,6 @@
+"""Contains the SlashedValidators class, which is responsible for managing the slashed
+validators."""
+
 from typing import Optional
 
 from prometheus_client import Gauge
@@ -17,7 +20,14 @@ total_slashed_validators_count = Gauge(
 
 
 class SlashedValidators:
+    """Slashed validators abstraction."""
+
     def __init__(self, slack: Optional[Slack]) -> None:
+        """Slashed validators
+
+        Parameters:
+        slack: Optional slack client
+        """
         self.__total_exited_slashed_indexes: Optional[set[int]] = None
         self.__our_exited_slashed_indexes: Optional[set[int]] = None
         self.__slack = slack
@@ -31,6 +41,22 @@ class SlashedValidators:
         total_withdrawal_index_to_validator: dict[int, Validators.DataItem.Validator],
         our_withdrawal_index_to_validator: dict[int, Validators.DataItem.Validator],
     ) -> None:
+        """Process slashed validators.
+
+        Parameters:
+        total_exited_slashed_index_to_validator: Dictionary with:
+            key  : total exited validator index
+            value: validator data corresponding to the validator index
+        our_exited_slashed_index_to_validator  : Dictionary with:
+            key  : our exited validator index
+            value: validator data corresponding to the validator index
+        total_withdrawal_index_to_validator    : Dictionary with:
+            key  : total withdrawal validator index
+            value: validator data corresponding to the validator index
+        our_withdrawal_index_to_validator      : Dictionary with:
+            key  : our withdrawal validator index
+            value: validator data corresponding to the validator index
+        """
         total_slashed_withdrawal_index_to_validator = {
             index
             for index, validator in total_withdrawal_index_to_validator.items()
