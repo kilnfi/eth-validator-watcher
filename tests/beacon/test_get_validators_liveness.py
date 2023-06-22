@@ -45,6 +45,15 @@ def test_get_proposer_duties_lighthouse():
         )
 
 
+def test_get_proposer_duties_nimbus():
+    beacon_url = "http://beacon:5052"
+    beacon = Beacon(beacon_url)
+
+    assert beacon.get_validators_liveness(
+        beacon_type=BeaconType.NIMBUS, epoch=1664, validators_index={42, 44, 46}
+    ) == {42: True, 44: True, 46: True}
+
+
 def test_get_proposer_duties_teku():
     beacon_url = "http://beacon:5052"
 
