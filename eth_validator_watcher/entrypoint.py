@@ -91,7 +91,7 @@ def handler(
         help=(
             "Use this option if connected to a lighthouse or a teku beacon node. "
             "See https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and "
-            "https://github.com/ConsenSys/teku/issues/7204 for Teku."
+            "https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0."
         ),
     ),
     liveness_file: Optional[Path] = Option(None, help="Liveness file"),

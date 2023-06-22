@@ -39,6 +39,7 @@ class Beacon:
         """
         self.__url = url
         self.__http = Session()
+        self.__nimbus_first_liveness_call = False
 
         self.__http.mount(
             "http://",
@@ -159,6 +160,24 @@ class Beacon:
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
         """
+
+        # On Nimbus, because of
+        # https://github.com/status-im/nimbus-eth2/issues/5019,
+        # we just assume that all validators are live
+
+        if beacon_type == BeaconType.NIMBUS:
+            if not self.__nimbus_first_liveness_call:
+                self.__nimbus_first_liveness_call = True
+                print(
+                    (
+                        "⚠️ You are using Nimbus. Liveness will be ignored. "
+                        "See https://github.com/status-im/nimbus-eth2/issues/5019 for "
+                        "more information."
+                    )
+                )
+
+            return {index: True for index in validators_index}
+
         beacon_type_to_function = {
             BeaconType.LIGHTHOUSE: self.__get_validators_liveness_lighthouse,
             BeaconType.TEKU: self.__get_validators_liveness_teku,
