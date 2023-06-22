@@ -37,8 +37,9 @@ def process_fee_recipient(
     if execution is None or expected_fee_recipient is None:
         return
 
-    # Not our validator, nothing to do
     proposer_index = block.data.message.proposer_index
+
+    # Not our validator, nothing to do
     if proposer_index not in index_to_validator:
         return
 
@@ -57,7 +58,7 @@ def process_fee_recipient(
     # set its own fee recipient. In this case, we need to check if the last transaction
     # in the execution block is a transaction to the expected fee recipient.
 
-    execution_block_hash = block.data.message.body.eth1_data.block_hash
+    execution_block_hash = block.data.message.body.execution_payload.block_hash
     execution_block = execution.eth_get_block_by_hash(execution_block_hash)
     transactions = execution_block.result.transactions
 

@@ -24,7 +24,7 @@ class Slack:
 class Execution:
     def eth_get_block_by_hash(self, hash: str) -> ExecutionBlock:
         assert (
-            hash == "0x060356bdb8bf84bb2c1ca7e3874883802c672a4120b25d3b8bfb67524483a6fe"
+            hash == "0x9fc5b74ae5b8a0f7495314c7e6608e524c2ffe8581eca704208066cd922a1fee"
         )
 
         execution_block_path = Path(assets.__file__).parent / "execution_block.json"
@@ -36,7 +36,7 @@ class Execution:
 class ExecutionEmptyBlock:
     def eth_get_block_by_hash(self, hash: str) -> ExecutionBlock:
         assert (
-            hash == "0x060356bdb8bf84bb2c1ca7e3874883802c672a4120b25d3b8bfb67524483a6fe"
+            hash == "0x9fc5b74ae5b8a0f7495314c7e6608e524c2ffe8581eca704208066cd922a1fee"
         )
 
         execution_block_path = (
