@@ -73,6 +73,15 @@ Command line options
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
+Beacon nodes compatibility
+--------------------------
+Beacon type      | Compatibility
+-----------------|----------------------------------------------------------------------------------------------------------
+Lighthouse       | Full with `--beacon-type=lighthouse`. See https://github.com/sigp/lighthouse/issues/4243 for more details.
+Teku `>= 23.6.0` | Full
+Teku `< 23.6.0 ` | Full with `--beacon-type=teku`. See https://github.com/ConsenSys/teku/pull/7212 for more details.
+Nimbus           | Partial - lot of missed attestation false positive. See https://github.com/status-im/nimbus-eth2/issues/5019 for more details.
+
 Exported Prometheus metrics
 ---------------------------
 
