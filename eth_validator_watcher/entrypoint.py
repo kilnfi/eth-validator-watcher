@@ -325,10 +325,10 @@ def _handler(
             print(f"🎂     Epoch     {epoch}     starts")
 
         should_process_missed_attestations = (
-            last_missed_attestations_process_epoch is None
-            or (
-                last_missed_attestations_process_epoch != epoch
-                and slot_in_epoch >= SLOT_FOR_MISSED_ATTESTATIONS_PROCESS
+            slot_in_epoch >= SLOT_FOR_MISSED_ATTESTATIONS_PROCESS
+            and (
+                last_missed_attestations_process_epoch is None
+                or last_missed_attestations_process_epoch != epoch
             )
         )
 
