@@ -11,7 +11,7 @@ The code is provided as-is with no warranties.
 
 Description
 -----------
-This tool watches the 🥓 Ethereum Beacon chain 🥓 and indicates when some of your
+**Ethereum Validator Watcher** watches the Ethereum beacon chain in real time and indicates when some of your
 validators:
 - are going to propose a block in the next two epochs
 - missed a block proposal
@@ -186,6 +186,15 @@ You got slashed (you don't want to see this one).
 🔕 Our validator 0x00000000 is slashed
 ```
 
+Slack messages
+--------------
+If a Slack channel is specified, Slack messages are sent on following events:
+- When you exited
+- When you got slashed
+- If fee recipient is specified, when you proposed a block with the wrong fee recipient
+- When you missed 2 attestations in a raw
+- When you missed a block
+
 Developer guide
 ---------------
 We use [Poetry](https://python-poetry.org/) to manage dependencies and packaging.
@@ -205,7 +214,7 @@ pytest
 pytest --cov eth_validator_watcher --cov-report=term-missing
 ```
 
-**Example of lineness probe usage on Kubernetes**
+**Example of liveness probe usage on Kubernetes**
 ```yaml
 livenessProbe:
   periodSeconds: 60
