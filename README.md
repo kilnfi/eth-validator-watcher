@@ -109,29 +109,33 @@ pip install .
 
 Docker images
 -------------
-Docker images (built for AMD64 and ARM64 are available [here](https://github.com/kilnfi/eth-validator-watcher/pkgs/container/eth-validator-watcher).
+Docker images (built for AMD64 and ARM64) are available [here](https://github.com/kilnfi/eth-validator-watcher/pkgs/container/eth-validator-watcher).
 
 
 Logs
 ----
 
+A new epoch starts.
+```
+🎂     Epoch     209904     starts
+```
+-----
+
+You are going to propose a block in the next two epochs.
+```
+💍 Our validator 0xa6cdd026 is going to propose a block at   slot 6716781 (in 13 slots)
+```
+-----
+
 Someone [proposed](https://beaconcha.in/slot/6716776) a block.
 ```
 ✅     validator 0xb9d2439f proposed block at epoch 209899 - slot 6716776 ✅
 ```
-
 -----
 
 You [proposed](https://beaconcha.in/slot/6716781) a block.
 ```
 ✨ Our validator 0xa6cdd026 proposed block at epoch 209899 - slot 6716781 ✨
-```
-
------
-
-On epoch start: You are going to propose a block in the next two epochs.
-```
-💍 Our validator 0xa6cdd026 is going to propose a block at   slot 6716781 (in 13 slots)
 ```
 -----
 
@@ -163,8 +167,24 @@ You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/7432
 ```
 😱  Our validator 0x8c9bfca1, 0xa68f7c5d and 0 more missed 2 attestations in a raw from epoch 209367
 ```
+-----
 
+You [exited](https://beaconcha.in/validator/491565).
+```
+🚶 Our validator 0xaeb82c90 is exited
+```
+-----
 
+Someone [got](https://beaconcha.in/validator/647102) slashed.
+```
+✂️     validator 0xb3a608a7 is slashed
+```
+-----
+
+You got slashed (you don't want to see this one).
+```
+🔕 Our validator 0x00000000 is slashed
+```
 
 Developer guide
 ---------------
