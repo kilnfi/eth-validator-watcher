@@ -39,7 +39,7 @@ from .web3signer import Web3Signer
 StatusEnum = Validators.DataItem.StatusEnum
 
 
-app = typer.Typer()
+app = typer.Typer(add_completion=False)
 
 slot_gauge = Gauge("slot", "Slot")
 epoch_gauge = Gauge("epoch", "Epoch")
@@ -67,41 +67,50 @@ total_active_validators_gauge = Gauge(
 
 @app.command()
 def handler(
-    beacon_url: str = Option(..., help="URL of beacon node"),
-    execution_url: str = Option(None, help="URL of execution node"),
+    beacon_url: str = Option(..., help="URL of beacon node", show_default=False),
+    execution_url: str = Option(None, help="URL of execution node", show_default=False),
     pubkeys_file_path: Optional[Path] = Option(
         None,
         help="File containing the list of public keys to watch",
         exists=True,
         file_okay=True,
         dir_okay=False,
+        show_default=False,
     ),
     web3signer_url: Optional[str] = Option(
-        None, help="URL to web3signer managing keys to watch"
+        None, help="URL to web3signer managing keys to watch", show_default=False
     ),
     fee_recipient: Optional[str] = Option(
-        None, help="Fee recipient address - --execution-url must be set"
+        None,
+        help="Fee recipient address - --execution-url must be set",
+        show_default=False,
     ),
     slack_channel: Optional[str] = Option(
-        None, help="Slack channel to send alerts - SLACK_TOKEN env var must be set"
+        None,
+        help="Slack channel to send alerts - SLACK_TOKEN env var must be set",
+        show_default=False,
     ),
     beacon_type: BeaconType = Option(
         BeaconType.OTHER,
         case_sensitive=False,
         help=(
-            "Use this option if connected to a lighthouse or a teku beacon node. "
-            "See https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and "
-            "https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0."
+            "Use this option if connected to a teku, lighthouse or nimbus beacon node. "
+            "See https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0,"
+            "https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and "
+            "https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus."
+            ""
         ),
+        show_default=False,
     ),
-    liveness_file: Optional[Path] = Option(None, help="Liveness file"),
+    liveness_file: Optional[Path] = Option(
+        None, help="Liveness file", show_default=False
+    ),
 ) -> None:
     """
     🚨 Ethereum Validator Watcher 🚨
 
     \b
-    This tool watches the 🥓 Ethereum Beacon chain 🥓 and tells you when some of your
-    validators:
+    Ethereum Validator Watcher watches the Ethereum beacon chain in real time and indicates when some of your validators:
     - are going to propose a block in the next two epochs
     - missed a block proposal
     - did not attest optimally
@@ -133,14 +142,13 @@ def handler(
     \b
     Pubkeys are load dynamically, at each epoch start.
     - If you use pubkeys file, you can change it without having to restart the watcher.
-    - If you use Web3Signer, a call to Web3Signer will be done at every epoch to get the
-    latest set of keys to watch.
+    - If you use Web3Signer, a call to Web3Signer will be done at every epoch to get the latest set of keys to watch.
 
     \b
     This program exports data on:
-    - Prometheus (so you can use Grafana to monitor your validators)
-    - Slack (so you can receive alerts on your phone)
-    - Logs
+    - Prometheus (you can use this Grafana dashboard to monitor your validators)
+    - Slack
+    - logs
 
     Prometheus server is automatically exposed on port 8000.
     """
