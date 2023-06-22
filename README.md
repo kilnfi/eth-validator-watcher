@@ -55,22 +55,20 @@ Command line options
 --------------------
  
 ```
-╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --beacon-url                TEXT                             URL of beacon node [default: None] [required]                                                        │
-│    --execution-url             TEXT                             URL of execution node [default: None]                                                                │
-│    --pubkeys-file-path         FILE                             File containing the list of public keys to watch [default: None]                                     │
-│    --web3signer-url            TEXT                             URL to web3signer managing keys to watch [default: None]                                             │
-│    --fee-recipient             TEXT                             Fee recipient address - --execution-url must be set [default: None]                                  │
-│    --slack-channel             TEXT                             Slack channel to send alerts - SLACK_TOKEN env var must be set [default: None]                       │
-│    --beacon-type               [lighthouse|teku|other]          Use this option if connected to a lighthouse or a teku beacon node. See                              │
-│                                                                 https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and                                    │
-│                                                                 https://github.com/ConsenSys/teku/issues/7204 for Teku.                                              │
-│                                                                 [default: BeaconType.OTHER]                                                                          │
-│    --liveness-file             PATH                             Liveness file [default: None]                                                                        │
-│    --install-completion        [bash|zsh|fish|powershell|pwsh]  Install completion for the specified shell. [default: None]                                          │
-│    --show-completion           [bash|zsh|fish|powershell|pwsh]  Show completion for the specified shell, to copy it or customize the installation. [default: None]   │
-│    --help                                                       Show this message and exit.                                                                          │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --beacon-url               TEXT                            URL of beacon node [required]                                                                   │
+│    --execution-url            TEXT                            URL of execution node                                                                           │
+│    --pubkeys-file-path        FILE                            File containing the list of public keys to watch                                                │
+│    --web3signer-url           TEXT                            URL to web3signer managing keys to watch                                                        │
+│    --fee-recipient            TEXT                            Fee recipient address - --execution-url must be set                                             │
+│    --slack-channel            TEXT                            Slack channel to send alerts - SLACK_TOKEN env var must be set                                  │
+│    --beacon-type              [lighthouse|nimbus|teku|other]  Use this option if connected to a teku, lighthouse or nimbus beacon node. See                   │
+│                                                               https://github.com/ConsenSys/teku/issues/7204 for Teku <                                        │
+│                                                               23.6.0,https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and                        │
+│                                                               https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus.                                │
+│    --liveness-file            PATH                            Liveness file                                                                                   │
+│    --help                                                     Show this message and exit.                                                                     │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 Beacon nodes compatibility
