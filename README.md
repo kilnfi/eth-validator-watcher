@@ -148,6 +148,7 @@ We use [Poetry](https://python-poetry.org/) to manage dependencies and packaging
 git clone git@github.com:kilnfi/validator-watcher.git
 cd validator-watcher
 poetry install --with dev
+poetry shell # To activate Python virtual environment
 ```
 
 **Running tests:**
