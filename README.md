@@ -11,48 +11,50 @@ The code is provided as-is with no warranties.
 
 Description
 -----------
+This tool watches the 🥓 Ethereum Beacon chain 🥓 and indicates when some of your
+validators:
+- are going to propose a block in the next two epochs
+- missed a block proposal
+- did not attest optimally
+- missed an attestation
+- missed two attestations in a raw
+- proposed a block with the wrong fee recipient
+- exited
+- got slashed
+
+It also exports some general metrics like:
+- your USD assets under management
+- the total staking market cap
+- epoch and slot
+- the number or total slashed validators
+- ETH/USD conversion rate
+- the number of your queued validators
+- the number of your active validators
+- the number of your exited validators
+- the number of network queued validators
+- the number of network active validators
+- the entry queue duration estimation
+
+You can specify:
+- the path to a file containing the list of public your keys to watch, or / and
+- an URL to a Web3Signer instance managing your keys to watch.
+
+Pubkeys are load dynamically, at each epoch start.
+- If you use pubkeys file, you can change it without having to restart the watcher.
+- If you use Web3Signer, a call to Web3Signer will be done at every epoch to get the
+latest set of keys to watch.
+
+This program exports data on:
+- Prometheus (so you can use Grafana to monitor your validators)
+- Slack (so you can receive alerts on your phone)
+- Logs
+  
+Prometheus server is automatically exposed on port 8000.
+
+Command line options
+--------------------
+ 
 ```
- 🚨 Ethereum Validator Watcher 🚨
- This tool watches the 🥓 Ethereum Beacon chain 🥓 and tells you when some of your
- validators:
- - are going to propose a block in the next two epochs
- - missed a block proposal
- - did not attest optimally
- - missed an attestation
- - missed two attestations in a raw
- - proposed a block with the wrong fee recipient
- - exited
- - got slashed
-
- It also exports some general metrics like:
- - your USD assets under management
- - the total staking market cap
- - epoch and slot
- - the number or total slashed validators
- - ETH/USD conversion rate
- - the number of your queued validators
- - the number of your active validators
- - the number of your exited validators
- - the number of network queued validators
- - the number of network active validators
- - the entry queue duration estimation
-
- You can specify:
- - the path to a file containing the list of public your keys to watch, or / and
- - an URL to a Web3Signer instance managing your keys to watch.
-
- Pubkeys are load dynamically, at each epoch start.
- - If you use pubkeys file, you can change it without having to restart the watcher.
- - If you use Web3Signer, a call to Web3Signer will be done at every epoch to get the
- latest set of keys to watch.
-
- This program exports data on:
- - Prometheus (so you can use Grafana to monitor your validators)
- - Slack (so you can receive alerts on your phone)
- - Logs
-
- Prometheus server is automatically exposed on port 8000.
-
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ *  --beacon-url                TEXT                             URL of beacon node [default: None] [required]                                                        │
 │    --execution-url             TEXT                             URL of execution node [default: None]                                                                │
@@ -71,8 +73,8 @@ Description
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Export Prometheus mertrics
---------------------------
+Exported Prometheus metrics
+---------------------------
 
 name                                       | description
 -------------------------------------------|------------
@@ -98,18 +100,56 @@ name                                       | description
 Installation
 ------------
 
-From PyPI:
-
-```
-pip install eth-validator-watcher # TBD
-```
-
 From source:
 ```
 git clone git@github.com:kilnfi/eth-validator-watcher.git
 cd eth-validator-watcher
 pip install .
 ```
+
+Docker images
+-------------
+Docker images (built for AMD64 and ARM64 are available [here](https://github.com/kilnfi/eth-validator-watcher/pkgs/container/eth-validator-watcher).
+
+
+Logs
+----
+
+```
+✅     validator 0xb9d2439f proposed block at epoch 209899 - slot 6716776 ✅
+```
+Someone [proposed](https://beaconcha.in/slot/6716776) a block.
+
+
+```
+✨ Our validator 0xa6cdd026 proposed block at epoch 209899 - slot 6716781 ✨
+```
+You [proposed](https://beaconcha.in/slot/6716781) a block.
+
+
+```
+💍 Our validator 0xa6cdd026 is going to propose a block at   slot 6716781 (in 13 slots)
+```
+On epoch start: One of your validator is going to propose a block in the next two epochs.
+
+
+```
+☣️ Our validator 0x98a5bad4, 0x8116a5f8, 0xa2fff7bd, 0x87cd0fd3, 0x978ebbdb and 1 more (1.2 %) had not optimal attestation inclusion at slot 6716778
+```
+Some of you validators did not had optimal attestation inclusion.
+![image](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/666dad82-2f67-432d-97eb-9f99ef6c106a)
+
+
+```
+💩     validator 0xa3dbc635 missed   block at epoch 209894 - slot 6716637 💩
+```
+Someone [missed](https://beaconcha.in/validator/399279#blocks) a block proposal.
+
+
+```
+❌ Our validator 0xa66d5712 missed   block at epoch 209695 - slot 6710240 ❌
+```
+You [missed](https://beaconcha.in/validator/631094#blocks) a block proposal.
 
 
 Developer guide
