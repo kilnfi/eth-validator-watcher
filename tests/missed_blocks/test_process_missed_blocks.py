@@ -1,5 +1,6 @@
 from eth_validator_watcher.missed_blocks import (
     missed_block_proposals_count,
+    missed_block_proposals_count_details,
     process_missed_blocks,
 )
 from eth_validator_watcher.models import ProposerDuties
@@ -30,16 +31,13 @@ def test_process_missed_blocks_no_block() -> None:
 
     slack = Slack()
 
-    try:
-        counter_before = missed_block_proposals_count.collect()[0].samples[0].value  # type: ignore
-    except IndexError:
-        counter_before = 0
+    counter_before = missed_block_proposals_count.collect()[0].samples[0].value  # type: ignore
     process_missed_blocks(Beacon(), None, 3, {"0xaaa", "0xddd"}, slack)  # type: ignore
     counter_after = missed_block_proposals_count.collect()[0].samples[0].value  # type: ignore
 
     # Has sample for slot
     has_slot_metric = False
-    for sample in missed_block_proposals_count.collect()[0].samples:
+    for sample in missed_block_proposals_count_details.collect()[0].samples:
         if sample.labels["slot"] == "3":
             has_slot_metric = True
 
@@ -74,16 +72,13 @@ def test_process_missed_blocks_habemus_blockam() -> None:
 
     slack = Slack()
 
-    try:
-        counter_before = missed_block_proposals_count.collect()[0].samples[0].value  # type: ignore
-    except IndexError:
-        counter_before = 0
+    counter_before = missed_block_proposals_count.collect()[0].samples[0].value  # type: ignore
     process_missed_blocks(Beacon(), "A BLOCK", 2, {"0xaaa", "0xddd"}, slack)  # type: ignore
     counter_after = missed_block_proposals_count.collect()[0].samples[0].value  # type: ignore
 
     # Has sample for slot
     has_slot_metric = False
-    for sample in missed_block_proposals_count.collect()[0].samples:
+    for sample in missed_block_proposals_count_details.collect()[0].samples:
         if sample.labels["slot"] == "2":
             has_slot_metric = True
 
