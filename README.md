@@ -45,8 +45,8 @@ Pubkeys are load dynamically, at each epoch start.
 latest set of keys to watch.
 
 This program exports data on:
-- Prometheus (so you can use Grafana to monitor your validators)
-- Slack (so you can receive alerts on your phone)
+- Prometheus (you can use [this Grafana dashboard](https://github.com/kilnfi/eth-validator-watcher/blob/main/grafana_dashboard.json) to monitor your validators)
+- Slack
 - Logs
   
 Prometheus server is automatically exposed on port 8000.
@@ -115,41 +115,43 @@ Docker images (built for AMD64 and ARM64 are available [here](https://github.com
 Logs
 ----
 
+Someone [proposed](https://beaconcha.in/slot/6716776) a block.
 ```
 ✅     validator 0xb9d2439f proposed block at epoch 209899 - slot 6716776 ✅
 ```
-Someone [proposed](https://beaconcha.in/slot/6716776) a block.
 
+-----
 
+You [proposed](https://beaconcha.in/slot/6716781) a block.
 ```
 ✨ Our validator 0xa6cdd026 proposed block at epoch 209899 - slot 6716781 ✨
 ```
-You [proposed](https://beaconcha.in/slot/6716781) a block.
 
+-----
 
+On epoch start: One of your validator is going to propose a block in the next two epochs.
 ```
 💍 Our validator 0xa6cdd026 is going to propose a block at   slot 6716781 (in 13 slots)
 ```
-On epoch start: One of your validator is going to propose a block in the next two epochs.
+-----
 
-
+Some of you validators [did not had](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/666dad82-2f67-432d-97eb-9f99ef6c106a) optimal attestation inclusion.
 ```
 ☣️ Our validator 0x98a5bad4, 0x8116a5f8, 0xa2fff7bd, 0x87cd0fd3, 0x978ebbdb and 1 more (1.2 %) had not optimal attestation inclusion at slot 6716778
 ```
-Some of you validators did not had optimal attestation inclusion.
-![image](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/666dad82-2f67-432d-97eb-9f99ef6c106a)
+-----
 
-
+Someone [missed](https://beaconcha.in/validator/399279#blocks) a block proposal.
 ```
 💩     validator 0xa3dbc635 missed   block at epoch 209894 - slot 6716637 💩
 ```
-Someone [missed](https://beaconcha.in/validator/399279#blocks) a block proposal.
+-----
 
-
+You [missed](https://beaconcha.in/validator/631094#blocks) a block proposal.
 ```
 ❌ Our validator 0xa66d5712 missed   block at epoch 209695 - slot 6710240 ❌
 ```
-You [missed](https://beaconcha.in/validator/631094#blocks) a block proposal.
+
 
 
 Developer guide
