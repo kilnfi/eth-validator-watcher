@@ -204,6 +204,10 @@ pytest
 pytest --cov eth_validator_watcher --cov-report=term-missing
 ```
 
+# Liveness
+You can use `--liveness-file <path-to-a-file>` option to ensure the watcher is live.
+If using this option, at the end of every slot, the watcher will simply write `OK` in the specified file.
+
 **Example of liveness probe usage on Kubernetes**
 ```yaml
 livenessProbe:
@@ -214,7 +218,7 @@ livenessProbe:
     command:
     - /usr/bin/python3.9
     - /usr/local/bin/liveness_check.py
-    - /tmp/liveness
+    - <path-to-a-file>
 ```
 
 ## FAQ
