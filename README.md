@@ -11,43 +11,41 @@ The code is provided as-is with no warranties.
 
 Description
 -----------
-**Ethereum Validator Watcher** watches the Ethereum beacon chain in real time and indicates when some of your
-validators:
+**Ethereum Validator Watcher** monitors the Ethereum beacon chain in real-time and notifies you when any of your validators:
 - are going to propose a block in the next two epochs
 - missed a block proposal
-- did not attest optimally
+- did not optimally attest
 - missed an attestation
-- missed two attestations in a raw
+- missed two attestations in a row
 - proposed a block with the wrong fee recipient
-- exited
+- has exited
 - got slashed
 
-It also exports some general metrics like:
+It also exports some general metrics such as:
 - your USD assets under management
 - the total staking market cap
-- epoch and slot
+- the epoch and slot
 - the number or total slashed validators
-- ETH/USD conversion rate
+- the ETH/USD conversion rate
 - the number of your queued validators
 - the number of your active validators
 - the number of your exited validators
-- the number of network queued validators
-- the number of network active validators
+- the number of the network queued validators
+- the number of the network active validators
 - the entry queue duration estimation
 
-You can specify:
-- the path to a file containing the list of public your keys to watch, or / and
-- an URL to a Web3Signer instance managing your keys to watch.
+Optionally, you can specify the following parameters:
+- the path to a file containing the list of public keys to watch, or / and
+- a URL to a Web3Signer instance managing your keys to watch.
 
-Pubkeys are load dynamically, at each epoch start.
-- If you use pubkeys file, you can change it without having to restart the watcher.
-- If you use Web3Signer, a call to Web3Signer will be done at every epoch to get the
-latest set of keys to watch.
+Pubkeys are dynamically loaded, at each epoch start.
+- If you use a pubkeys file, you can change it without having to restart the watcher.
+- If you use Web3Signer, a request to Web3Signer is done at every epoch to get the latest set of keys to watch.
 
-This program exports data on:
-- Prometheus (you can use [this Grafana dashboard](https://github.com/kilnfi/eth-validator-watcher/blob/main/grafana_dashboard.json) to monitor your validators)
+Finally, this program exports the following sets of data from:
+- Prometheus (you can use this Grafana dashboard to monitor your validators)
 - Slack
-- Logs
+- logs
   
 Prometheus server is automatically exposed on port 8000.
 
@@ -177,7 +175,7 @@ You got slashed (you don't want to see this one). | ```🔕 Our validator 0x0000
 
 Slack messages
 --------------
-If a Slack channel is specified, Slack messages are sent on following events:
+If a Slack channel is specified, the slack messages are sent according to the following events:
 - When you exited
 - When you got slashed
 - If fee recipient is specified, when you proposed a block with the wrong fee recipient
