@@ -100,7 +100,7 @@ Example with Lighthouse, with keys to watch retrieved from a file, and with a sp
 eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type=lighthouse --execution-url=http://localhost:8545 --pubkeys-file-path keys.txt --fee-recipient 0x4675c7e5baafbffbca748158becba61ef3b0a263
 ```
 
-`--fee-recipient` key **must** contain `0x` prefix: https://github.com/kilnfi/eth-validator-watcher/issues/49
+⚠️ Key in`--fee-recipient` **must** contain `0x` prefix: https://github.com/kilnfi/eth-validator-watcher/issues/49
 
 With the following `keys.txt` file:
 ```
