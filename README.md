@@ -109,7 +109,7 @@ With the following `keys.txt` file:
 8adf063f810e2321a1aea258fd3a6ee5560911cee631980e1ef32bd88bf8c3dd5d28724e22a8987bfe411dd731f6dd38
 ```
 
-⚠️ Keys **must not** contain `0x` prefix: https://github.com/kilnfi/eth-validator-watcher/issues/48
+⚠️ Keys in `keys.txt` file **must not** contain `0x` prefix: https://github.com/kilnfi/eth-validator-watcher/issues/48
 
 Exported Prometheus metrics
 ---------------------------
