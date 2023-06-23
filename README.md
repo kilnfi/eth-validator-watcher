@@ -82,6 +82,31 @@ Lighthouse       | Full with `--beacon-type=lighthouse`. See https://github.com/
 Nimbus           | Partial with `--beacon-type=nimbus` - Missed attestations detection disabled. See https://github.com/status-im/nimbus-eth2/issues/5019 for more details.
 Lodestar         | Not (yet) tested.
 
+Command lines examples
+----------------------
+
+Minimal example, connected to Prysm:
+```
+eth-validator-watcher --beacon-url http://localhost:3500
+```
+
+Example with Lighthouse and with keys to watch retrieved from Web3Signer:
+```
+eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type=lighthouse --web3signer-url=http://localhost:9000
+```
+
+Example with Lighthouse, with keys to watch retrieved from a file, and with a specified fee recipient:
+```
+eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type=lighthouse --execution-url=http://localhost:8545 --pubkeys-file-path keys.txt --fee-recipient 0x4675c7e5baafbffbca748158becba61ef3b0a263
+```
+
+With the following `keys.txt` file:
+```
+0x815210c169e598f1800dbda3b2ee146a0178f772c5105722e0673d824535bcab03aa6bc422955264bb201b5ddbb6981d
+0x950f77f6cba50c9ad97240a7171cf4506bf86cbed11bb8e2f45a38036e4375c4f5344647e7150c640f308fd9d6de4d59
+0x8adf063f810e2321a1aea258fd3a6ee5560911cee631980e1ef32bd88bf8c3dd5d28724e22a8987bfe411dd731f6dd38
+```
+
 Exported Prometheus metrics
 ---------------------------
 
@@ -181,6 +206,13 @@ livenessProbe:
     - /usr/local/bin/liveness_check.py
     - /tmp/liveness
 ```
+
+## FAQ
+Why `--execution-url` is needed when `--fee-recipient` is used?
+
+When using external block building (with MEV-boost for example), then the block builder may set its address as a fee recipient.
+In such a case, it adds an extra transaction in the block from its address to the proposer's fee recipient.
+To check this last transaction, the watcher needs to retrieve the execution block.
 
 ## License
 
