@@ -111,6 +111,12 @@ With the following `keys.txt` file:
 
 ⚠️ Keys in `keys.txt` file **must not** contain `0x` prefix: https://github.com/kilnfi/eth-validator-watcher/issues/48
 
+Example with Prysm, with keys to watch retrieved from Web3Signer and with Slack alerting:
+```
+export SLACK_TOKEN=xoxb-xxxxxxxxxxxxx-xxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxx
+eth-validator-watcher --beacon-url http://localhost:3500 --web3signer-url=http://localhost:9000 --slack-channel eth-alerting
+```
+
 Exported Prometheus metrics
 ---------------------------
 
