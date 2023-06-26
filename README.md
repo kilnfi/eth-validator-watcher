@@ -90,12 +90,12 @@ eth-validator-watcher --beacon-url http://localhost:3500
 
 Example with Lighthouse and with keys to watch retrieved from Web3Signer:
 ```
-eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type=lighthouse --web3signer-url=http://localhost:9000
+eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type lighthouse --web3signer-url http://localhost:9000
 ```
 
 Example with Lighthouse, with keys to watch retrieved from a file, and with a specified fee recipient:
 ```
-eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type=lighthouse --execution-url=http://localhost:8545 --pubkeys-file-path keys.txt --fee-recipient 0x4675c7e5baafbffbca748158becba61ef3b0a263
+eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type lighthouse --execution-url http://localhost:8545 --pubkeys-file-path keys.txt --fee-recipient 0x4675c7e5baafbffbca748158becba61ef3b0a263
 ```
 
 ⚠️ Key in`--fee-recipient` **must** contain `0x` prefix: https://github.com/kilnfi/eth-validator-watcher/issues/49
@@ -112,7 +112,7 @@ With the following `keys.txt` file:
 Example with Prysm, with keys to watch retrieved from Web3Signer and with Slack alerting:
 ```
 export SLACK_TOKEN=xoxb-xxxxxxxxxxxxx-xxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxx
-eth-validator-watcher --beacon-url http://localhost:3500 --web3signer-url=http://localhost:9000 --slack-channel eth-alerting
+eth-validator-watcher --beacon-url http://localhost:3500 --web3signer-url http://localhost:9000 --slack-channel eth-alerting
 ```
 
 Exported Prometheus metrics
