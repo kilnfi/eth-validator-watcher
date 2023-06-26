@@ -33,7 +33,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             {{- if .Values.watchedKeys }}
-            - --pubkeys-file-path=watched-keys.txt
+            - --pubkeys-file-path watched-keys.txt
             {{- end }}
             {{- with .Values.args }}
             {{- toYaml . | nindent 12 }}
