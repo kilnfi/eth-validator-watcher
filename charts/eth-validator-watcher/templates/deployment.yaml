@@ -32,31 +32,23 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            {{- toYaml .Values.args | nindent 12 }}
-          {{- range $key, $value := .Values.extraArgs }}
-            {{- /* Accept keys without values or with false as value */}}
-            {{- if eq ($value | quote | len) 2 }}
-            - --{{ $key }}
-            {{- else }}
-            - --{{ $key }}={{ $value }}
+            {{- if .Values.watchedKeys }}
+            - --pubkeys-file-path=watched-keys.txt
             {{- end }}
-          {{- end }}
-          {{- end }}
+            {{- with .Values.args }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           ports:
-          - name: http
-            containerPort: {{ .Values.servicePorts.server | default 8080 }}
+          - name: metrics
+            containerPort: 8000
             protocol: TCP
-          - name: http-health
-            containerPort: {{ .Values.servicePorts.healthz | default 8081 }}
-            protocol: TCP
-          {{- if not .Values.sleepMode }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if or .Values.env .Values.envFrom }}
           env:
           {{- with .Values.envFrom }}
           {{- range $key, $value := . }}
@@ -70,10 +62,25 @@ spec:
             value: {{ $value | quote }}
           {{- end }}
           {{- end }}
-          {{- with .Values.volumeMounts }}
-          volumeMounts:
-            {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if .Values.watchedKeys }}
+          volumeMounts:
+            - name: "watched-keys"
+              mountPath: "/watched-keys.txt"
+              subPath: "watched-keys.txt"
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.watchedKeys }}
+      volumes:
+        - name: "watched-keys"
+          configMap:
+            name: {{ include "eth-validator-watcher.fullname" . }}
+      {{- end }}
+      {{- with .Values.volumes }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -84,9 +91,5 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.volumes }}
-      volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}

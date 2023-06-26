@@ -5,9 +5,9 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
-args:
-  - exit
-  - run
+# -- Specifies the arguments to the command line
+# Please refer to https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#description
+args: []
 
 env: {}
 envFrom: {}
@@ -17,11 +17,11 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
+  # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
@@ -39,22 +39,23 @@ securityContext: {}
   # runAsUser: 1000
 
 readinessProbe:
-  httpGet:
-    path: /ready
-    port: http-health
-  initialDelaySeconds: 5
-  periodSeconds: 30
-  timeoutSeconds: 10
-  failureThreshold: 3
-
+  periodSeconds: 60
+  initialDelaySeconds: 60
+  failureThreshold: 1
+  exec:
+    command:
+    - /usr/bin/python3.9
+    - /usr/local/bin/liveness_check.py
+    - /tmp/liveness
 livenessProbe:
-  httpGet:
-    path: /live
-    port: http-health
-  initialDelaySeconds: 15
-  periodSeconds: 30
-  timeoutSeconds: 10
-  failureThreshold: 3
+  periodSeconds: 60
+  initialDelaySeconds: 60
+  failureThreshold: 1
+  exec:
+    command:
+    - /usr/bin/python3.9
+    - /usr/local/bin/liveness_check.py
+    - /tmp/liveness
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -91,3 +92,6 @@ serviceMonitor:
   # honorLabels: true
   targetLabels: []
   metricRelabelings: []
+
+# -- List of public keys to watch. See https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#command-lines-examples
+watchedKeys: []

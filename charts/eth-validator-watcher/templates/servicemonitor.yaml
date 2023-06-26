@@ -13,7 +13,7 @@ metadata:
   {{- end }}
 spec:
   endpoints:
-    - port: http-health
+    - port: metrics
       interval: {{ .Values.serviceMonitor.scrapeInterval }}
     {{- if .Values.serviceMonitor.honorLabels }}
       honorLabels: true

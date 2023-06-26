@@ -15,4 +15,4 @@ COPY liveness_check.py /usr/local/bin/liveness_check.py
 
 ENV PYTHONPATH=/usr/local/lib/python3.9/site-packages
 
-ENTRYPOINT [ "python", "/usr/local/bin/eth-validator-watcher" ] 
+ENTRYPOINT [ "python", "/usr/local/bin/eth-validator-watcher" ]
