@@ -30,9 +30,9 @@ from .utils import (
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     Slack,
     get_our_pubkeys,
-    is_eth1_address,
     slots,
     write_liveness_file,
+    eth1_address_0x_prefixed,
 )
 from .web3signer import Web3Signer
 
@@ -182,10 +182,11 @@ def _handler(
             "`execution-url` must be set if you want to use `fee-recipient`"
         )
 
-    if fee_recipient is not None and not is_eth1_address(fee_recipient):
-        raise typer.BadParameter(
-            "`fee-recipient` should be a valid, 0x prefixed, eth1 address"
-        )
+    if fee_recipient is not None:
+        try:
+            fee_recipient = eth1_address_0x_prefixed(fee_recipient)
+        except ValueError:
+            raise typer.BadParameter("`fee-recipient` should be a valid ETH1 address")
 
     if slack_channel is not None and slack_token is None:
         raise typer.BadParameter(
@@ -229,7 +230,11 @@ def _handler(
         is_new_epoch = previous_epoch is None or previous_epoch != epoch
 
         if is_new_epoch:
-            our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
+            try:
+                our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
+            except ValueError:
+                raise typer.BadParameter("Some pubkeys are invalid")
+
             total_status_to_index_to_validator = (
                 beacon.get_status_to_index_to_validator()
             )
