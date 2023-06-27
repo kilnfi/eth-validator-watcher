@@ -6,12 +6,16 @@ from more_itertools import chunked
 from prometheus_client import Gauge
 from slack_sdk import WebClient
 
+import re
+
 from .web3signer import Web3Signer
 
 NB_SLOT_PER_EPOCH = 32
 NB_SECOND_PER_SLOT = 12
 BLOCK_NOT_ORPHANED_TIME_SEC = 9
 SLOT_FOR_MISSED_ATTESTATIONS_PROCESS = 16
+ETH1_ADDRESS_LEN = 40
+ETH2_ADDRESS_LEN = 96
 
 keys_count = Gauge(
     "keys_count",
@@ -151,7 +155,7 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
         Returns the corresponding set of public keys.
     """
     with path.open() as file_descriptor:
-        return set((f"0x{line.strip()}" for line in file_descriptor))
+        return set((eth2_address_0x_prefixed(line.strip()) for line in file_descriptor))
 
 
 def get_our_pubkeys(
@@ -218,5 +222,21 @@ def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
         pass  # pragma: no cover
 
 
-def is_eth1_address(address: str) -> bool:
-    return address[:2] == "0x" and len(address) == 42
+def eth1_address_0x_prefixed(address: str) -> str:
+    if not re.match(f"^(0x)?[0-9a-fA-F]{{{ETH1_ADDRESS_LEN}}}$", address):
+        raise ValueError(f"Invalid ETH1 address: {address}")
+
+    if len(address) == ETH1_ADDRESS_LEN:
+        return f"0x{address}"
+
+    return address
+
+
+def eth2_address_0x_prefixed(address: str) -> str:
+    if not re.match(f"^(0x)?[0-9a-fA-F]{{{ETH2_ADDRESS_LEN}}}$", address):
+        raise ValueError(f"Invalid ETH2 address: {address}")
+
+    if len(address) == ETH2_ADDRESS_LEN:
+        return f"0x{address}"
+
+    return address

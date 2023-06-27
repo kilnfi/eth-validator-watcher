@@ -57,6 +57,50 @@ def test_slack_token_not_defined() -> None:
         )
 
 
+def test_invalid_pubkeys() -> None:
+    class Beacon:
+        def __init__(self, url: str) -> None:
+            assert url == "http://localhost:5052"
+
+        def get_genesis(self) -> Genesis:
+            return Genesis(
+                data=Genesis.Data(
+                    genesis_time=0,
+                    genesis_fork_version="0x123",
+                    genesis_validators_root="0xabc",
+                )
+            )
+
+    def get_our_pubkeys(pubkeys_file_path: Path, web3signer: None) -> set[str]:
+        assert pubkeys_file_path == Path("/path/to/pubkeys")
+        raise ValueError("Invalid pubkeys")
+
+    def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
+        assert genesis_time == 0
+        yield 63, 1664
+        yield 64, 1676
+
+    def start_http_server(_: int) -> None:
+        pass
+
+    entrypoint.get_our_pubkeys = get_our_pubkeys  # type: ignore
+    entrypoint.Beacon = Beacon  # type: ignore
+    entrypoint.slots = slots  # type: ignore
+    entrypoint.start_http_server = start_http_server  # type: ignore
+
+    with raises(BadParameter):
+        _handler(
+            beacon_url="http://localhost:5052",
+            execution_url=None,
+            pubkeys_file_path=Path("/path/to/pubkeys"),
+            web3signer_url=None,
+            fee_recipient=None,
+            slack_channel=None,
+            beacon_type=BeaconType.TEKU,
+            liveness_file=None,
+        )
+
+
 @freeze_time("2023-01-01 00:00:00", auto_tick_seconds=15)
 def test_nominal() -> None:
     class Beacon:
