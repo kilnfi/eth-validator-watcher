@@ -65,7 +65,10 @@ def process_fee_recipient(
     try:
         *_, last_transaction = transactions
 
-        if expected_fee_recipient == last_transaction.to:
+        if (
+            last_transaction.to is not None
+            and expected_fee_recipient == last_transaction.to
+        ):
             # The last transaction is to the expected fee recipient
             return
     except ValueError:
