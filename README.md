@@ -98,16 +98,14 @@ Example with Lighthouse, with keys to watch retrieved from a file, and with a sp
 eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type lighthouse --execution-url http://localhost:8545 --pubkeys-file-path keys.txt --fee-recipient 0x4675c7e5baafbffbca748158becba61ef3b0a263
 ```
 
-⚠️ Key in`--fee-recipient` **must** contain `0x` prefix: https://github.com/kilnfi/eth-validator-watcher/issues/49
-
 With the following `keys.txt` file:
 ```
-815210c169e598f1800dbda3b2ee146a0178f772c5105722e0673d824535bcab03aa6bc422955264bb201b5ddbb6981d
-950f77f6cba50c9ad97240a7171cf4506bf86cbed11bb8e2f45a38036e4375c4f5344647e7150c640f308fd9d6de4d59
-8adf063f810e2321a1aea258fd3a6ee5560911cee631980e1ef32bd88bf8c3dd5d28724e22a8987bfe411dd731f6dd38
+0x815210c169e598f1800dbda3b2ee146a0178f772c5105722e0673d824535bcab03aa6bc422955264bb201b5ddbb6981d
+0x950f77f6cba50c9ad97240a7171cf4506bf86cbed11bb8e2f45a38036e4375c4f5344647e7150c640f308fd9d6de4d59
+0x8adf063f810e2321a1aea258fd3a6ee5560911cee631980e1ef32bd88bf8c3dd5d28724e22a8987bfe411dd731f6dd38
 ```
 
-⚠️ Keys in `keys.txt` file **must not** contain `0x` prefix: https://github.com/kilnfi/eth-validator-watcher/issues/48
+ `--pubkeys-file-path` and `--fee-recipient` flag allow both `0x` prefixed and non `0x` prefixed ETH1 address / pubkeys.
 
 Example with Prysm, with keys to watch retrieved from Web3Signer and with Slack alerting:
 ```
