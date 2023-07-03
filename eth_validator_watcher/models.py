@@ -139,7 +139,3 @@ class ExecutionBlock(BaseModel):
     jsonrpc: str
     id: int
     result: Result
-
-
-class Header(BaseModel):
-    version: str
