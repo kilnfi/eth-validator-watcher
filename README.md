@@ -20,6 +20,7 @@ Description
 - proposed a block with the wrong fee recipient
 - has exited
 - got slashed
+- proposed a block with an unknown relay (alpha feature)
 
 It also exports some general metrics such as:
 - your USD assets under management
@@ -63,7 +64,8 @@ Command line options
 │    --beacon-type              [lighthouse|nimbus|teku|other]  Use this option if connected to a teku, lighthouse or nimbus beacon node. See                   │
 │                                                               https://github.com/ConsenSys/teku/issues/7204 for Teku <                                        │
 │                                                               23.6.0,https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and                        │
-│                                                               https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus.                                │
+│                                                               https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus.                                |
+|    --relay-url                TEXT                            URL of allow listed relay (alpha feature)                                                       │
 │    --liveness-file            PATH                            Liveness file                                                                                   │
 │    --help                                                     Show this message and exit.                                                                     │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
@@ -113,6 +115,10 @@ export SLACK_TOKEN=xoxb-xxxxxxxxxxxxx-xxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxx
 eth-validator-watcher --beacon-url http://localhost:3500 --web3signer-url http://localhost:9000 --slack-channel eth-alerting
 ```
 
+Example with Prysm, with keys to watch retrieved from Web3Signer and with Flasbots and UltraSound as allowed relays:
+```
+eth-validator-watcher --beacon-url http://localhost:3500 --web3signer-url http://localhost:9000 --relay-url https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net --relay-url https://0xa1559ace749633b997cb3fdacffb890aeebdb0f5a3b6aaa7eeeaf1a38af0a8fe88b9e4b1f61f236d2e64d95733327a62@relay.ultrasound.money
+```
 Exported Prometheus metrics
 ---------------------------
 
@@ -135,6 +141,7 @@ name                                       | description
 `total_slashed_validators_count`           | Total slashed validators count
 `suboptimal_attestations_rate`             | Suboptimal attestations rate
 `keys_count`                               | Keys count
+`bad_relay_count`                          | Bad relay count
 
 
 Installation
@@ -170,6 +177,7 @@ You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/7432
 You [exited](https://beaconcha.in/validator/491565). | ```🚶 Our validator 0xaeb82c90 is exited```
 Someone [got](https://beaconcha.in/validator/647102) slashed. | ```✂️     validator 0xb3a608a7 is slashed```
 You got slashed (you don't want to see this one). | ```🔕 Our validator 0x00000000 is slashed```
+You proposed a block with a non-allowed relay. | ```🟧 Block proposed with unknown builder (may be a locally built block)```
 
 Slack messages
 --------------
