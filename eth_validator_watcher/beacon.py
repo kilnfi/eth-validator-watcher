@@ -222,7 +222,7 @@ class Beacon:
             f"{self.__url}/lighthouse/liveness",
             json=ValidatorsLivenessRequestLighthouse(
                 epoch=epoch, indices=sorted(list(validators_index))
-            ).dict(),
+            ).model_dump(),
         )
 
     def __get_validators_liveness_teku(
@@ -241,7 +241,7 @@ class Beacon:
             f"{self.__url}/eth/v1/validator/liveness/{epoch}",
             json=ValidatorsLivenessRequestTeku(
                 indices=sorted(list(validators_index))
-            ).dict(),
+            ).model_dump(),
         )
 
     def __get_validators_liveness_beacon_api(

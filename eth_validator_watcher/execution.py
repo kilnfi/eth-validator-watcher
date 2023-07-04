@@ -36,7 +36,7 @@ class Execution:
         hash: Hash of the block to retrieve
         """
         request_body = EthGetBlockByHashRequest(params=[hash, True])
-        response = self.__http.post(self.__url, json=request_body.dict())
+        response = self.__http.post(self.__url, json=request_body.model_dump())
         response.raise_for_status()
         execution_block_dict = response.json()
         return ExecutionBlock(**execution_block_dict)
