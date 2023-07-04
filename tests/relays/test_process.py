@@ -1,6 +1,7 @@
 from eth_validator_watcher.relays import Relays, bad_relay_count
 from requests_mock import Mocker
 from pytest import raises
+from requests.exceptions import ConnectionError
 
 
 def test_process_no_relay() -> None:
@@ -70,3 +71,18 @@ def test_process_relay_bad_answer() -> None:
 
         with raises(AssertionError):
             relays.process(slot=42)
+
+
+def test___is_proposer_payload_delivered() -> None:
+    relays = Relays(urls=["http://relay.com"])
+
+    with Mocker() as mock:
+        mock.get(
+            "http://relay.com/relay/v1/data/bidtraces/proposer_payload_delivered?slot=42",
+            exc=ConnectionError,
+        )
+
+        with raises(ConnectionError):
+            relays._Relays__is_proposer_payload_delivered(  # type: ignore
+                url="http://relay.com", slot=42, wait_sec=0
+            )
