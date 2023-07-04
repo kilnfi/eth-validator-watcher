@@ -36,6 +36,8 @@ from .utils import (
 )
 from .web3signer import Web3Signer
 
+from .relays import Relays
+
 StatusEnum = Validators.DataItem.StatusEnum
 
 
@@ -102,6 +104,9 @@ def handler(
         ),
         show_default=False,
     ),
+    relay_url: List[str] = Option(
+        [], help="URL of allow listed relay (alpha feature)", show_default=False
+    ),
     liveness_file: Optional[Path] = Option(
         None, help="Liveness file", show_default=False
     ),
@@ -110,18 +115,19 @@ def handler(
     🚨 Ethereum Validator Watcher 🚨
 
     \b
-    Ethereum Validator Watcher watches the Ethereum beacon chain in real time and indicates when some of your validators:
+    Ethereum Validator Watcher monitors the Ethereum beacon chain in real-time and notifies you when any of your validators:
     - are going to propose a block in the next two epochs
     - missed a block proposal
-    - did not attest optimally
+    - did not optimally attest
     - missed an attestation
-    - missed two attestations in a raw
+    - missed two attestations in a row
     - proposed a block with the wrong fee recipient
-    - exited
+    - has exited
     - got slashed
+    - proposed a block with an unknown relay (alpha feature)
 
     \b
-    It also exports some general metrics like:
+    It also exports some general metrics such as:
     - your USD assets under management
     - the total staking market cap
     - epoch and slot
@@ -130,23 +136,24 @@ def handler(
     - the number of your queued validators
     - the number of your active validators
     - the number of your exited validators
-    - the number of network queued validators
-    - the number of network active validators
+    - the number of the network queued validators
+    - the number of the network active validators
     - the entry queue duration estimation
 
     \b
-    You can specify:
+    Optionally, you can specify the following parameters:
     - the path to a file containing the list of public your keys to watch, or / and
-    - an URL to a Web3Signer instance managing your keys to watch.
+    - a URL to a Web3Signer instance managing your keys to watch.
 
     \b
-    Pubkeys are load dynamically, at each epoch start.
+    Pubkeys are dynamically loaded, at each epoch start.
     - If you use pubkeys file, you can change it without having to restart the watcher.
-    - If you use Web3Signer, a call to Web3Signer will be done at every epoch to get the latest set of keys to watch.
+    - If you use Web3Signer, a request to Web3Signer is done at every epoch to get the
+    latest set of keys to watch.
 
     \b
-    This program exports data on:
-    - Prometheus (you can use this Grafana dashboard to monitor your validators)
+    Finally, this program exports the following sets of data from:
+    - Prometheus (you can use a Grafana dashboard to monitor your validators)
     - Slack
     - logs
 
@@ -160,6 +167,7 @@ def handler(
         fee_recipient,
         slack_channel,
         beacon_type,
+        relay_url,
         liveness_file,
     )
 
@@ -172,6 +180,7 @@ def _handler(
     fee_recipient: Optional[str],
     slack_channel: Optional[str],
     beacon_type: BeaconType,
+    relays_url: List[str],
     liveness_file: Optional[Path],
 ) -> None:
     """Just a wrapper to be able to test the handler function"""
@@ -204,8 +213,8 @@ def _handler(
     beacon = Beacon(beacon_url)
     execution = Execution(execution_url) if execution_url is not None else None
     coinbase = Coinbase()
-
     web3signer = Web3Signer(web3signer_url) if web3signer_url is not None else None
+    relays = Relays(relays_url)
 
     our_pubkeys: set[str] = set()
     our_active_index_to_validator: dict[int, Validators.DataItem.Validator] = {}
@@ -375,13 +384,16 @@ def _handler(
                 block, our_active_index_to_validator, execution, fee_recipient, slack
             )
 
-        process_missed_blocks(
+        is_our_validator = process_missed_blocks(
             beacon,
             potential_block,
             slot,
             our_pubkeys,
             slack,
         )
+
+        if is_our_validator and potential_block is not None:
+            relays.process(slot)
 
         our_validators_indexes_that_missed_previous_attestation = (
             our_validators_indexes_that_missed_attestation

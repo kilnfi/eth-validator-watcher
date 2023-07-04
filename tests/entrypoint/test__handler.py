@@ -25,6 +25,7 @@ def test_fee_recipient_set_while_execution_url_not_set() -> None:
             fee_recipient="something",
             slack_channel="MY SLACK CHANNEL",
             beacon_type=BeaconType.TEKU,
+            relays_url=[],
             liveness_file=None,
         )
 
@@ -39,6 +40,7 @@ def test_fee_recipient_not_valid() -> None:
             fee_recipient="something",
             slack_channel="MY SLACK CHANNEL",
             beacon_type=BeaconType.TEKU,
+            relays_url=[],
             liveness_file=None,
         )
 
@@ -53,6 +55,7 @@ def test_slack_token_not_defined() -> None:
             fee_recipient=None,
             slack_channel="MY SLACK CHANNEL",
             beacon_type=BeaconType.TEKU,
+            relays_url=[],
             liveness_file=None,
         )
 
@@ -66,8 +69,6 @@ def test_invalid_pubkeys() -> None:
             return Genesis(
                 data=Genesis.Data(
                     genesis_time=0,
-                    genesis_fork_version="0x123",
-                    genesis_validators_root="0xabc",
                 )
             )
 
@@ -97,6 +98,7 @@ def test_invalid_pubkeys() -> None:
             fee_recipient=None,
             slack_channel=None,
             beacon_type=BeaconType.TEKU,
+            relays_url=[],
             liveness_file=None,
         )
 
@@ -111,8 +113,6 @@ def test_nominal() -> None:
             return Genesis(
                 data=Genesis.Data(
                     genesis_time=0,
-                    genesis_fork_version="0x123",
-                    genesis_validators_root="0xabc",
                 )
             )
 
@@ -149,6 +149,13 @@ def test_nominal() -> None:
         @classmethod
         def emit_eth_usd_conversion_rate(cls) -> None:
             cls.nb_calls += 1
+
+    class Relays:
+        def __init__(self, urls: list[str]) -> None:
+            assert urls == ["http://my-awesome-relay.com"]
+
+        def process(self, slot: int) -> None:
+            assert slot in {63, 64}
 
     def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
         assert genesis_time == 0
@@ -230,12 +237,14 @@ def test_nominal() -> None:
         slot: int,
         pubkeys: set[str],
         slack: Slack,
-    ) -> None:
+    ) -> bool:
         assert isinstance(beacon, Beacon)
         assert potential_block == "A BLOCK"
         assert slot in {63, 64}
         assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
         assert isinstance(slack, Slack)
+
+        return True
 
     def write_liveness_file(liveness_file: Path) -> None:
         assert liveness_file == Path("/path/to/liveness")
@@ -243,6 +252,7 @@ def test_nominal() -> None:
     entrypoint.Beacon = Beacon  # type: ignore
     entrypoint.Coinbase = Coinbase  # type: ignore
     entrypoint.Web3Signer = Web3Signer  # type: ignore
+    entrypoint.Relays = Relays  # type: ignore
     entrypoint.get_our_pubkeys = get_our_pubkeys  # type: ignore
     entrypoint.process_missed_attestations = process_missed_attestations  # type: ignore
 
@@ -266,6 +276,7 @@ def test_nominal() -> None:
         fee_recipient=None,
         slack_channel="my slack channel",
         beacon_type=BeaconType.TEKU,
+        relays_url=["http://my-awesome-relay.com"],
         liveness_file=Path("/path/to/liveness"),
     )
 

@@ -28,7 +28,7 @@ def process_missed_blocks(
     slot: int,
     our_pubkeys: set[str],
     slack: Optional[Slack],
-) -> None:
+) -> bool:
     """Process missed block proposals detection
 
     Parameters:
@@ -37,6 +37,8 @@ def process_missed_blocks(
     slot           : Slot
     our_pubkeys    : Set of our validators public keys
     slack          : Slack instance
+
+    Returns `True` if we had to propose the block, `False` otherwise
     """
     missed = potential_block is None
     epoch = slot // NB_SLOT_PER_EPOCH
@@ -88,3 +90,5 @@ def process_missed_blocks(
     if is_our_validator and missed:
         missed_block_proposals_count.inc()
         missed_block_proposals_count_details.labels(slot=slot, epoch=epoch).inc()
+
+    return is_our_validator
