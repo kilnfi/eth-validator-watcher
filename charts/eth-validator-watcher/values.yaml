@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/eth-validator-watcher
+  repository: ghcr.io/kilnfi/eth-validator-watcher
   pullPolicy: IfNotPresent
   tag: "latest"
 

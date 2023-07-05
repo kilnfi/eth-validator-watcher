@@ -33,7 +33,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             {{- if .Values.watchedKeys }}
-            - --pubkeys-file-path watched-keys.txt
+            - --pubkeys-file-path=/data/keys/watched-keys.txt
             {{- end }}
             {{- with .Values.args }}
             {{- toYaml . | nindent 12 }}
@@ -66,8 +66,8 @@ spec:
           {{- if .Values.watchedKeys }}
           volumeMounts:
             - name: "watched-keys"
-              mountPath: "/watched-keys.txt"
-              subPath: "watched-keys.txt"
+              mountPath: "/data/keys"
+              readOnly: true
           {{- end }}
           {{- with .Values.volumeMounts }}
           {{- toYaml . | nindent 12 }}

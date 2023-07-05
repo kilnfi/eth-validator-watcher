@@ -20,7 +20,7 @@ A Helm chart for running eth-validator-watcher
 | envFrom | object | `{}` |  |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"ghcr.io/eth-validator-watcher"` |  |
+| image.repository | string | `"ghcr.io/kilnfi/eth-validator-watcher"` |  |
 | image.tag | string | `"latest"` |  |
 | imagePullSecrets | list | `[]` |  |
 | livenessProbe.exec.command[0] | string | `"/usr/bin/python3.9"` |  |

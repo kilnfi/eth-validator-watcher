@@ -5,7 +5,7 @@ COPY . /app
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir --progress-bar off .
 
-FROM gcr.io/distroless/python3:nonroot
+FROM gcr.io/distroless/python3:debug
 
 COPY --from=builder /app /app
 COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
