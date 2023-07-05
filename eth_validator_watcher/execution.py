@@ -18,16 +18,16 @@ class Execution:
         self.__url = url
         self.__http = Session()
 
-        self.__http.mount(
-            "http://",
-            HTTPAdapter(
-                max_retries=Retry(
-                    backoff_factor=0.5,
-                    total=3,
-                    status_forcelist=[codes.not_found],
-                )
-            ),
+        adapter = HTTPAdapter(
+            max_retries=Retry(
+                backoff_factor=0.5,
+                total=3,
+                status_forcelist=[codes.not_found],
+            )
         )
+
+        self.__http.mount("http://", adapter)
+        self.__http.mount("https://", adapter)
 
     def eth_get_block_by_hash(self, hash: str) -> ExecutionBlock:
         """Get execution block.

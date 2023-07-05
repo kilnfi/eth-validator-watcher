@@ -27,16 +27,16 @@ class Relays:
         self.__urls = urls
         self.__http = Session()
 
-        self.__http.mount(
-            "http://",
-            HTTPAdapter(
-                max_retries=Retry(
-                    backoff_factor=0.5,
-                    total=3,
-                    status_forcelist=[codes.not_found],
-                )
-            ),
+        adapter = HTTPAdapter(
+            max_retries=Retry(
+                backoff_factor=0.5,
+                total=3,
+                status_forcelist=[codes.not_found],
+            )
         )
+
+        self.__http.mount("http://", adapter)
+        self.__http.mount("https://", adapter)
 
     def process(self, slot: int) -> None:
         """Detect if the block was built by a known relay.
