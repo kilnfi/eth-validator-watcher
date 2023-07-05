@@ -41,16 +41,16 @@ class Beacon:
         self.__http = Session()
         self.__nimbus_first_liveness_call = False
 
-        self.__http.mount(
-            "http://",
-            HTTPAdapter(
-                max_retries=Retry(
-                    backoff_factor=0.5,
-                    total=3,
-                    status_forcelist=[codes.not_found],
-                )
-            ),
+        adapter = HTTPAdapter(
+            max_retries=Retry(
+                backoff_factor=0.5,
+                total=3,
+                status_forcelist=[codes.not_found],
+            )
         )
+
+        self.__http.mount("http://", adapter)
+        self.__http.mount("https://", adapter)
 
     def get_genesis(self) -> Genesis:
         """Get genesis data."""
@@ -67,6 +67,7 @@ class Beacon:
         """
         try:
             response = self.__http.get(f"{self.__url}/eth/v2/beacon/blocks/{slot}")
+
         except RetryError as e:
             # If we are here, it means the block does not exist
             raise NoBlockError from e
