@@ -308,7 +308,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<img src=https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Eth-diamond-rainbow.png/800px-Eth-diamond-rainbow.png height=\"auto\" width=\"auto\"/>\n",
+        "content": "<img src=\"https://ethereum.org/static/eth-diamond-rainbow.svg\" height=\"auto\" width=\"auto\"/>\n",
         "mode": "html"
       },
       "pluginVersion": "9.3.2",
