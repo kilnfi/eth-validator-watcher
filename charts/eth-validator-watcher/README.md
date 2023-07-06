@@ -33,12 +33,7 @@ A Helm chart for running eth-validator-watcher
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
-| readinessProbe.exec.command[0] | string | `"/usr/bin/python3.9"` |  |
-| readinessProbe.exec.command[1] | string | `"/usr/local/bin/liveness_check.py"` |  |
-| readinessProbe.exec.command[2] | string | `"/tmp/liveness"` |  |
-| readinessProbe.failureThreshold | int | `1` |  |
-| readinessProbe.initialDelaySeconds | int | `60` |  |
-| readinessProbe.periodSeconds | int | `60` |  |
+| readinessProbe | object | `{}` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
 | securityContext | object | `{}` |  |
@@ -52,6 +47,11 @@ A Helm chart for running eth-validator-watcher
 | serviceMonitor.namespaceSelector | object | `{}` |  |
 | serviceMonitor.scrapeInterval | string | `"60s"` |  |
 | serviceMonitor.targetLabels | list | `[]` |  |
+| startupProbe.exec.command[0] | string | `"/usr/bin/python3.9"` |  |
+| startupProbe.exec.command[1] | string | `"/usr/local/bin/liveness_check.py"` |  |
+| startupProbe.exec.command[2] | string | `"/tmp/liveness"` |  |
+| startupProbe.failureThreshold | int | `10` |  |
+| startupProbe.periodSeconds | int | `30` |  |
 | tolerations | list | `[]` |  |
 | volumeMounts | list | `[]` |  |
 | volumes | list | `[]` |  |

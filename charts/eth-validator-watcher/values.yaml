@@ -38,7 +38,7 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-readinessProbe:
+livenessProbe:
   periodSeconds: 60
   initialDelaySeconds: 60
   failureThreshold: 1
@@ -47,10 +47,10 @@ readinessProbe:
     - /usr/bin/python3.9
     - /usr/local/bin/liveness_check.py
     - /tmp/liveness
-livenessProbe:
-  periodSeconds: 60
-  initialDelaySeconds: 60
-  failureThreshold: 1
+readinessProbe: {}
+startupProbe:
+  periodSeconds: 30
+  failureThreshold: 10
   exec:
     command:
     - /usr/bin/python3.9
