@@ -99,7 +99,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "future_block_proposals_count{cluster=\"$cluster\"}",
+          "expr": "max(future_block_proposals_count{cluster=\"$cluster\"})",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -167,7 +167,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "eth_usd{cluster=\"$cluster\"}",
+          "expr": "max(eth_usd{cluster=\"$cluster\"})",
           "hide": true,
           "legendFormat": "__auto",
           "range": true,
@@ -179,7 +179,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "our_active_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(our_active_validators_count{cluster=\"$cluster\"})",
           "hide": true,
           "legendFormat": "__auto",
           "range": true,
@@ -257,7 +257,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "eth_usd{cluster=\"$cluster\"}",
+          "expr": "max(eth_usd{cluster=\"$cluster\"})",
           "hide": true,
           "legendFormat": "__auto",
           "range": true,
@@ -269,7 +269,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "total_active_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(total_active_validators_count{cluster=\"$cluster\"})",
           "hide": true,
           "legendFormat": "__auto",
           "range": true,
@@ -308,7 +308,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<img src=\"https://ethereum.org/static/eth-diamond-rainbow.svg\" height=\"auto\" width=\"auto\"/>\n",
+        "content": "<div style=\"width:100%;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:center\">\n<img src=\"https://ethereum.org/static/eth-diamond-rainbow.svg\" height=\"100%\" width=\"100%\" style=\"max-width:100%;max-height:100%\"/>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "9.3.2",
@@ -332,7 +332,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<p style=\"text-align:center;\"><img src=https://user-images.githubusercontent.com/79211569/170065083-5deff6bf-a786-4550-93f2-dd4eb5ae1f9f.svg height=auto width=auto/></p>\n",
+        "content": "<div style=\"width:100%;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:center\">\n<img src=\"https://user-images.githubusercontent.com/79211569/170065083-5deff6bf-a786-4550-93f2-dd4eb5ae1f9f.svg\" height=\"100%\" width=\"100%\" style=\"max-width:100%;max-height:100%;\"/>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "9.3.2",
@@ -396,7 +396,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "our_slashed_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(our_slashed_validators_count{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -462,7 +462,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "total_slashed_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(total_slashed_validators_count{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -529,7 +529,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "epoch{cluster=\"$cluster\"}",
+          "expr": "max(epoch{cluster=\"$cluster\"})",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -597,7 +597,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "slot{cluster=\"$cluster\"}",
+          "expr": "max(slot{cluster=\"$cluster\"})",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -663,7 +663,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "our_pending_queued_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(our_pending_queued_validators_count{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -728,7 +728,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "total_pending_queued_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(total_pending_queued_validators_count{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -795,7 +795,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "our_pending_queued_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(our_pending_queued_validators_count{cluster=\"$cluster\"})",
           "hide": true,
           "legendFormat": "__auto",
           "range": true,
@@ -807,7 +807,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "total_pending_queued_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(total_pending_queued_validators_count{cluster=\"$cluster\"})",
           "hide": true,
           "legendFormat": "__auto",
           "range": true,
@@ -859,7 +859,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
+        "w": 3,
         "x": 12,
         "y": 8
       },
@@ -887,7 +887,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "entry_queue_duration_sec{cluster=\"$cluster\"}",
+          "expr": "max(entry_queue_duration_sec{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -926,8 +926,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
-        "x": 16,
+        "w": 3,
+        "x": 15,
         "y": 8
       },
       "id": 39,
@@ -953,7 +953,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "eth_usd{cluster=\"$cluster\"}",
+          "expr": "max(eth_usd{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -991,8 +991,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
-        "x": 20,
+        "w": 3,
+        "x": 18,
         "y": 8
       },
       "id": 41,
@@ -1018,7 +1018,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "our_exited_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(our_exited_validators_count{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1026,6 +1026,70 @@
       ],
       "title": "Kiln exited validators",
       "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 8
+      },
+      "id": 43,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "9.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "builder",
+          "expr": "max(slot{cluster=\"$cluster\"}) % 32",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Epoch completion",
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -1085,7 +1149,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "our_active_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(our_active_validators_count{cluster=\"$cluster\"})",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1151,7 +1215,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "total_active_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(total_active_validators_count{cluster=\"$cluster\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1219,7 +1283,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "our_active_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(our_active_validators_count{cluster=\"$cluster\"})",
           "hide": true,
           "legendFormat": "__auto",
           "range": true,
@@ -1231,7 +1295,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "total_active_validators_count{cluster=\"$cluster\"}",
+          "expr": "max(total_active_validators_count{cluster=\"$cluster\"})",
           "hide": true,
           "legendFormat": "__auto",
           "range": true,
@@ -1402,7 +1466,7 @@
           },
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "suboptimal_attestations_rate{cluster=\"$cluster\"}",
+          "expr": "max(suboptimal_attestations_rate{cluster=\"$cluster\"})",
           "format": "time_series",
           "instant": false,
           "legendFormat": "Raw",
@@ -1415,7 +1479,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "min_over_time(suboptimal_attestations_rate{cluster=\"$cluster\"}[1m])",
+          "expr": "max(min_over_time(suboptimal_attestations_rate{cluster=\"$cluster\"}[1m]))",
           "hide": false,
           "legendFormat": "1 min - mini value ",
           "range": true,
@@ -1563,7 +1627,7 @@
           },
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "missed_block_proposals_count_total{cluster=\"$cluster\"}",
+          "expr": "increase(missed_block_proposals_count_total{cluster=\"$cluster\"}[24h])",
           "format": "time_series",
           "instant": false,
           "legendFormat": "Missed blocks",
@@ -1571,7 +1635,7 @@
           "refId": "A"
         }
       ],
-      "title": "Kiln missed block proposals",
+      "title": "Kiln missed block proposals in the last 24H",
       "type": "timeseries"
     },
     {
@@ -1721,7 +1785,7 @@
           },
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "missed_attestations_count{cluster=\"$cluster\"}",
+          "expr": "max(missed_attestations_count{cluster=\"$cluster\"})",
           "format": "time_series",
           "instant": false,
           "legendFormat": "Simple",
@@ -1734,7 +1798,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "builder",
-          "expr": "double_missed_attestations_count{cluster=\"$cluster\"}",
+          "expr": "max(double_missed_attestations_count{cluster=\"$cluster\"})",
           "hide": false,
           "legendFormat": "Double",
           "range": true,
@@ -1742,6 +1806,183 @@
         }
       ],
       "title": "Kiln missed attestations during the last epoch",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 72,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "pointSize": 7,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "yellow",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "{__name__=\"bad_relay_count_total\", cluster=\"kiln-aws-mainnet-eu-west-1\", container=\"validator-watcher\", endpoint=\"metrics\", instance=\"10.40.5.90:8000\", job=\"ethereum-monitoring/ethereum-validator-watcher\", namespace=\"ethereum-monitoring\", pod=\"ethereum-validator-watcher-7d9d574dfb-4ff66\", prometheus=\"telemetry/kube-prometheus-stack-prometheus\"}"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "{__name__=\"bad_relay_count_total\", cluster=\"kiln-aws-mainnet-eu-west-1\", container=\"validator-watcher\", endpoint=\"metrics\", instance=\"10.40.5.90:8000\", job=\"ethereum-monitoring/ethereum-validator-watcher\", namespace=\"ethereum-monitoring\", pod=\"ethereum-validator-watcher-57874c6589-bs6hf\", prometheus=\"telemetry/kube-prometheus-stack-prometheus\"}"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "{__name__=\"bad_relay_count_total\", cluster=\"kiln-aws-mainnet-eu-west-1\", container=\"validator-watcher\", endpoint=\"metrics\", instance=\"10.40.81.197:8000\", job=\"ethereum-monitoring/ethereum-validator-watcher\", namespace=\"ethereum-monitoring\", pod=\"ethereum-validator-watcher-77fc55fff6-nztrz\", prometheus=\"telemetry/kube-prometheus-stack-prometheus\"}"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "max(bad_relay_count_total{cluster=\"kiln-aws-mainnet-eu-west-1\"})"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max(bad_relay_count_total{cluster=\"kiln-aws-mainnet-eu-west-1\"})"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 34
+      },
+      "id": 45,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "builder",
+          "expr": "max(bad_relay_count_total{cluster=\"$cluster\"})",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Blocks built with non-allowlisted relay",
       "type": "timeseries"
     }
   ],
@@ -1781,13 +2022,13 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-60m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Ethereum Validator Watcher - Mainnet",
   "uid": "K_icw4y4k",
-  "version": 41,
+  "version": 53,
   "weekStart": ""
 }
