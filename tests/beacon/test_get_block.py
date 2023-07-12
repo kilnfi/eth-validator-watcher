@@ -27,7 +27,7 @@ def test_get_block_exists() -> None:
 
 
 def test_get_block_does_not_exist() -> None:
-    def get(url: str) -> Response:
+    def get(url: str, **_) -> Response:
         assert url == "http://beacon-node:5052/eth/v2/beacon/blocks/42"
         raise RetryError
 

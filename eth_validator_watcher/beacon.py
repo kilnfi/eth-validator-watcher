@@ -3,11 +3,13 @@
 
 from collections import defaultdict
 from functools import lru_cache
-from typing import Optional
+from typing import Any, Optional
 
 from requests import Response, Session, codes
 from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import RetryError
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
+from requests.exceptions import ChunkedEncodingError
 
 from .models import (
     BeaconType,
@@ -45,16 +47,38 @@ class Beacon:
             max_retries=Retry(
                 backoff_factor=0.5,
                 total=3,
-                status_forcelist=[codes.not_found],
+                status_forcelist=[
+                    codes.not_found,
+                    codes.bad_gateway,
+                    codes.service_unavailable,
+                ],
             )
         )
 
         self.__http.mount("http://", adapter)
         self.__http.mount("https://", adapter)
 
+    @retry(
+        stop=stop_after_attempt(5),
+        wait=wait_fixed(3),
+        retry=retry_if_exception_type(ChunkedEncodingError),
+    )
+    def __get(self, *args: Any, **kwargs: Any) -> Response:
+        """Wrapper around requests.get()"""
+        return self.__http.get(*args, **kwargs)
+
+    @retry(
+        stop=stop_after_attempt(5),
+        wait=wait_fixed(3),
+        retry=retry_if_exception_type(ChunkedEncodingError),
+    )
+    def __post(self, *args: Any, **kwargs: Any) -> Response:
+        """Wrapper around requests.get()"""
+        return self.__http.post(*args, **kwargs)
+
     def get_genesis(self) -> Genesis:
         """Get genesis data."""
-        response = self.__http.get(f"{self.__url}/eth/v1/beacon/genesis")
+        response = self.__get(f"{self.__url}/eth/v1/beacon/genesis", timeout=5)
         response.raise_for_status()
         genesis_dict = response.json()
         return Genesis(**genesis_dict)
@@ -66,7 +90,9 @@ class Beacon:
         slot: Slot corresponding to the block to retrieve
         """
         try:
-            response = self.__http.get(f"{self.__url}/eth/v2/beacon/blocks/{slot}")
+            response = self.__get(
+                f"{self.__url}/eth/v2/beacon/blocks/{slot}", timeout=5
+            )
 
         except RetryError as e:
             # If we are here, it means the block does not exist
@@ -83,8 +109,8 @@ class Beacon:
 
         epoch: Epoch corresponding to the proposer duties to retrieve
         """
-        response = self.__http.get(
-            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}"
+        response = self.__get(
+            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}", timeout=10
         )
 
         response.raise_for_status()
@@ -100,8 +126,8 @@ class Beacon:
         outer value (=inner key): Index of validator
         inner value             : Validator
         """
-        response = self.__http.get(
-            f"{self.__url}/eth/v1/beacon/states/head/validators",
+        response = self.__get(
+            f"{self.__url}/eth/v1/beacon/states/head/validators", timeout=25
         )
 
         response.raise_for_status()
@@ -131,9 +157,10 @@ class Beacon:
         Parameters:
         epoch: Epoch
         """
-        response = self.__http.get(
+        response = self.__get(
             f"{self.__url}/eth/v1/beacon/states/head/committees",
             params=dict(epoch=epoch),
+            timeout=10,
         )
 
         response.raise_for_status()
@@ -219,11 +246,12 @@ class Beacon:
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
         """
-        return self.__http.post(
+        return self.__post(
             f"{self.__url}/lighthouse/liveness",
             json=ValidatorsLivenessRequestLighthouse(
                 epoch=epoch, indices=sorted(list(validators_index))
             ).model_dump(),
+            timeout=10,
         )
 
     def __get_validators_liveness_teku(
@@ -238,11 +266,12 @@ class Beacon:
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
         """
-        return self.__http.post(
+        return self.__post(
             f"{self.__url}/eth/v1/validator/liveness/{epoch}",
             json=ValidatorsLivenessRequestTeku(
                 indices=sorted(list(validators_index))
             ).model_dump(),
+            timeout=10,
         )
 
     def __get_validators_liveness_beacon_api(
@@ -257,10 +286,11 @@ class Beacon:
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
         """
-        return self.__http.post(
+        return self.__post(
             f"{self.__url}/eth/v1/validator/liveness/{epoch}",
             json=[
                 str(validator_index)
                 for validator_index in sorted(list(validators_index))
             ],
+            timeout=10,
         )
