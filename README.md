@@ -20,7 +20,7 @@ Description
 - proposed a block with the wrong fee recipient
 - has exited
 - got slashed
-- proposed a block with an unknown relay (alpha feature)
+- proposed a block with an unknown relay
 
 It also exports some general metrics such as:
 - your USD assets under management
@@ -65,7 +65,7 @@ Command line options
 │                                                               https://github.com/ConsenSys/teku/issues/7204 for Teku <                                        │
 │                                                               23.6.0,https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and                        │
 │                                                               https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus.                                |
-|    --relay-url                TEXT                            URL of allow listed relay (alpha feature)                                                       │
+|    --relay-url                TEXT                            URL of allow listed relay                                             │
 │    --liveness-file            PATH                            Liveness file                                                                                   │
 │    --help                                                     Show this message and exit.                                                                     │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
