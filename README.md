@@ -7,7 +7,7 @@ Ethereum Validator Watcher
 
 The code is provided as-is with no warranties.
 
-![kiln-logo](docs/img/grafana_dashboard.png)
+![grafana-dashboard](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/4e243352-68f7-42fe-a488-732ff5c5a8aa)
 
 Description
 -----------
