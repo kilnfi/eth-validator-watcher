@@ -105,7 +105,7 @@ def handler(
         show_default=False,
     ),
     relay_url: List[str] = Option(
-        [], help="URL of allow listed relay (alpha feature)", show_default=False
+        [], help="URL of allow listed relay", show_default=False
     ),
     liveness_file: Optional[Path] = Option(
         None, help="Liveness file", show_default=False
@@ -124,7 +124,7 @@ def handler(
     - proposed a block with the wrong fee recipient
     - has exited
     - got slashed
-    - proposed a block with an unknown relay (alpha feature)
+    - proposed a block with an unknown relay
 
     \b
     It also exports some general metrics such as:
