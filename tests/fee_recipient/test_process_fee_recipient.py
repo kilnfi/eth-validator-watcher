@@ -111,7 +111,11 @@ def test_our_validator_allright(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_validator={365100: Validator(pubkey="0xabcd", slashed=False)},
+        index_to_validator={
+            365100: Validator(
+                pubkey="0xabcd", effective_balance=32000000000, slashed=False
+            )
+        },
         execution="execution",  # type: ignore
         expected_fee_recipient="0xebec795c9c8bbd61ffc14a6662944748f299cacf",
         slack=slack,  # type: ignore
@@ -129,7 +133,11 @@ def test_our_validator_ok_in_last_tx(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_validator={365100: Validator(pubkey="0xabcd", slashed=False)},
+        index_to_validator={
+            365100: Validator(
+                pubkey="0xabcd", effective_balance=32000000000, slashed=False
+            )
+        },
         execution=Execution(),  # type: ignore
         expected_fee_recipient="0x760a6314a1d207377271917075f88e520141d55f",
         slack=slack,  # type: ignore
@@ -147,7 +155,11 @@ def test_our_validator_not_ok_empty_block(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_validator={365100: Validator(pubkey="0xabcd", slashed=False)},
+        index_to_validator={
+            365100: Validator(
+                pubkey="0xabcd", effective_balance=32000000000, slashed=False
+            )
+        },
         execution=ExecutionEmptyBlock(),  # type: ignore
         expected_fee_recipient="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         slack=slack,  # type: ignore
@@ -165,7 +177,11 @@ def test_our_validator_not_ok(block: Block):
 
     process_fee_recipient(
         block=block,
-        index_to_validator={365100: Validator(pubkey="0xabcd", slashed=False)},
+        index_to_validator={
+            365100: Validator(
+                pubkey="0xabcd", effective_balance=32000000000, slashed=False
+            )
+        },
         execution=Execution(),  # type: ignore
         expected_fee_recipient="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         slack=slack,  # type: ignore

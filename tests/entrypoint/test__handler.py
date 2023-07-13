@@ -121,17 +121,31 @@ def test_nominal() -> None:
         ) -> dict[StatusEnum, dict[int, Validator]]:
             return {
                 StatusEnum.activeOngoing: {
-                    0: Validator(pubkey="0xaaa", slashed=False),
-                    2: Validator(pubkey="0xccc", slashed=False),
-                    4: Validator(pubkey="0xeee", slashed=False),
+                    0: Validator(
+                        pubkey="0xaaa", effective_balance=32000000000, slashed=False
+                    ),
+                    2: Validator(
+                        pubkey="0xccc", effective_balance=32000000000, slashed=False
+                    ),
+                    4: Validator(
+                        pubkey="0xeee", effective_balance=32000000000, slashed=False
+                    ),
                 },
                 StatusEnum.pendingQueued: {
-                    1: Validator(pubkey="0xbbb", slashed=False),
-                    3: Validator(pubkey="0xddd", slashed=False),
+                    1: Validator(
+                        pubkey="0xbbb", effective_balance=32000000000, slashed=False
+                    ),
+                    3: Validator(
+                        pubkey="0xddd", effective_balance=32000000000, slashed=False
+                    ),
                 },
                 StatusEnum.exitedSlashed: {
-                    5: Validator(pubkey="0xfff", slashed=False),
-                    6: Validator(pubkey="0xggg", slashed=False),
+                    5: Validator(
+                        pubkey="0xfff", effective_balance=32000000000, slashed=False
+                    ),
+                    6: Validator(
+                        pubkey="0xggg", effective_balance=32000000000, slashed=False
+                    ),
                 },
             }
 
@@ -177,9 +191,9 @@ def test_nominal() -> None:
         assert isinstance(beacon, Beacon)
         assert beacon_type is BeaconType.TEKU
         assert index_to_validator == {
-            0: Validator(pubkey="0xaaa", slashed=False),
-            2: Validator(pubkey="0xccc", slashed=False),
-            4: Validator(pubkey="0xeee", slashed=False),
+            0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
+            2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
+            4: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),
         }
         assert epoch == 1
 
@@ -195,9 +209,9 @@ def test_nominal() -> None:
         assert indexes_that_missed_attestation == {0, 4}
         assert indexes_that_previously_missed_attestation == set()
         assert index_to_validator == {
-            0: Validator(pubkey="0xaaa", slashed=False),
-            2: Validator(pubkey="0xccc", slashed=False),
-            4: Validator(pubkey="0xeee", slashed=False),
+            0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
+            2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
+            4: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),
         }
         assert epoch == 1
         assert isinstance(slack, Slack)
@@ -224,9 +238,9 @@ def test_nominal() -> None:
         assert potential_block == "A BLOCK"
         assert slot in {63, 64}
         assert index_to_validator == {
-            0: Validator(pubkey="0xaaa", slashed=False),
-            2: Validator(pubkey="0xccc", slashed=False),
-            4: Validator(pubkey="0xeee", slashed=False),
+            0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
+            2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
+            4: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),
         }
 
         return {0}
