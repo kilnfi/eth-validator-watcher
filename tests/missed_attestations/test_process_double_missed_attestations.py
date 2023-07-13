@@ -20,12 +20,24 @@ def test_process_double_missed_attestations_some_dead_indexes() -> None:
         {42, 43, 44, 45},
         {40, 41, 42, 43},
         {
-            40: Validator(pubkey="pubkey40", slashed=False),
-            41: Validator(pubkey="pubkey41", slashed=False),
-            42: Validator(pubkey="pubkey42", slashed=False),
-            43: Validator(pubkey="pubkey43", slashed=False),
-            44: Validator(pubkey="pubkey44", slashed=False),
-            45: Validator(pubkey="pubkey45", slashed=False),
+            40: Validator(
+                pubkey="pubkey40", effective_balance=32000000000, slashed=False
+            ),
+            41: Validator(
+                pubkey="pubkey41", effective_balance=32000000000, slashed=False
+            ),
+            42: Validator(
+                pubkey="pubkey42", effective_balance=32000000000, slashed=False
+            ),
+            43: Validator(
+                pubkey="pubkey43", effective_balance=32000000000, slashed=False
+            ),
+            44: Validator(
+                pubkey="pubkey44", effective_balance=32000000000, slashed=False
+            ),
+            45: Validator(
+                pubkey="pubkey45", effective_balance=32000000000, slashed=False
+            ),
         },
         1664,
         slack,  # type: ignore
@@ -41,12 +53,24 @@ def test_process_double_missed_attestations_no_dead_indexes() -> None:
         {44, 45},
         {40, 41},
         {
-            40: Validator(pubkey="pubkey40", slashed=False),
-            41: Validator(pubkey="pubkey41", slashed=False),
-            42: Validator(pubkey="pubkey42", slashed=False),
-            43: Validator(pubkey="pubkey43", slashed=False),
-            44: Validator(pubkey="pubkey44", slashed=False),
-            45: Validator(pubkey="pubkey45", slashed=False),
+            40: Validator(
+                pubkey="pubkey40", effective_balance=32000000000, slashed=False
+            ),
+            41: Validator(
+                pubkey="pubkey41", effective_balance=32000000000, slashed=False
+            ),
+            42: Validator(
+                pubkey="pubkey42", effective_balance=32000000000, slashed=False
+            ),
+            43: Validator(
+                pubkey="pubkey43", effective_balance=32000000000, slashed=False
+            ),
+            44: Validator(
+                pubkey="pubkey44", effective_balance=32000000000, slashed=False
+            ),
+            45: Validator(
+                pubkey="pubkey45", effective_balance=32000000000, slashed=False
+            ),
         },
         1664,
         None,

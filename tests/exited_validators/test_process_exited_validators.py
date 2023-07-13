@@ -18,13 +18,13 @@ def test_process_exited_validators():
     slack = Slack()
 
     our_exited_unslashed_index_to_validator = {
-        44: Validator(pubkey="0x9012", slashed=False),
-        45: Validator(pubkey="0x3456", slashed=False),
+        44: Validator(pubkey="0x9012", effective_balance=32000000000, slashed=False),
+        45: Validator(pubkey="0x3456", effective_balance=32000000000, slashed=False),
     }
 
     our_withdrawal_index_to_validator = {
-        46: Validator(pubkey="0x1234", slashed=False),
-        47: Validator(pubkey="0x5678", slashed=True),
+        46: Validator(pubkey="0x1234", effective_balance=32000000000, slashed=False),
+        47: Validator(pubkey="0x5678", effective_balance=32000000000, slashed=True),
     }
 
     exited_validators = ExitedValidators(slack)  # type: ignore
@@ -42,9 +42,9 @@ def test_process_exited_validators():
     )
 
     our_exited_unslashed_index_to_validator = {
-        44: Validator(pubkey="0x9012", slashed=False),
-        45: Validator(pubkey="0x3456", slashed=False),
-        48: Validator(pubkey="0x5432", slashed=False),
+        44: Validator(pubkey="0x9012", effective_balance=32000000000, slashed=False),
+        45: Validator(pubkey="0x3456", effective_balance=32000000000, slashed=False),
+        48: Validator(pubkey="0x5432", effective_balance=32000000000, slashed=False),
     }
     exited_validators.process(
         our_exited_unslashed_index_to_validator, our_withdrawal_index_to_validator

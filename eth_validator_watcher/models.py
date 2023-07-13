@@ -21,6 +21,7 @@ class Validators(BaseModel):
 
         class Validator(BaseModel):
             pubkey: str
+            effective_balance: int
             slashed: bool
 
         index: int

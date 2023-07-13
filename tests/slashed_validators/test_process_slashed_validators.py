@@ -21,28 +21,28 @@ def test_process_slashed_validators():
     slashed_validators = SlashedValidators(slack)  # type: ignore
 
     total_exited_slashed_index_to_validator = {
-        42: Validator(pubkey="0x1234", slashed=True),
-        43: Validator(pubkey="0x5678", slashed=True),
-        44: Validator(pubkey="0x9012", slashed=True),
-        45: Validator(pubkey="0x3456", slashed=True),
-        46: Validator(pubkey="0xabcd", slashed=True),
+        42: Validator(pubkey="0x1234", effective_balance=32000000000, slashed=True),
+        43: Validator(pubkey="0x5678", effective_balance=32000000000, slashed=True),
+        44: Validator(pubkey="0x9012", effective_balance=32000000000, slashed=True),
+        45: Validator(pubkey="0x3456", effective_balance=32000000000, slashed=True),
+        46: Validator(pubkey="0xabcd", effective_balance=32000000000, slashed=True),
     }
 
     total_withdrawal_index_to_validator = {
-        47: Validator(pubkey="0xefgh", slashed=True),
-        48: Validator(pubkey="0xijkl", slashed=False),
-        49: Validator(pubkey="0xaaaa", slashed=False),
-        50: Validator(pubkey="0xbbbb", slashed=True),
+        47: Validator(pubkey="0xefgh", effective_balance=32000000000, slashed=True),
+        48: Validator(pubkey="0xijkl", effective_balance=32000000000, slashed=False),
+        49: Validator(pubkey="0xaaaa", effective_balance=32000000000, slashed=False),
+        50: Validator(pubkey="0xbbbb", effective_balance=32000000000, slashed=True),
     }
 
     our_exited_slashed_index_to_validator = {
-        44: Validator(pubkey="0x9012", slashed=True),
-        45: Validator(pubkey="0x3456", slashed=True),
+        44: Validator(pubkey="0x9012", effective_balance=32000000000, slashed=True),
+        45: Validator(pubkey="0x3456", effective_balance=32000000000, slashed=True),
     }
 
     our_withdrawal_index_to_validator = {
-        49: Validator(pubkey="0xaaaa", slashed=False),
-        50: Validator(pubkey="0xbbbb", slashed=True),
+        49: Validator(pubkey="0xaaaa", effective_balance=32000000000, slashed=False),
+        50: Validator(pubkey="0xbbbb", effective_balance=32000000000, slashed=True),
     }
 
     slashed_validators.process(
@@ -67,18 +67,18 @@ def test_process_slashed_validators():
     )
 
     total_exited_slashed_index_to_validator = {
-        42: Validator(pubkey="0x1234", slashed=True),
-        43: Validator(pubkey="0x5678", slashed=True),
-        44: Validator(pubkey="0x9012", slashed=True),
-        45: Validator(pubkey="0x3456", slashed=True),
-        46: Validator(pubkey="0xabcd", slashed=True),
-        51: Validator(pubkey="0xffff", slashed=True),
+        42: Validator(pubkey="0x1234", effective_balance=32000000000, slashed=True),
+        43: Validator(pubkey="0x5678", effective_balance=32000000000, slashed=True),
+        44: Validator(pubkey="0x9012", effective_balance=32000000000, slashed=True),
+        45: Validator(pubkey="0x3456", effective_balance=32000000000, slashed=True),
+        46: Validator(pubkey="0xabcd", effective_balance=32000000000, slashed=True),
+        51: Validator(pubkey="0xffff", effective_balance=32000000000, slashed=True),
     }
 
     our_exited_slashed_index_to_validator = {
-        44: Validator(pubkey="0x9012", slashed=True),
-        45: Validator(pubkey="0x3456", slashed=True),
-        52: Validator(pubkey="0xeeee", slashed=True),
+        44: Validator(pubkey="0x9012", effective_balance=32000000000, slashed=True),
+        45: Validator(pubkey="0x3456", effective_balance=32000000000, slashed=True),
+        52: Validator(pubkey="0xeeee", effective_balance=32000000000, slashed=True),
     }
 
     slashed_validators.process(

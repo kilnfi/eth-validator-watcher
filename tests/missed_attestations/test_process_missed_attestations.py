@@ -24,9 +24,15 @@ def test_process_missed_attestations_some_dead_indexes() -> None:
         beacon=Beacon(),  # type: ignore
         beacon_type=BeaconType.TEKU,
         our_active_index_to_validator={
-            42: Validator(pubkey="pubkey42", slashed=False),
-            43: Validator(pubkey="pubkey43", slashed=False),
-            44: Validator(pubkey="pubkey44", slashed=False),
+            42: Validator(
+                pubkey="pubkey42", effective_balance=32000000000, slashed=False
+            ),
+            43: Validator(
+                pubkey="pubkey43", effective_balance=32000000000, slashed=False
+            ),
+            44: Validator(
+                pubkey="pubkey44", effective_balance=32000000000, slashed=False
+            ),
         },
         epoch=1,
     )
@@ -52,9 +58,15 @@ def test_process_missed_attestations_no_dead_indexes() -> None:
         beacon=Beacon(),  # type: ignore
         beacon_type=BeaconType.TEKU,
         our_active_index_to_validator={
-            42: Validator(pubkey="pubkey42", slashed=False),
-            43: Validator(pubkey="pubkey43", slashed=False),
-            44: Validator(pubkey="pubkey44", slashed=False),
+            42: Validator(
+                pubkey="pubkey42", effective_balance=32000000000, slashed=False
+            ),
+            43: Validator(
+                pubkey="pubkey43", effective_balance=32000000000, slashed=False
+            ),
+            44: Validator(
+                pubkey="pubkey44", effective_balance=32000000000, slashed=False
+            ),
         },
         epoch=1,
     )
