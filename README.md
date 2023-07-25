@@ -78,8 +78,8 @@ Beacon nodes compatibility
 Beacon type      | Compatibility
 -----------------|----------------------------------------------------------------------------------------------------------
 Prysm            | Full
-Teku `>= 23.6.0` | Full
-Teku `< 23.6.0 ` | Full with `--beacon-type=teku`. See https://github.com/ConsenSys/teku/pull/7212 for more details.
+Teku `>= 23.6.0` | Full. You need to activate the [beacon-liveness-tracking-enabled](https://docs.teku.consensys.net/reference/cli#options) flag.
+Teku `< 23.6.0 ` | Full with `--beacon-type=teku`. See https://github.com/ConsenSys/teku/pull/7212 for more details. You need to activate the [beacon-liveness-tracking-enabled](https://docs.teku.consensys.net/reference/cli#options) flag.
 Lighthouse       | Full with `--beacon-type=lighthouse`. See https://github.com/sigp/lighthouse/issues/4243 for more details.
 Nimbus           | Partial with `--beacon-type=nimbus` - Missed attestations detection disabled. See https://github.com/status-im/nimbus-eth2/issues/5019 for more details.
 Lodestar         | Not (yet) tested.
