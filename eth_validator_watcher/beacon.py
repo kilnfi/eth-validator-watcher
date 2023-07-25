@@ -17,6 +17,7 @@ from .models import (
     Committees,
     Genesis,
     ProposerDuties,
+    Rewards,
     Validators,
     ValidatorsLivenessRequestLighthouse,
     ValidatorsLivenessRequestTeku,
@@ -176,6 +177,24 @@ class Beacon:
             result[item.slot][item.index] = item.validators
 
         return result
+
+    def get_rewards(self, epoch: int, validators_index: set[int]) -> Rewards:
+        """Get rewards.
+
+        Parameters:
+        epoch           : Epoch corresponding to the rewards to retrieve
+        validators_index: Set of validator indexes corresponding to the rewards to
+                          retrieve
+        """
+        response = self.__post(
+            f"{self.__url}/eth/v1/beacon/rewards/attestations/{epoch}",
+            json=[str(index) for index in sorted(validators_index)],
+            timeout=10,
+        )
+
+        response.raise_for_status()
+        rewards_dict = response.json()
+        return Rewards(**rewards_dict)
 
     def get_validators_liveness(
         self, beacon_type: BeaconType, epoch: int, validators_index: set[int]

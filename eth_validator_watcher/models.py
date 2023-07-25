@@ -140,3 +140,23 @@ class ExecutionBlock(BaseModel):
     jsonrpc: str
     id: int
     result: Result
+
+
+class Rewards(BaseModel):
+    class Data(BaseModel):
+        class IdealReward(BaseModel):
+            effective_balance: int
+            source: int
+            target: int
+            head: int
+
+        class TotalReward(BaseModel):
+            validator_index: int
+            source: int
+            target: int
+            head: int
+
+        ideal_rewards: list[IdealReward]
+        total_rewards: list[TotalReward]
+
+    data: Data

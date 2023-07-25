@@ -260,6 +260,17 @@ def test_nominal() -> None:
 
         return True
 
+    def process_rewards(
+        beacon: Beacon, epoch: int, our_active_index_to_validator: dict[int, Validator]
+    ):
+        assert isinstance(beacon, Beacon)
+        assert epoch == 1
+        assert our_active_index_to_validator == {
+            0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
+            2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
+            4: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),
+        }
+
     def write_liveness_file(liveness_file: Path) -> None:
         assert liveness_file == Path("/path/to/liveness")
 
@@ -278,6 +289,7 @@ def test_nominal() -> None:
     entrypoint.process_future_blocks_proposal = process_future_blocks_proposal  # type: ignore
     entrypoint.process_suboptimal_attestations = process_suboptimal_attestations  # type: ignore
     entrypoint.process_missed_blocks = process_missed_blocks  # type: ignore
+    entrypoint.process_rewards = process_rewards  # type: ignore
     entrypoint.write_liveness_file = write_liveness_file  # type: ignore
 
     environ["SLACK_TOKEN"] = "my_slack_token"

@@ -21,6 +21,7 @@ Description
 - has exited
 - got slashed
 - proposed a block with an unknown relay
+- did not had ideal source, target or head reward
 
 It also exports some general metrics such as:
 - your USD assets under management
@@ -54,21 +55,21 @@ Command line options
 --------------------
  
 ```
-╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --beacon-url               TEXT                            URL of beacon node [required]                                                                   │
-│    --execution-url            TEXT                            URL of execution node                                                                           │
-│    --pubkeys-file-path        FILE                            File containing the list of public keys to watch                                                │
-│    --web3signer-url           TEXT                            URL to web3signer managing keys to watch                                                        │
-│    --fee-recipient            TEXT                            Fee recipient address - --execution-url must be set                                             │
-│    --slack-channel            TEXT                            Slack channel to send alerts - SLACK_TOKEN env var must be set                                  │
-│    --beacon-type              [lighthouse|nimbus|teku|other]  Use this option if connected to a teku, lighthouse or nimbus beacon node. See                   │
-│                                                               https://github.com/ConsenSys/teku/issues/7204 for Teku <                                        │
-│                                                               23.6.0,https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and                        │
-│                                                               https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus.                                |
-|    --relay-url                TEXT                            URL of allow listed relay                                             │
-│    --liveness-file            PATH                            Liveness file                                                                                   │
-│    --help                                                     Show this message and exit.                                                                     │
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --beacon-url               TEXT                            URL of beacon node [required]                                                          │
+│    --execution-url            TEXT                            URL of execution node                                                                  │
+│    --pubkeys-file-path        FILE                            File containing the list of public keys to watch                                       │
+│    --web3signer-url           TEXT                            URL to web3signer managing keys to watch                                               │
+│    --fee-recipient            TEXT                            Fee recipient address - --execution-url must be set                                    │
+│    --slack-channel            TEXT                            Slack channel to send alerts - SLACK_TOKEN env var must be set                         │
+│    --beacon-type              [lighthouse|nimbus|teku|other]  Use this option if connected to a Teku < 23.6.0, Lighthouse or Nimbus beacon node. See │
+│                                                               https://github.com/ConsenSys/teku/issues/7204 for Teku <                               │
+│                                                               23.6.0,https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and               │
+│                                                               https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus.                       │
+│    --relay-url                TEXT                            URL of allow listed relay                                                              │
+│    --liveness-file            PATH                            Liveness file                                                                          │
+│    --help                                                     Show this message and exit.                                                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 Beacon nodes compatibility
@@ -142,7 +143,17 @@ name                                       | description
 `suboptimal_attestations_rate`             | Suboptimal attestations rate
 `keys_count`                               | Keys count
 `bad_relay_count`                          | Bad relay count
-
+`suboptimal_sources_rate`                  | Suboptimal sources rate
+`suboptimal_targets_rate`                  | Suboptimal targets rate
+`suboptimal_heads_rate`                    | Suboptimal heads rate
+`ideal_sources_count`                      | Ideal sources count
+`ideal_targets_count`                      | Ideal targets count
+`ideal_heads_count`                        | Ideal heads count
+`actual_positive_sources_count`            | Actual positive sources count
+`actual_negative_sources_count`            | Actual negative sources count
+`actual_positive_targets_count`            | Actual positive targets count
+`actual_negative_targets_count`            | Actual negative targets count
+`actual_heads_count`                       | Actual heads count
 
 Installation
 ------------
@@ -178,6 +189,9 @@ You [exited](https://beaconcha.in/validator/491565). | ```🚶 Our validator 0xa
 Someone [got](https://beaconcha.in/validator/647102) slashed. | ```✂️     validator 0xb3a608a7 is slashed```
 You got slashed (you don't want to see this one). | ```🔕 Our validator 0x00000000 is slashed```
 You proposed a block with a non-allowed relay. | ```🟧 Block proposed with unknown builder (may be a locally built block)```
+You did not had ideal source rewards. | ```🚰 Our validator 0x8012aba2, 0x8012cdb1, 0x803f3b39, 0x8054cda1, 0x8055bb56 and 0 more had not ideal rewards on source at epoch 215201```
+You did not had ideal target rewards. | ```🎯 Our validator 0x8000118f, 0x80a238ea, 0x80e5809d, 0x80ec3c2d, 0x80f4487d and 0 more had not ideal rewards on target at epoch 215201```
+You did not had ideal head rewards. | ```🗣️ Our validator 0x8005f5e8, 0x801910e5, 0x80193dd5, 0x801a26e9, 0x80285258 and 0 more had not ideal rewards on head  at epoch 215200```
 
 Slack messages
 --------------

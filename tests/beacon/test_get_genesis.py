@@ -18,8 +18,6 @@ def test_get_genesis():
     expected = Genesis(
         data=Genesis.Data(
             genesis_time=1590832934,
-            genesis_validators_root="0xcf8e0d4e9587369b2301d0790347320302cc0943d5a1884560367e8208d920f2",
-            genesis_fork_version="0x00000000",
         )
     )
 

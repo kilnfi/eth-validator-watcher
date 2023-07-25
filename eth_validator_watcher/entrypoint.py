@@ -28,12 +28,15 @@ from .utils import (
     BLOCK_NOT_ORPHANED_TIME_SEC,
     NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
+    SLOT_FOR_REWARDS_PROCESS,
     Slack,
     get_our_pubkeys,
     slots,
     write_liveness_file,
     eth1_address_0x_prefixed,
 )
+
+from .rewards import process_rewards
 from .web3signer import Web3Signer
 
 from .relays import Relays
@@ -96,7 +99,8 @@ def handler(
         BeaconType.OTHER,
         case_sensitive=False,
         help=(
-            "Use this option if connected to a teku, lighthouse or nimbus beacon node. "
+            "Use this option if connected to a Teku < 23.6.0, Lighthouse or Nimbus "
+            "beacon node. "
             "See https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0,"
             "https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and "
             "https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus."
@@ -125,6 +129,7 @@ def handler(
     - has exited
     - got slashed
     - proposed a block with an unknown relay
+    - did not had optimal source, target or head reward
 
     \b
     It also exports some general metrics such as:
@@ -226,6 +231,7 @@ def _handler(
     slashed_validators = SlashedValidators(slack)
 
     last_missed_attestations_process_epoch: Optional[int] = None
+    last_rewards_process_epoch: Optional[int] = None
 
     genesis = beacon.get_genesis()
 
@@ -362,6 +368,14 @@ def _handler(
             )
 
             last_missed_attestations_process_epoch = epoch
+
+        should_process_rewards = slot_in_epoch >= SLOT_FOR_REWARDS_PROCESS and (
+            last_rewards_process_epoch is None or last_rewards_process_epoch != epoch
+        )
+
+        if should_process_rewards:
+            process_rewards(beacon, epoch, our_active_index_to_validator)
+            last_rewards_process_epoch = epoch
 
         process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
 
