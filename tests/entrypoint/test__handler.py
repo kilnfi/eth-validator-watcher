@@ -261,9 +261,13 @@ def test_nominal() -> None:
         return True
 
     def process_rewards(
-        beacon: Beacon, epoch: int, our_active_index_to_validator: dict[int, Validator]
+        beacon: Beacon,
+        beacon_type: BeaconType,
+        epoch: int,
+        our_active_index_to_validator: dict[int, Validator],
     ):
         assert isinstance(beacon, Beacon)
+        assert isinstance(beacon_type, BeaconType)
         assert epoch == 1
         assert our_active_index_to_validator == {
             0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),

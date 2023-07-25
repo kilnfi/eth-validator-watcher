@@ -42,7 +42,8 @@ class Beacon:
         """
         self.__url = url
         self.__http = Session()
-        self.__nimbus_first_liveness_call = False
+        self.__first_liveness_call = True
+        self.__first_rewards_call = True
 
         adapter = HTTPAdapter(
             max_retries=Retry(
@@ -178,14 +179,40 @@ class Beacon:
 
         return result
 
-    def get_rewards(self, epoch: int, validators_index: set[int]) -> Rewards:
+    def get_rewards(
+        self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+    ) -> Rewards:
         """Get rewards.
 
         Parameters:
+        beacon_type     : Type of beacon node
         epoch           : Epoch corresponding to the rewards to retrieve
         validators_index: Set of validator indexes corresponding to the rewards to
                           retrieve
         """
+
+        # On Prysm, because of
+        # https://github.com/prysmaticlabs/prysm/issues/11581,
+        # we just assume there is no rewards at all
+
+        # On Nimbus, because of
+        # https://github.com/status-im/nimbus-eth2/issues/5138,
+        # we just assume there is no rewards at all
+
+        if beacon_type in {BeaconType.NIMBUS, BeaconType.PRYSM}:
+            if self.__first_rewards_call:
+                self.__first_rewards_call = False
+                print(
+                    (
+                        "⚠️ You are using Prysm or Nimbus. Rewards will be ignored. "
+                        "See https://github.com/prysmaticlabs/prysm/issues/11581 "
+                        "(Prysm) & https://github.com/status-im/nimbus-eth2/issues/5138 "
+                        "(Nimbus) for more information."
+                    )
+                )
+
+            return Rewards(data=Rewards.Data(ideal_rewards=[], total_rewards=[]))
+
         response = self.__post(
             f"{self.__url}/eth/v1/beacon/rewards/attestations/{epoch}",
             json=[str(index) for index in sorted(validators_index)],
@@ -202,7 +229,7 @@ class Beacon:
         """Get validators liveness.
 
         Parameters      :
-        beacon_type     : Type of beacon node (Teku, Lighthouse or other)
+        beacon_type     : Type of beacon node
         epoch           : Epoch corresponding to the validators liveness to retrieve
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
@@ -213,11 +240,11 @@ class Beacon:
         # we just assume that all validators are live
 
         if beacon_type == BeaconType.NIMBUS:
-            if not self.__nimbus_first_liveness_call:
-                self.__nimbus_first_liveness_call = True
+            if self.__first_liveness_call:
+                self.__first_liveness_call = False
                 print(
                     (
-                        "⚠️ You are using Nimbus. Liveness will be ignored. "
+                        "⚠️ You are using Nimbus. Missed attestations will be ignored. "
                         "See https://github.com/status-im/nimbus-eth2/issues/5019 for "
                         "more information."
                     )
@@ -227,6 +254,7 @@ class Beacon:
 
         beacon_type_to_function = {
             BeaconType.LIGHTHOUSE: self.__get_validators_liveness_lighthouse,
+            BeaconType.PRYSM: self.__get_validators_liveness_beacon_api,
             BeaconType.TEKU: self.__get_validators_liveness_teku,
             BeaconType.OTHER: self.__get_validators_liveness_beacon_api,
         }

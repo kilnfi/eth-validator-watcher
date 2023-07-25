@@ -1,14 +1,23 @@
 import json
 from pathlib import Path
 
-from pytest import raises
-from requests import Response
-from requests.exceptions import RetryError
 from requests_mock import Mocker
 
-from eth_validator_watcher.beacon import Beacon, NoBlockError
+from eth_validator_watcher.beacon import Beacon
 from tests.beacon import assets
-from eth_validator_watcher.models import Rewards
+from eth_validator_watcher.models import BeaconType, Rewards
+
+
+def test_get_rewards_not_supported() -> None:
+    beacon = Beacon("http://beacon-node:5052")
+
+    expected = Rewards(data=Rewards.Data(ideal_rewards=[], total_rewards=[]))
+
+    actual = beacon.get_rewards(BeaconType.PRYSM, 42, {8499, 8500})
+    assert expected == actual
+
+    actual = beacon.get_rewards(BeaconType.NIMBUS, 42, {8499, 8500})
+    assert expected == actual
 
 
 def test_get_rewards() -> None:
@@ -50,4 +59,4 @@ def test_get_rewards() -> None:
             json=rewards_dict,
         )
 
-        assert beacon.get_rewards(42, {8499, 8500}) == expected
+        assert beacon.get_rewards(BeaconType.LIGHTHOUSE, 42, {8499, 8500}) == expected

@@ -13,19 +13,45 @@ from eth_validator_watcher.rewards import (
     actual_heads_count,
     process_rewards,
 )
+from eth_validator_watcher.models import BeaconType
 
 from math import isclose
+
 
 Validator = Validators.DataItem.Validator
 
 
 def test_process_rewards_no_validator() -> None:
-    process_rewards("a beacon", 42, {})  # type: ignore
+    process_rewards(BeaconType.LIGHTHOUSE, "a beacon", 42, {})  # type: ignore
+
+
+def test_process_rewards_empty() -> None:
+    class Beacon:
+        def get_rewards(
+            self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+        ) -> Rewards:
+            assert isinstance(beacon_type, BeaconType)
+            assert epoch == 40
+            assert validators_index == {12345}
+
+            return Rewards(
+                data=Rewards.Data(
+                    ideal_rewards=[],
+                    total_rewards=[],
+                )
+            )
+
+    beacon = Beacon()
+
+    process_rewards(beacon, BeaconType.PRYSM, 42, {12345: "a validator"})  # type: ignore
 
 
 def test_process_rewards_all_validators_are_ideal() -> None:
     class Beacon:
-        def get_rewards(self, epoch: int, validators_index: set[int]) -> Rewards:
+        def get_rewards(
+            self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+        ) -> Rewards:
+            assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
             assert validators_index == {1, 2, 3}
 
@@ -73,6 +99,7 @@ def test_process_rewards_all_validators_are_ideal() -> None:
 
     process_rewards(
         beacon,  # type: ignore
+        BeaconType.LIGHTHOUSE,
         42,
         {
             1: Validator(
@@ -142,7 +169,10 @@ def test_process_rewards_some_validators_are_ideal() -> None:
     """
 
     class Beacon:
-        def get_rewards(self, epoch: int, validators_index: set[int]) -> Rewards:
+        def get_rewards(
+            self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+        ) -> Rewards:
+            assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
             assert validators_index == {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
@@ -211,6 +241,7 @@ def test_process_rewards_some_validators_are_ideal() -> None:
 
     process_rewards(
         beacon,  # type: ignore
+        BeaconType.LIGHTHOUSE,
         42,
         {
             1: Validator(
@@ -319,7 +350,10 @@ def test_process_rewards_some_validators_are_ideal() -> None:
 
 def test_process_rewards_no_validator_is_ideal() -> None:
     class Beacon:
-        def get_rewards(self, epoch: int, validators_index: set[int]) -> Rewards:
+        def get_rewards(
+            self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+        ) -> Rewards:
+            assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
             assert validators_index == {1, 2, 3}
 
@@ -367,6 +401,7 @@ def test_process_rewards_no_validator_is_ideal() -> None:
 
     process_rewards(
         beacon,  # type: ignore
+        BeaconType.LIGHTHOUSE,
         42,
         {
             1: Validator(

@@ -2,7 +2,7 @@
 
 from typing import Tuple
 from .beacon import Beacon
-from .models import Validators
+from .models import BeaconType, Validators
 
 from prometheus_client import Gauge, Counter
 
@@ -46,12 +46,16 @@ actual_heads_count = Counter("actual_heads_count", "Actual heads count")
 
 
 def process_rewards(
-    beacon: Beacon, epoch: int, index_to_validator: dict[int, Validator]
+    beacon: Beacon,
+    beacon_type: BeaconType,
+    epoch: int,
+    index_to_validator: dict[int, Validator],
 ) -> None:
     """Process rewards for given epoch and validators
 
     Parameters:
         beacon (Beacon): Beacon object
+        beacon_type (BeaconType): Beacon type
         epoch (int): Epoch number
         index_to_validator (dict[int, Validator]): Dictionary with:
             key: validator index
@@ -60,7 +64,11 @@ def process_rewards(
     if len(index_to_validator) == 0:
         return
 
-    data = beacon.get_rewards(epoch - 2, set(index_to_validator)).data
+    data = beacon.get_rewards(beacon_type, epoch - 2, set(index_to_validator)).data
+
+    if len(data.ideal_rewards) == 0 and len(data.total_rewards) == 0:
+        # We probably are connected to a beacon that does not support rewards
+        return
 
     effective_balance_to_ideal_reward: dict[int, Reward] = {
         reward.effective_balance: (reward.source, reward.target, reward.head)
