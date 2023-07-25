@@ -1,5 +1,6 @@
-from eth_validator_watcher.utils import eth2_address_0x_prefixed
 from pytest import raises
+
+from eth_validator_watcher.utils import eth2_address_0x_prefixed
 
 
 def test_eth2_address_0x_prefixed_invalid() -> None:

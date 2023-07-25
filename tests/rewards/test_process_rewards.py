@@ -1,22 +1,20 @@
-from eth_validator_watcher.models import Rewards, Validators
-from eth_validator_watcher.rewards import (
-    suboptimal_sources_rate_gauge,
-    suboptimal_targets_rate_gauge,
-    suboptimal_heads_rate_gauge,
-    ideal_sources_count,
-    ideal_targets_count,
-    ideal_heads_count,
-    actual_positive_sources_count,
-    actual_negative_sources_count,
-    actual_positive_targets_count,
-    actual_negative_targets_count,
-    actual_heads_count,
-    process_rewards,
-)
-from eth_validator_watcher.models import BeaconType
-
 from math import isclose
 
+from eth_validator_watcher.models import BeaconType, Rewards, Validators
+from eth_validator_watcher.rewards import (
+    actual_heads_count,
+    actual_negative_sources_count,
+    actual_negative_targets_count,
+    actual_positive_sources_count,
+    actual_positive_targets_count,
+    ideal_heads_count,
+    ideal_sources_count,
+    ideal_targets_count,
+    process_rewards,
+    suboptimal_heads_rate_gauge,
+    suboptimal_sources_rate_gauge,
+    suboptimal_targets_rate_gauge,
+)
 
 Validator = Validators.DataItem.Validator
 

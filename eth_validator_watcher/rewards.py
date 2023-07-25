@@ -1,11 +1,11 @@
 """Contains functions to handle rewards calculation"""
 
 from typing import Tuple
+
+from prometheus_client import Counter, Gauge
+
 from .beacon import Beacon
 from .models import BeaconType, Validators
-
-from prometheus_client import Gauge, Counter
-
 
 Validator = Validators.DataItem.Validator
 
@@ -64,7 +64,8 @@ def process_rewards(
     if len(index_to_validator) == 0:
         return
 
-    data = beacon.get_rewards(beacon_type, epoch - 2, set(index_to_validator)).data
+    validators_index = set(index_to_validator)
+    data = beacon.get_rewards(beacon_type, epoch - 2, validators_index).data
 
     if len(data.ideal_rewards) == 0 and len(data.total_rewards) == 0:
         # We probably are connected to a beacon that does not support rewards
