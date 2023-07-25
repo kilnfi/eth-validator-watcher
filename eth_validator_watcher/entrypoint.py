@@ -99,12 +99,13 @@ def handler(
         BeaconType.OTHER,
         case_sensitive=False,
         help=(
-            "Use this option if connected to a Teku < 23.6.0, Lighthouse or Nimbus "
-            "beacon node. "
-            "See https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0,"
-            "https://github.com/sigp/lighthouse/issues/4243 for Lighthouse and "
-            "https://github.com/status-im/nimbus-eth2/issues/5019 for Nimbus."
-            ""
+            "Use this option if connected to a Teku < 23.6.0, Prysm, Lighthouse or "
+            "Nimbus beacon node. "
+            "See https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0, "
+            "https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm, "
+            "https://github.com/sigp/lighthouse/issues/4243 for Lighthouse, "
+            "https://github.com/status-im/nimbus-eth2/issues/5019 and "
+            "https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus."
         ),
         show_default=False,
     ),
@@ -374,7 +375,7 @@ def _handler(
         )
 
         if should_process_rewards:
-            process_rewards(beacon, epoch, our_active_index_to_validator)
+            process_rewards(beacon, beacon_type, epoch, our_active_index_to_validator)
             last_rewards_process_epoch = epoch
 
         process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
