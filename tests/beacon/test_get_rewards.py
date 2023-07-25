@@ -4,8 +4,8 @@ from pathlib import Path
 from requests_mock import Mocker
 
 from eth_validator_watcher.beacon import Beacon
-from tests.beacon import assets
 from eth_validator_watcher.models import BeaconType, Rewards
+from tests.beacon import assets
 
 
 def test_get_rewards_not_supported() -> None:

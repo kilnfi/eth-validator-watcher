@@ -1,6 +1,7 @@
 """Contains the Relays class which is used to interact with the relays."""
 
 from time import sleep
+
 from prometheus_client import Counter
 from requests import Session, codes
 from requests.adapters import HTTPAdapter, Retry

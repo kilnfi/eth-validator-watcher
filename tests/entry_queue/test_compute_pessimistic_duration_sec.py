@@ -1,7 +1,5 @@
 from eth_validator_watcher.entry_queue import (
-    NB_SECONDS_PER_EPOCH,
-    compute_pessimistic_duration_sec,
-)
+    NB_SECONDS_PER_EPOCH, compute_pessimistic_duration_sec)
 
 
 def test_compute_pessimistic_duration_sec() -> None:

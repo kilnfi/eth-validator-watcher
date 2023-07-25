@@ -7,9 +7,8 @@ from typing import Any, Optional
 
 from requests import Response, Session, codes
 from requests.adapters import HTTPAdapter, Retry
-from requests.exceptions import RetryError
+from requests.exceptions import ChunkedEncodingError, RetryError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
-from requests.exceptions import ChunkedEncodingError
 
 from .models import (
     BeaconType,

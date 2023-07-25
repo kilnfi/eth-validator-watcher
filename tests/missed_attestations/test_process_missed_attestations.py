@@ -1,6 +1,7 @@
 from typing import Set
 
-from eth_validator_watcher.missed_attestations import process_missed_attestations
+from eth_validator_watcher.missed_attestations import \
+    process_missed_attestations
 from eth_validator_watcher.models import BeaconType, Validators
 
 Validator = Validators.DataItem.Validator

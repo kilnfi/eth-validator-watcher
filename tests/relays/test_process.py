@@ -1,7 +1,8 @@
-from eth_validator_watcher.relays import Relays, bad_relay_count
-from requests_mock import Mocker
 from pytest import raises
 from requests.exceptions import ConnectionError
+from requests_mock import Mocker
+
+from eth_validator_watcher.relays import Relays, bad_relay_count
 
 
 def test_process_no_relay() -> None:
