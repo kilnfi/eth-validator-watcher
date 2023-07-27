@@ -264,12 +264,12 @@ def test_nominal() -> None:
         beacon: Beacon,
         beacon_type: BeaconType,
         epoch: int,
-        our_active_index_to_validator: dict[int, Validator],
+        epoch_to_index_to_validator: dict[int, Validator],
     ):
         assert isinstance(beacon, Beacon)
         assert isinstance(beacon_type, BeaconType)
         assert epoch == 1
-        assert our_active_index_to_validator == {
+        assert epoch_to_index_to_validator[1] == {
             0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
             2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
             4: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),
