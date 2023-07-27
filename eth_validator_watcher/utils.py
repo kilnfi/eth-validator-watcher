@@ -240,3 +240,27 @@ def eth2_address_0x_prefixed(address: str) -> str:
         return f"0x{address}"
 
     return address
+
+
+class LimitedDict:
+    def __init__(self, max_size: int) -> None:
+        assert max_size >= 0, "max_size must be non-negative"
+
+        self.__max_size = max_size
+        self.__dict: dict[Any, Any] = dict()
+
+    def __setitem__(self, key: Any, value: Any) -> None:
+        self.__dict[key] = value
+
+        first_keys = sorted(self.__dict)[: -self.__max_size]
+        for key in first_keys:
+            self.__dict.pop(key)
+
+    def __getitem__(self, key: Any) -> Any:
+        return self.__dict[key]
+
+    def __contains__(self, key: Any) -> bool:
+        return key in self.__dict
+
+    def __len__(self) -> int:
+        return len(self.__dict)

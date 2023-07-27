@@ -1,8 +1,8 @@
 from typing import Set
 
-from eth_validator_watcher.missed_attestations import \
-    process_missed_attestations
+from eth_validator_watcher.missed_attestations import process_missed_attestations
 from eth_validator_watcher.models import BeaconType, Validators
+from eth_validator_watcher.utils import LimitedDict
 
 Validator = Validators.DataItem.Validator
 
@@ -21,20 +21,17 @@ def test_process_missed_attestations_some_dead_indexes() -> None:
 
     expected = {42, 44}
 
+    epoch_to_index_to_validator_client = LimitedDict(2)
+    epoch_to_index_to_validator_client[0] = {
+        42: Validator(pubkey="pubkey42", effective_balance=32000000000, slashed=False),
+        43: Validator(pubkey="pubkey43", effective_balance=32000000000, slashed=False),
+        44: Validator(pubkey="pubkey44", effective_balance=32000000000, slashed=False),
+    }
+
     actual = process_missed_attestations(
         beacon=Beacon(),  # type: ignore
         beacon_type=BeaconType.TEKU,
-        our_active_index_to_validator={
-            42: Validator(
-                pubkey="pubkey42", effective_balance=32000000000, slashed=False
-            ),
-            43: Validator(
-                pubkey="pubkey43", effective_balance=32000000000, slashed=False
-            ),
-            44: Validator(
-                pubkey="pubkey44", effective_balance=32000000000, slashed=False
-            ),
-        },
+        epoch_to_index_to_validator_index=epoch_to_index_to_validator_client,
         epoch=1,
     )
 
@@ -55,20 +52,17 @@ def test_process_missed_attestations_no_dead_indexes() -> None:
 
     expected: Set[int] = set()
 
+    epoch_to_index_to_validator_client = LimitedDict(2)
+    epoch_to_index_to_validator_client[0] = {
+        42: Validator(pubkey="pubkey42", effective_balance=32000000000, slashed=False),
+        43: Validator(pubkey="pubkey43", effective_balance=32000000000, slashed=False),
+        44: Validator(pubkey="pubkey44", effective_balance=32000000000, slashed=False),
+    }
+
     actual = process_missed_attestations(
         beacon=Beacon(),  # type: ignore
         beacon_type=BeaconType.TEKU,
-        our_active_index_to_validator={
-            42: Validator(
-                pubkey="pubkey42", effective_balance=32000000000, slashed=False
-            ),
-            43: Validator(
-                pubkey="pubkey43", effective_balance=32000000000, slashed=False
-            ),
-            44: Validator(
-                pubkey="pubkey44", effective_balance=32000000000, slashed=False
-            ),
-        },
+        epoch_to_index_to_validator_index=epoch_to_index_to_validator_client,
         epoch=1,
     )
 

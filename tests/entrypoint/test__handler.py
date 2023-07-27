@@ -9,7 +9,7 @@ from typer import BadParameter
 from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
 from eth_validator_watcher.models import BeaconType, Genesis, Validators
-from eth_validator_watcher.utils import Slack
+from eth_validator_watcher.utils import LimitedDict, Slack
 
 StatusEnum = Validators.DataItem.StatusEnum
 Validator = Validators.DataItem.Validator
@@ -185,12 +185,12 @@ def test_nominal() -> None:
     def process_missed_attestations(
         beacon: Beacon,
         beacon_type: BeaconType,
-        index_to_validator: dict[int, Validator],
+        epoch_to_index_to_validator_index: LimitedDict,
         epoch: int,
     ) -> set[int]:
         assert isinstance(beacon, Beacon)
         assert beacon_type is BeaconType.TEKU
-        assert index_to_validator == {
+        assert epoch_to_index_to_validator_index[1] == {
             0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
             2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
             4: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),
@@ -202,13 +202,13 @@ def test_nominal() -> None:
     def process_double_missed_attestations(
         indexes_that_missed_attestation: set[int],
         indexes_that_previously_missed_attestation: set[int],
-        index_to_validator: dict[int, str],
+        epoch_to_index_to_validator_index: LimitedDict,
         epoch: int,
         slack: Slack,
     ) -> set[int]:
         assert indexes_that_missed_attestation == {0, 4}
         assert indexes_that_previously_missed_attestation == set()
-        assert index_to_validator == {
+        assert epoch_to_index_to_validator_index[1] == {
             0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
             2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
             4: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),
