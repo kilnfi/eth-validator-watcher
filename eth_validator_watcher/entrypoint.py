@@ -234,7 +234,7 @@ def _handler(
 
     last_missed_attestations_process_epoch: Optional[int] = None
     last_rewards_process_epoch: Optional[int] = None
-    epoch_to_our_active_index_to_validator = LimitedDict(2)
+    epoch_to_our_active_index_to_validator = LimitedDict(4)
 
     genesis = beacon.get_genesis()
 
@@ -381,7 +381,10 @@ def _handler(
         )
 
         if should_process_rewards:
-            process_rewards(beacon, beacon_type, epoch, our_active_index_to_validator)
+            process_rewards(
+                beacon, beacon_type, epoch, epoch_to_our_active_index_to_validator
+            )
+
             last_rewards_process_epoch = epoch
 
         process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)

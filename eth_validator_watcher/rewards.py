@@ -4,6 +4,8 @@ from typing import Tuple
 
 from prometheus_client import Counter, Gauge
 
+from eth_validator_watcher.utils import LimitedDict
+
 from .beacon import Beacon
 from .models import BeaconType, Validators
 
@@ -49,7 +51,7 @@ def process_rewards(
     beacon: Beacon,
     beacon_type: BeaconType,
     epoch: int,
-    index_to_validator: dict[int, Validator],
+    epoch_to_index_to_validator: LimitedDict,
 ) -> None:
     """Process rewards for given epoch and validators
 
@@ -57,10 +59,22 @@ def process_rewards(
         beacon (Beacon): Beacon object
         beacon_type (BeaconType): Beacon type
         epoch (int): Epoch number
-        index_to_validator (dict[int, Validator]): Dictionary with:
-            key: validator index
-            value: Validator object
+
+        epoch_to_index_to_validator : Limited dictionary with:
+            outer key             : epoch
+            outer value, inner key: validator indexes
+            inner value           : validators
     """
+    index_to_validator = (
+        epoch_to_index_to_validator[epoch - 2]
+        if epoch - 2 in epoch_to_index_to_validator
+        else (
+            epoch_to_index_to_validator[epoch - 1]
+            if epoch - 1 in epoch_to_index_to_validator
+            else epoch_to_index_to_validator[epoch]
+        )
+    )
+
     if len(index_to_validator) == 0:
         return
 

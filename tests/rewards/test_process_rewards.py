@@ -15,12 +15,16 @@ from eth_validator_watcher.rewards import (
     suboptimal_sources_rate_gauge,
     suboptimal_targets_rate_gauge,
 )
+from eth_validator_watcher.utils import LimitedDict
 
 Validator = Validators.DataItem.Validator
 
 
 def test_process_rewards_no_validator() -> None:
-    process_rewards(BeaconType.LIGHTHOUSE, "a beacon", 42, {})  # type: ignore
+    epoch_to_index_to_validator = LimitedDict(2)
+    epoch_to_index_to_validator[42] = {}
+
+    process_rewards(BeaconType.LIGHTHOUSE, "a beacon", 42, epoch_to_index_to_validator)  # type: ignore
 
 
 def test_process_rewards_empty() -> None:
@@ -41,7 +45,10 @@ def test_process_rewards_empty() -> None:
 
     beacon = Beacon()
 
-    process_rewards(beacon, BeaconType.PRYSM, 42, {12345: "a validator"})  # type: ignore
+    epoch_to_index_to_validator = LimitedDict(2)
+    epoch_to_index_to_validator[42] = {12345: "a validator"}
+
+    process_rewards(beacon, BeaconType.PRYSM, 42, epoch_to_index_to_validator)  # type: ignore
 
 
 def test_process_rewards_all_validators_are_ideal() -> None:
@@ -95,27 +102,30 @@ def test_process_rewards_all_validators_are_ideal() -> None:
     actual_negative_targets_count_before = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
     actual_heads_count_before = actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
+    epoch_to_index_to_validator = LimitedDict(2)
+    epoch_to_index_to_validator[42] = {
+        1: Validator(
+            pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        2: Validator(
+            pubkey="0x222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",
+            effective_balance=31_000_000_000,
+            slashed=False,
+        ),
+        3: Validator(
+            pubkey="0x333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+    }
+
     process_rewards(
         beacon,  # type: ignore
         BeaconType.LIGHTHOUSE,
         42,
-        {
-            1: Validator(
-                pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            2: Validator(
-                pubkey="0x222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",
-                effective_balance=31_000_000_000,
-                slashed=False,
-            ),
-            3: Validator(
-                pubkey="0x333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-        },
+        epoch_to_index_to_validator,
     )
 
     ideal_sources_count_after = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
@@ -237,62 +247,62 @@ def test_process_rewards_some_validators_are_ideal() -> None:
     actual_negative_targets_count_before = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
     actual_heads_count_before = actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
+    epoch_to_index_to_validator = LimitedDict(2)
+    epoch_to_index_to_validator[42] = {
+        1: Validator(
+            pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        2: Validator(
+            pubkey="0x222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        3: Validator(
+            pubkey="0x333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        4: Validator(
+            pubkey="444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        5: Validator(
+            pubkey="555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        6: Validator(
+            pubkey="666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        7: Validator(
+            pubkey="777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        8: Validator(
+            pubkey="888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        9: Validator(
+            pubkey="999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+            effective_balance=31_000_000_000,
+            slashed=False,
+        ),
+        10: Validator(
+            pubkey="000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+    }
+
     process_rewards(
-        beacon,  # type: ignore
-        BeaconType.LIGHTHOUSE,
-        42,
-        {
-            1: Validator(
-                pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            2: Validator(
-                pubkey="0x222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            3: Validator(
-                pubkey="0x333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            4: Validator(
-                pubkey="444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            5: Validator(
-                pubkey="555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            6: Validator(
-                pubkey="666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            7: Validator(
-                pubkey="777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777777",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            8: Validator(
-                pubkey="888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            9: Validator(
-                pubkey="999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
-                effective_balance=31_000_000_000,
-                slashed=False,
-            ),
-            10: Validator(
-                pubkey="000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-        },
+        beacon, BeaconType.LIGHTHOUSE, 42, epoch_to_index_to_validator  # type: ignore
     )
 
     ideal_sources_count_after = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
@@ -397,27 +407,27 @@ def test_process_rewards_no_validator_is_ideal() -> None:
     actual_negative_targets_count_before = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
     actual_heads_count_before = actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
+    epoch_to_index_to_validator = LimitedDict(2)
+    epoch_to_index_to_validator[42] = {
+        1: Validator(
+            pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+        2: Validator(
+            pubkey="0x222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",
+            effective_balance=31_000_000_000,
+            slashed=False,
+        ),
+        3: Validator(
+            pubkey="0x333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+            effective_balance=32_000_000_000,
+            slashed=False,
+        ),
+    }
+
     process_rewards(
-        beacon,  # type: ignore
-        BeaconType.LIGHTHOUSE,
-        42,
-        {
-            1: Validator(
-                pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-            2: Validator(
-                pubkey="0x222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222",
-                effective_balance=31_000_000_000,
-                slashed=False,
-            ),
-            3: Validator(
-                pubkey="0x333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
-                effective_balance=32_000_000_000,
-                slashed=False,
-            ),
-        },
+        beacon, BeaconType.LIGHTHOUSE, 42, epoch_to_index_to_validator  # type: ignore
     )
 
     ideal_sources_count_after = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
