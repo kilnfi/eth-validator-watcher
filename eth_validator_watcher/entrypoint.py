@@ -29,6 +29,7 @@ from .utils import (
     NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
+    LimitedDict,
     Slack,
     get_our_pubkeys,
     slots,
@@ -233,6 +234,7 @@ def _handler(
 
     last_missed_attestations_process_epoch: Optional[int] = None
     last_rewards_process_epoch: Optional[int] = None
+    epoch_to_our_active_index_to_validator = LimitedDict(2)
 
     genesis = beacon.get_genesis()
 
@@ -277,6 +279,10 @@ def _handler(
                 | our_status_to_index_to_validator.get(StatusEnum.activeExiting, {})
                 | our_status_to_index_to_validator.get(StatusEnum.activeSlashed, {})
             )
+
+            epoch_to_our_active_index_to_validator[
+                epoch
+            ] = our_active_index_to_validator
 
             our_active_validators_gauge.set(len(our_active_index_to_validator))
 
@@ -356,14 +362,14 @@ def _handler(
         if should_process_missed_attestations:
             our_validators_indexes_that_missed_attestation = (
                 process_missed_attestations(
-                    beacon, beacon_type, our_active_index_to_validator, epoch
+                    beacon, beacon_type, epoch_to_our_active_index_to_validator, epoch
                 )
             )
 
             process_double_missed_attestations(
                 our_validators_indexes_that_missed_attestation,
                 our_validators_indexes_that_missed_previous_attestation,
-                our_active_index_to_validator,
+                epoch_to_our_active_index_to_validator,
                 epoch,
                 slack,
             )

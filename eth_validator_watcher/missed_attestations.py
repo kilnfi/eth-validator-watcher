@@ -9,7 +9,7 @@ from eth_validator_watcher.models import BeaconType
 
 from .beacon import Beacon
 from .models import Validators
-from .utils import Slack
+from .utils import LimitedDict, Slack
 
 print = functools.partial(print, flush=True)
 
@@ -27,7 +27,7 @@ double_missed_attestations_count = Gauge(
 def process_missed_attestations(
     beacon: Beacon,
     beacon_type: BeaconType,
-    our_active_index_to_validator: dict[int, Validators.DataItem.Validator],
+    epoch_to_index_to_validator_index: LimitedDict,
     epoch: int,
 ) -> set[int]:
     """Process missed attestations.
@@ -35,12 +35,19 @@ def process_missed_attestations(
     Parameters:
     beacon                       : Beacon instance
     beacon_type                  : Beacon type
-    our_active_index_to_validator: Dictionary with:
-        key  : our active validator index
-        value: validator data corresponding to the validator index
+    epoch_to_index_to_validator : Limited dictionary with:
+        outer key             : epoch
+        outer value, inner key: validator indexes
+        inner value           : validators
     epoch                        : Epoch where the missed attestations are checked
     """
-    validators_index = set(our_active_index_to_validator)
+    index_to_validator: dict[int, Validators.DataItem.Validator] = (
+        epoch_to_index_to_validator_index[epoch - 1]
+        if epoch - 1 in epoch_to_index_to_validator_index
+        else epoch_to_index_to_validator_index[epoch]
+    )
+
+    validators_index = set(index_to_validator)
     validators_liveness = beacon.get_validators_liveness(
         beacon_type, epoch - 1, validators_index
     )
@@ -57,8 +64,7 @@ def process_missed_attestations(
     first_indexes = list(dead_indexes)[:5]
 
     first_pubkeys = (
-        our_active_index_to_validator[first_index].pubkey
-        for first_index in first_indexes
+        index_to_validator[first_index].pubkey for first_index in first_indexes
     )
 
     short_first_pubkeys = [pubkey[:10] for pubkey in first_pubkeys]
@@ -76,7 +82,7 @@ def process_missed_attestations(
 def process_double_missed_attestations(
     dead_indexes: set[int],
     previous_dead_indexes: set[int],
-    our_active_index_to_validator: dict[int, Validators.DataItem.Validator],
+    epoch_to_index_to_validator_index: LimitedDict,
     epoch: int,
     slack: Optional[Slack],
 ) -> Set[int]:
@@ -87,24 +93,26 @@ def process_double_missed_attestations(
                                    attestations
     previous_dead_indexes        : Set of indexes of the validators that missed
                                    attestations in the previous epoch
-    our_active_index_to_validator: Dictionary with:
-        key  : our active validator index
-        value: validator data corresponding to the validator index
+
+    epoch_to_index_to_validator  : Limited dictionary with:
+        outer key             : epoch
+        outer value, inner key: validator indexes
+        inner value           : validators
+
     epoch                        : Epoch where the missed attestations are checked
     slack                        : Slack instance
     """
     double_dead_indexes = dead_indexes & previous_dead_indexes
-
     double_missed_attestations_count.set(len(double_dead_indexes))
 
     if len(double_dead_indexes) == 0:
         return set()
 
+    index_to_validator = epoch_to_index_to_validator_index[epoch - 1]
     first_indexes = list(double_dead_indexes)[:5]
 
     first_pubkeys = (
-        our_active_index_to_validator[first_index].pubkey
-        for first_index in first_indexes
+        index_to_validator[first_index].pubkey for first_index in first_indexes
     )
 
     short_first_pubkeys = [pubkey[:10] for pubkey in first_pubkeys]
