@@ -120,7 +120,7 @@ class BeaconType(str, Enum):
     LIGHTHOUSE = "lighthouse"
     NIMBUS = "nimbus"
     PRYSM = "prysm"
-    TEKU = "teku"
+    OLD_TEKU = "old-teku"
     OTHER = "other"
 
 

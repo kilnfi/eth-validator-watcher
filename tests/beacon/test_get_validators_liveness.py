@@ -80,7 +80,9 @@ def test_get_proposer_duties_teku():
 
         assert (
             beacon.get_validators_liveness(
-                beacon_type=BeaconType.TEKU, epoch=1664, validators_index={42, 44, 46}
+                beacon_type=BeaconType.OLD_TEKU,
+                epoch=1664,
+                validators_index={42, 44, 46},
             )
             == expected
         )

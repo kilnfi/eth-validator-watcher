@@ -24,7 +24,7 @@ def test_fee_recipient_set_while_execution_url_not_set() -> None:
             web3signer_url=None,
             fee_recipient="something",
             slack_channel="MY SLACK CHANNEL",
-            beacon_type=BeaconType.TEKU,
+            beacon_type=BeaconType.OLD_TEKU,
             relays_url=[],
             liveness_file=None,
         )
@@ -39,7 +39,7 @@ def test_fee_recipient_not_valid() -> None:
             web3signer_url=None,
             fee_recipient="something",
             slack_channel="MY SLACK CHANNEL",
-            beacon_type=BeaconType.TEKU,
+            beacon_type=BeaconType.OLD_TEKU,
             relays_url=[],
             liveness_file=None,
         )
@@ -54,7 +54,7 @@ def test_slack_token_not_defined() -> None:
             web3signer_url=None,
             fee_recipient=None,
             slack_channel="MY SLACK CHANNEL",
-            beacon_type=BeaconType.TEKU,
+            beacon_type=BeaconType.OLD_TEKU,
             relays_url=[],
             liveness_file=None,
         )
@@ -97,7 +97,7 @@ def test_invalid_pubkeys() -> None:
             web3signer_url=None,
             fee_recipient=None,
             slack_channel=None,
-            beacon_type=BeaconType.TEKU,
+            beacon_type=BeaconType.OLD_TEKU,
             relays_url=[],
             liveness_file=None,
         )
@@ -189,7 +189,7 @@ def test_nominal() -> None:
         epoch: int,
     ) -> set[int]:
         assert isinstance(beacon, Beacon)
-        assert beacon_type is BeaconType.TEKU
+        assert beacon_type is BeaconType.OLD_TEKU
         assert epoch_to_index_to_validator_index[1] == {
             0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
             2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
@@ -305,7 +305,7 @@ def test_nominal() -> None:
         web3signer_url="http://localhost:9000",
         fee_recipient=None,
         slack_channel="my slack channel",
-        beacon_type=BeaconType.TEKU,
+        beacon_type=BeaconType.OLD_TEKU,
         relays_url=["http://my-awesome-relay.com"],
         liveness_file=Path("/path/to/liveness"),
     )
