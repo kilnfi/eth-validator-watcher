@@ -254,7 +254,7 @@ class Beacon:
         beacon_type_to_function = {
             BeaconType.LIGHTHOUSE: self.__get_validators_liveness_lighthouse,
             BeaconType.PRYSM: self.__get_validators_liveness_beacon_api,
-            BeaconType.TEKU: self.__get_validators_liveness_teku,
+            BeaconType.OLD_TEKU: self.__get_validators_liveness_old_teku,
             BeaconType.OTHER: self.__get_validators_liveness_beacon_api,
         }
 
@@ -300,7 +300,7 @@ class Beacon:
             timeout=10,
         )
 
-    def __get_validators_liveness_teku(
+    def __get_validators_liveness_old_teku(
         self, epoch: int, validators_index: set[int]
     ) -> Response:
         """Get validators liveness from Teku.

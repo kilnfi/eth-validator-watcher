@@ -13,7 +13,7 @@ def test_process_missed_attestations_some_dead_indexes() -> None:
         def get_validators_liveness(
             beacon_type: BeaconType, epoch: int, validators_index: set[int]
         ) -> dict[int, bool]:
-            assert beacon_type is BeaconType.TEKU
+            assert beacon_type is BeaconType.OLD_TEKU
             assert epoch == 0
             assert validators_index == {42, 43, 44}
 
@@ -30,7 +30,7 @@ def test_process_missed_attestations_some_dead_indexes() -> None:
 
     actual = process_missed_attestations(
         beacon=Beacon(),  # type: ignore
-        beacon_type=BeaconType.TEKU,
+        beacon_type=BeaconType.OLD_TEKU,
         epoch_to_index_to_validator_index=epoch_to_index_to_validator_client,
         epoch=1,
     )
@@ -44,7 +44,7 @@ def test_process_missed_attestations_no_dead_indexes() -> None:
         def get_validators_liveness(
             beacon_type: BeaconType, epoch: int, validators_index: set[int]
         ) -> dict[int, bool]:
-            assert beacon_type is BeaconType.TEKU
+            assert beacon_type is BeaconType.OLD_TEKU
             assert epoch == 0
             assert validators_index == {42, 43, 44}
 
@@ -61,7 +61,7 @@ def test_process_missed_attestations_no_dead_indexes() -> None:
 
     actual = process_missed_attestations(
         beacon=Beacon(),  # type: ignore
-        beacon_type=BeaconType.TEKU,
+        beacon_type=BeaconType.OLD_TEKU,
         epoch_to_index_to_validator_index=epoch_to_index_to_validator_client,
         epoch=1,
     )
