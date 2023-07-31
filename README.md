@@ -187,7 +187,7 @@ You [did not had](https://github.com/kilnfi/eth-validator-watcher/assets/4943830
 Someone [missed](https://beaconcha.in/validator/399279#blocks) a block proposal.  | ```💩     validator 0xa3dbc635 missed   block at epoch 209894 - slot 6716637 💩```
 You [missed](https://beaconcha.in/validator/631094#blocks) a block proposal. | ```❌ Our validator 0xa66d5712 missed   block at epoch 209695 - slot 6710240 ❌```
 You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/9bed8b53-5c53-4cf0-818d-066434660004) an attestation. | ```☹️ Our validator 0xa672f362, 0xb5f46214, 0xac81b7f4 and 0 more missed attestation at epoch 209894```
-You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/74326f4f-d3f5-405d-87ce-9576f9ed79a0) 2 attestations in a raw. | ```😱  Our validator 0x8c9bfca1, 0xa68f7c5d and 0 more missed 2 attestations in a raw from epoch 209367```
+You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/74326f4f-d3f5-405d-87ce-9576f9ed79a0) 2 attestations in a row. | ```😱  Our validator 0x8c9bfca1, 0xa68f7c5d and 0 more missed 2 attestations in a row from epoch 209367```
 You [exited](https://beaconcha.in/validator/491565). | ```🚶 Our validator 0xaeb82c90 is exited```
 Someone [got](https://beaconcha.in/validator/647102) slashed. | ```✂️     validator 0xb3a608a7 is slashed```
 You got slashed (you don't want to see this one). | ```🔕 Our validator 0x00000000 is slashed```
@@ -202,7 +202,7 @@ If a Slack channel is specified, the slack messages are sent according to the fo
 - When you exited
 - When you got slashed
 - If fee recipient is specified, when you proposed a block with the wrong fee recipient
-- When you missed 2 attestations in a raw
+- When you missed 2 attestations in a row
 - When you missed a block
 
 Developer guide

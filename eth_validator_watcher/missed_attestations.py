@@ -121,7 +121,7 @@ def process_double_missed_attestations(
     message_console = (
         f"😱 Our validator {short_first_pubkeys_str} and "
         f"{len(double_dead_indexes) - len(short_first_pubkeys)} more "
-        f"missed 2 attestations in a raw from epoch {epoch - 2}"
+        f"missed 2 attestations in a row from epoch {epoch - 2}"
     )
 
     print(message_console)
@@ -130,7 +130,7 @@ def process_double_missed_attestations(
         message_slack = (
             f"😱 Our validator `{short_first_pubkeys_str}` and "
             f"`{len(double_dead_indexes) - len(short_first_pubkeys)}` more "
-            f"missed 2 attestations in a raw from epoch `{epoch - 2}`"
+            f"missed 2 attestations in a row from epoch `{epoch - 2}`"
         )
 
         slack.send_message(message_slack)
