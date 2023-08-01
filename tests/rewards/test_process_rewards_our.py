@@ -1,64 +1,37 @@
 from math import isclose
+from typing import Optional
 
 from eth_validator_watcher.models import BeaconType, Rewards, Validators
 from eth_validator_watcher.rewards import (
-    actual_heads_count,
-    actual_negative_sources_count,
-    actual_negative_targets_count,
-    actual_positive_sources_count,
-    actual_positive_targets_count,
-    ideal_heads_count,
-    ideal_sources_count,
-    ideal_targets_count,
+    our_ideal_sources_count,
+    our_ideal_targets_count,
+    our_ideal_heads_count,
+    our_actual_neg_sources_count,
+    our_actual_pos_sources_count,
+    our_actual_neg_targets_count,
+    our_actual_pos_targets_count,
+    our_actual_heads_count,
+    our_suboptimal_sources_rate_gauge,
+    our_suboptimal_targets_rate_gauge,
+    our_suboptimal_heads_rate_gauge,
     process_rewards,
-    suboptimal_heads_rate_gauge,
-    suboptimal_sources_rate_gauge,
-    suboptimal_targets_rate_gauge,
 )
 from eth_validator_watcher.utils import LimitedDict
 
 Validator = Validators.DataItem.Validator
 
 
-def test_process_rewards_no_validator() -> None:
-    epoch_to_index_to_validator = LimitedDict(2)
-    epoch_to_index_to_validator[42] = {}
-
-    process_rewards(BeaconType.LIGHTHOUSE, "a beacon", 42, epoch_to_index_to_validator)  # type: ignore
-
-
-def test_process_rewards_empty() -> None:
+def test_process_rewards_all_our_validators_are_ideal() -> None:
     class Beacon:
         def get_rewards(
-            self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+            self,
+            beacon_type: BeaconType,
+            epoch: int,
+            validators_index: Optional[set[int]] = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
-            assert validators_index == {12345}
-
-            return Rewards(
-                data=Rewards.Data(
-                    ideal_rewards=[],
-                    total_rewards=[],
-                )
-            )
-
-    beacon = Beacon()
-
-    epoch_to_index_to_validator = LimitedDict(2)
-    epoch_to_index_to_validator[42] = {12345: "a validator"}
-
-    process_rewards(beacon, BeaconType.PRYSM, 42, epoch_to_index_to_validator)  # type: ignore
-
-
-def test_process_rewards_all_validators_are_ideal() -> None:
-    class Beacon:
-        def get_rewards(
-            self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
-        ) -> Rewards:
-            assert isinstance(beacon_type, BeaconType)
-            assert epoch == 40
-            assert validators_index == {1, 2, 3}
+            assert validators_index in (None, {1, 2, 3})
 
             return Rewards(
                 data=Rewards.Data(
@@ -92,18 +65,18 @@ def test_process_rewards_all_validators_are_ideal() -> None:
 
     beacon = Beacon()
 
-    ideal_sources_count_before = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_before = ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_before = ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_before = our_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_before = our_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_before = our_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_before = actual_positive_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_before = actual_negative_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_before = actual_positive_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_before = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_heads_count_before = actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_before = our_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_before = our_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_before = our_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_before = our_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_before = our_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    epoch_to_index_to_validator = LimitedDict(2)
-    epoch_to_index_to_validator[42] = {
+    net_epoch_to_index_to_validator = LimitedDict(2)
+    net_epoch_to_index_to_validator[42] = {
         1: Validator(
             pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
             effective_balance=32_000_000_000,
@@ -121,23 +94,27 @@ def test_process_rewards_all_validators_are_ideal() -> None:
         ),
     }
 
+    our_epoch_to_index_to_validator = LimitedDict(2)
+    our_epoch_to_index_to_validator[42] = net_epoch_to_index_to_validator[42]
+
     process_rewards(
         beacon,  # type: ignore
         BeaconType.LIGHTHOUSE,
         42,
-        epoch_to_index_to_validator,
+        net_epoch_to_index_to_validator,
+        our_epoch_to_index_to_validator,
     )
 
-    ideal_sources_count_after = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_after = ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_after = ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_after = our_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_after = our_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_after = our_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_after = actual_positive_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_after = actual_negative_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_after = actual_positive_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_after = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_after = our_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_after = our_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_after = our_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_after = our_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_heads_count_after = actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_after = our_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     assert ideal_sources_count_after - ideal_sources_count_before == 9_090
     assert ideal_targets_count_after - ideal_targets_count_before == 16_889
@@ -163,12 +140,12 @@ def test_process_rewards_all_validators_are_ideal() -> None:
 
     assert actual_heads_count_after - actual_heads_count_before == 8_752
 
-    assert isclose(suboptimal_sources_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
-    assert isclose(suboptimal_targets_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
-    assert isclose(suboptimal_heads_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
+    assert isclose(our_suboptimal_sources_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
+    assert isclose(our_suboptimal_targets_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
+    assert isclose(our_suboptimal_heads_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
 
 
-def test_process_rewards_some_validators_are_ideal() -> None:
+def test_process_rewards_some_our_validators_are_ideal() -> None:
     """10 validators.
     5 are perfect.
     2 have good source, good target but wrong head.
@@ -178,11 +155,14 @@ def test_process_rewards_some_validators_are_ideal() -> None:
 
     class Beacon:
         def get_rewards(
-            self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+            self,
+            beacon_type: BeaconType,
+            epoch: int,
+            validators_index: Optional[set[int]] = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
-            assert validators_index == {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+            assert validators_index in (None, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
 
             return Rewards(
                 data=Rewards.Data(
@@ -237,18 +217,18 @@ def test_process_rewards_some_validators_are_ideal() -> None:
 
     beacon = Beacon()
 
-    ideal_sources_count_before = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_before = ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_before = ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_before = our_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_before = our_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_before = our_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_before = actual_positive_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_before = actual_negative_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_before = actual_positive_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_before = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_heads_count_before = actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_before = our_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_before = our_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_before = our_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_before = our_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_before = our_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    epoch_to_index_to_validator = LimitedDict(2)
-    epoch_to_index_to_validator[42] = {
+    net_epoch_to_index_to_validator = LimitedDict(2)
+    net_epoch_to_index_to_validator[42] = {
         1: Validator(
             pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
             effective_balance=32_000_000_000,
@@ -301,20 +281,27 @@ def test_process_rewards_some_validators_are_ideal() -> None:
         ),
     }
 
+    our_epoch_to_index_to_validator = LimitedDict(2)
+    our_epoch_to_index_to_validator[42] = net_epoch_to_index_to_validator[42]
+
     process_rewards(
-        beacon, BeaconType.LIGHTHOUSE, 42, epoch_to_index_to_validator  # type: ignore
+        beacon,  # type: ignore
+        BeaconType.LIGHTHOUSE,
+        42,
+        net_epoch_to_index_to_validator,
+        our_epoch_to_index_to_validator,
     )
 
-    ideal_sources_count_after = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_after = ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_after = ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_after = our_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_after = our_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_after = our_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_after = actual_positive_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_after = actual_negative_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_after = actual_positive_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_after = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_after = our_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_after = our_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_after = our_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_after = our_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_heads_count_after = actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_after = our_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     assert ideal_sources_count_after - ideal_sources_count_before == 30_524
     assert ideal_targets_count_after - ideal_targets_count_before == 56_712
@@ -341,29 +328,32 @@ def test_process_rewards_some_validators_are_ideal() -> None:
     assert actual_heads_count_after - actual_heads_count_before == 14_740
 
     assert isclose(
-        suboptimal_sources_rate_gauge.collect()[0].samples[0].value,  # type: ignore
+        our_suboptimal_sources_rate_gauge.collect()[0].samples[0].value,  # type: ignore
         0.1,
     )
 
     assert isclose(
-        suboptimal_targets_rate_gauge.collect()[0].samples[0].value,  # type: ignore
+        our_suboptimal_targets_rate_gauge.collect()[0].samples[0].value,  # type: ignore
         0.3,
     )
 
     assert isclose(
-        suboptimal_heads_rate_gauge.collect()[0].samples[0].value,  # type: ignore
+        our_suboptimal_heads_rate_gauge.collect()[0].samples[0].value,  # type: ignore
         0.5,
     )
 
 
-def test_process_rewards_no_validator_is_ideal() -> None:
+def test_process_rewards_no_our_validator_is_ideal() -> None:
     class Beacon:
         def get_rewards(
-            self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+            self,
+            beacon_type: BeaconType,
+            epoch: int,
+            validators_index: Optional[set[int]] = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
-            assert validators_index == {1, 2, 3}
+            assert validators_index in (None, {1, 2, 3})
 
             return Rewards(
                 data=Rewards.Data(
@@ -397,18 +387,18 @@ def test_process_rewards_no_validator_is_ideal() -> None:
 
     beacon = Beacon()
 
-    ideal_sources_count_before = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_before = ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_before = ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_before = our_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_before = our_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_before = our_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_before = actual_positive_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_before = actual_negative_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_before = actual_positive_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_before = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_heads_count_before = actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_before = our_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_before = our_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_before = our_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_before = our_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_before = our_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    epoch_to_index_to_validator = LimitedDict(2)
-    epoch_to_index_to_validator[42] = {
+    net_epoch_to_index_to_validator = LimitedDict(2)
+    net_epoch_to_index_to_validator[42] = {
         1: Validator(
             pubkey="0x111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
             effective_balance=32_000_000_000,
@@ -426,20 +416,27 @@ def test_process_rewards_no_validator_is_ideal() -> None:
         ),
     }
 
+    our_epoch_to_index_to_validator = LimitedDict(2)
+    our_epoch_to_index_to_validator[42] = net_epoch_to_index_to_validator[42]
+
     process_rewards(
-        beacon, BeaconType.LIGHTHOUSE, 42, epoch_to_index_to_validator  # type: ignore
+        beacon,  # type: ignore
+        BeaconType.LIGHTHOUSE,
+        42,
+        net_epoch_to_index_to_validator,
+        our_epoch_to_index_to_validator,
     )
 
-    ideal_sources_count_after = ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_after = ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_after = ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_after = our_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_after = our_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_after = our_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_after = actual_positive_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_after = actual_negative_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_after = actual_positive_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_after = actual_negative_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_after = our_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_after = our_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_after = our_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_after = our_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_heads_count_after = actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_after = our_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     assert ideal_sources_count_after - ideal_sources_count_before == 9_090
     assert ideal_targets_count_after - ideal_targets_count_before == 16_889
@@ -465,6 +462,6 @@ def test_process_rewards_no_validator_is_ideal() -> None:
 
     assert actual_heads_count_after - actual_heads_count_before == 0
 
-    assert isclose(suboptimal_sources_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
-    assert isclose(suboptimal_targets_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
-    assert isclose(suboptimal_heads_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
+    assert isclose(our_suboptimal_sources_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
+    assert isclose(our_suboptimal_targets_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
+    assert isclose(our_suboptimal_heads_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
