@@ -11,7 +11,7 @@ from typer import Option
 
 from .beacon import Beacon
 from .coinbase import Coinbase
-from .entry_queue import export_duration_sec as export_entry_queue_duration_sec
+from .entry_queue import export_duration_sec as export_entry_queue_dur_sec
 from .execution import Execution
 from .exited_validators import ExitedValidators
 from .fee_recipient import process_fee_recipient
@@ -42,7 +42,7 @@ from .web3signer import Web3Signer
 
 from .relays import Relays
 
-StatusEnum = Validators.DataItem.StatusEnum
+Status = Validators.DataItem.StatusEnum
 
 
 app = typer.Typer(add_completion=False)
@@ -50,12 +50,12 @@ app = typer.Typer(add_completion=False)
 slot_gauge = Gauge("slot", "Slot")
 epoch_gauge = Gauge("epoch", "Epoch")
 
-our_pending_queued_validators_gauge = Gauge(
+our_queued_vals_gauge = Gauge(
     "our_pending_queued_validators_count",
     "Our pending queued validators count",
 )
 
-total_pending_queued_validators_gauge = Gauge(
+net_pending_q_vals_gauge = Gauge(
     "total_pending_queued_validators_count",
     "Total pending queued validators count",
 )
@@ -65,7 +65,7 @@ our_active_validators_gauge = Gauge(
     "Our active validators count",
 )
 
-total_active_validators_gauge = Gauge(
+net_active_validators_gauge = Gauge(
     "total_active_validators_count",
     "Total active validators count",
 )
@@ -224,18 +224,19 @@ def _handler(
     relays = Relays(relays_url)
 
     our_pubkeys: set[str] = set()
-    our_active_index_to_validator: dict[int, Validators.DataItem.Validator] = {}
+    our_active_idx2val: dict[int, Validators.DataItem.Validator] = {}
     our_validators_indexes_that_missed_attestation: set[int] = set()
     our_validators_indexes_that_missed_previous_attestation: set[int] = set()
-    previous_epoch: Optional[int] = None
+    our_epoch2active_idx2val = LimitedDict(3)
+    net_epoch2active_idx2val = LimitedDict(3)
 
     exited_validators = ExitedValidators(slack)
     slashed_validators = SlashedValidators(slack)
 
     last_missed_attestations_process_epoch: Optional[int] = None
     last_rewards_process_epoch: Optional[int] = None
-    epoch_to_our_active_index_to_validator = LimitedDict(4)
 
+    previous_epoch: Optional[int] = None
     genesis = beacon.get_genesis()
 
     for slot, slot_start_time_sec in slots(genesis.data.genesis_time):
@@ -253,99 +254,67 @@ def _handler(
             except ValueError:
                 raise typer.BadParameter("Some pubkeys are invalid")
 
-            total_status_to_index_to_validator = (
-                beacon.get_status_to_index_to_validator()
-            )
+            # Network validators
+            # ------------------
+            net_status2idx2val = beacon.get_status_to_index_to_validator()
 
-            our_status_to_index_to_validator = {
+            net_pending_q_idx2val = net_status2idx2val.get(Status.pendingQueued, {})
+            nb_total_pending_q_vals = len(net_pending_q_idx2val)
+            net_pending_q_vals_gauge.set(nb_total_pending_q_vals)
+
+            active_ongoing = net_status2idx2val.get(Status.activeOngoing, {})
+            active_exiting = net_status2idx2val.get(Status.activeExiting, {})
+            active_slashed = net_status2idx2val.get(Status.activeSlashed, {})
+            net_active_idx2val = active_ongoing | active_exiting | active_slashed
+            net_epoch2active_idx2val[epoch] = net_active_idx2val
+
+            net_active_vals_count = len(net_active_idx2val)
+            net_active_validators_gauge.set(net_active_vals_count)
+
+            net_exited_s_idx2val = net_status2idx2val.get(Status.exitedSlashed, {})
+
+            with_poss = net_status2idx2val.get(Status.withdrawalPossible, {})
+            with_done = net_status2idx2val.get(Status.withdrawalDone, {})
+            net_withdrawable_idx2val = with_poss | with_done
+
+            # Our validators
+            # --------------
+            our_status2idx2val = {
                 status: {
                     index: validator
                     for index, validator in validator.items()
                     if validator.pubkey in our_pubkeys
                 }
-                for status, validator in total_status_to_index_to_validator.items()
+                for status, validator in net_status2idx2val.items()
             }
 
-            our_pending_queued_index_to_validator = (
-                our_status_to_index_to_validator.get(StatusEnum.pendingQueued, {})
-            )
+            our_queued_idx2val = our_status2idx2val.get(Status.pendingQueued, {})
+            our_queued_vals_gauge.set(len(our_queued_idx2val))
 
-            our_pending_queued_validators_gauge.set(
-                len(our_pending_queued_index_to_validator)
-            )
+            ongoing = our_status2idx2val.get(Status.activeOngoing, {})
+            active_exiting = our_status2idx2val.get(Status.activeExiting, {})
+            active_slashed = our_status2idx2val.get(Status.activeSlashed, {})
+            our_active_idx2val = ongoing | active_exiting | active_slashed
+            our_epoch2active_idx2val[epoch] = our_active_idx2val
 
-            our_active_index_to_validator = (
-                our_status_to_index_to_validator.get(StatusEnum.activeOngoing, {})
-                | our_status_to_index_to_validator.get(StatusEnum.activeExiting, {})
-                | our_status_to_index_to_validator.get(StatusEnum.activeSlashed, {})
-            )
+            our_active_validators_gauge.set(len(our_active_idx2val))
+            our_exited_u_idx2val = our_status2idx2val.get(Status.exitedUnslashed, {})
+            our_exited_s_idx2val = our_status2idx2val.get(Status.exitedSlashed, {})
 
-            epoch_to_our_active_index_to_validator[
-                epoch
-            ] = our_active_index_to_validator
+            with_poss = our_status2idx2val.get(Status.withdrawalPossible, {})
+            with_done = our_status2idx2val.get(Status.withdrawalDone, {})
+            our_withdrawable_idx2val = with_poss | with_done
 
-            our_active_validators_gauge.set(len(our_active_index_to_validator))
-
-            our_exited_unslashed_index_to_validator = (
-                our_status_to_index_to_validator.get(StatusEnum.exitedUnslashed, {})
-            )
-
-            our_exited_slashed_index_to_validator = (
-                our_status_to_index_to_validator.get(StatusEnum.exitedSlashed, {})
-            )
-
-            our_withdrawable_index_to_validator = our_status_to_index_to_validator.get(
-                StatusEnum.withdrawalPossible, {}
-            ) | our_status_to_index_to_validator.get(StatusEnum.withdrawalDone, {})
-
-            total_pending_queued_index_to_validator = (
-                total_status_to_index_to_validator.get(StatusEnum.pendingQueued, {})
-            )
-
-            nb_total_pending_queued_validators = len(
-                total_pending_queued_index_to_validator
-            )
-
-            total_pending_queued_validators_gauge.set(
-                nb_total_pending_queued_validators
-            )
-
-            total_active_index_to_validator = (
-                total_status_to_index_to_validator.get(StatusEnum.activeOngoing, {})
-                | total_status_to_index_to_validator.get(StatusEnum.activeExiting, {})
-                | total_status_to_index_to_validator.get(StatusEnum.activeSlashed, {})
-            )
-
-            nb_total_active_validators = len(total_active_index_to_validator)
-            total_active_validators_gauge.set(nb_total_active_validators)
-
-            total_exited_slashed_index_to_validator = (
-                total_status_to_index_to_validator.get(StatusEnum.exitedSlashed, {})
-            )
-
-            total_withdrawable_index_to_validator = (
-                total_status_to_index_to_validator.get(
-                    StatusEnum.withdrawalPossible, {}
-                )
-                | total_status_to_index_to_validator.get(StatusEnum.withdrawalDone, {})
-            )
-
-            exited_validators.process(
-                our_exited_unslashed_index_to_validator,
-                our_withdrawable_index_to_validator,
-            )
+            exited_validators.process(our_exited_u_idx2val, our_withdrawable_idx2val)
 
             slashed_validators.process(
-                total_exited_slashed_index_to_validator,
-                our_exited_slashed_index_to_validator,
-                total_withdrawable_index_to_validator,
-                our_withdrawable_index_to_validator,
+                net_exited_s_idx2val,
+                our_exited_s_idx2val,
+                net_withdrawable_idx2val,
+                our_withdrawable_idx2val,
             )
 
-            export_entry_queue_duration_sec(
-                nb_total_active_validators, nb_total_pending_queued_validators
-            )
-
+            export_entry_queue_dur_sec(net_active_vals_count, nb_total_pending_q_vals)
             coinbase.emit_eth_usd_conversion_rate()
 
         if previous_epoch is not None and previous_epoch != epoch:
@@ -362,27 +331,33 @@ def _handler(
         if should_process_missed_attestations:
             our_validators_indexes_that_missed_attestation = (
                 process_missed_attestations(
-                    beacon, beacon_type, epoch_to_our_active_index_to_validator, epoch
+                    beacon, beacon_type, our_epoch2active_idx2val, epoch
                 )
             )
 
             process_double_missed_attestations(
                 our_validators_indexes_that_missed_attestation,
                 our_validators_indexes_that_missed_previous_attestation,
-                epoch_to_our_active_index_to_validator,
+                our_epoch2active_idx2val,
                 epoch,
                 slack,
             )
 
             last_missed_attestations_process_epoch = epoch
 
-        should_process_rewards = slot_in_epoch >= SLOT_FOR_REWARDS_PROCESS and (
-            last_rewards_process_epoch is None or last_rewards_process_epoch != epoch
-        )
+        is_slot_big_enough = slot_in_epoch >= SLOT_FOR_REWARDS_PROCESS
+        is_last_rewards_epoch_none = last_rewards_process_epoch is None
+        is_new_rewards_epoch = last_rewards_process_epoch != epoch
+        epoch_condition = is_last_rewards_epoch_none or is_new_rewards_epoch
+        should_process_rewards = is_slot_big_enough and epoch_condition
 
         if should_process_rewards:
             process_rewards(
-                beacon, beacon_type, epoch, epoch_to_our_active_index_to_validator
+                beacon,
+                beacon_type,
+                epoch,
+                net_epoch2active_idx2val,
+                our_epoch2active_idx2val,
             )
 
             last_rewards_process_epoch = epoch
@@ -401,11 +376,11 @@ def _handler(
                 beacon,
                 block,
                 slot,
-                our_active_index_to_validator,
+                our_active_idx2val,
             )
 
             process_fee_recipient(
-                block, our_active_index_to_validator, execution, fee_recipient, slack
+                block, our_active_idx2val, execution, fee_recipient, slack
             )
 
         is_our_validator = process_missed_blocks(

@@ -10,6 +10,7 @@ from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
 from eth_validator_watcher.models import BeaconType, Genesis, Validators
 from eth_validator_watcher.utils import LimitedDict, Slack
+from eth_validator_watcher.web3signer import Web3Signer
 
 StatusEnum = Validators.DataItem.StatusEnum
 Validator = Validators.DataItem.Validator
@@ -141,10 +142,10 @@ def test_nominal() -> None:
                 },
                 StatusEnum.exitedSlashed: {
                     5: Validator(
-                        pubkey="0xfff", effective_balance=32000000000, slashed=False
+                        pubkey="0xfff", effective_balance=32000000000, slashed=True
                     ),
                     6: Validator(
-                        pubkey="0xggg", effective_balance=32000000000, slashed=False
+                        pubkey="0xggg", effective_balance=32000000000, slashed=True
                     ),
                 },
             }
@@ -152,10 +153,6 @@ def test_nominal() -> None:
         def get_potential_block(self, slot: int) -> Optional[str]:
             assert slot in {63, 64}
             return "A BLOCK"
-
-    class Web3Signer:
-        def __init__(self, url: str) -> None:
-            assert url == "http://localhost:9000"
 
     class Coinbase:
         nb_calls = 0
@@ -264,12 +261,13 @@ def test_nominal() -> None:
         beacon: Beacon,
         beacon_type: BeaconType,
         epoch: int,
-        epoch_to_index_to_validator: dict[int, Validator],
+        net_epoch2active_idx2val: dict[int, Validator],
+        our_epoch2active_idx2val: dict[int, Validator],
     ):
         assert isinstance(beacon, Beacon)
         assert isinstance(beacon_type, BeaconType)
         assert epoch == 1
-        assert epoch_to_index_to_validator[1] == {
+        assert net_epoch2active_idx2val[1] == {
             0: Validator(pubkey="0xaaa", effective_balance=32000000000, slashed=False),
             2: Validator(pubkey="0xccc", effective_balance=32000000000, slashed=False),
             4: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),

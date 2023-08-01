@@ -146,17 +146,28 @@ name                                       | description
 `suboptimal_attestations_rate`             | Suboptimal attestations rate
 `keys_count`                               | Keys count
 `bad_relay_count`                          | Bad relay count
-`suboptimal_sources_rate`                  | Suboptimal sources rate
-`suboptimal_targets_rate`                  | Suboptimal targets rate
-`suboptimal_heads_rate`                    | Suboptimal heads rate
-`ideal_sources_count`                      | Ideal sources count
-`ideal_targets_count`                      | Ideal targets count
-`ideal_heads_count`                        | Ideal heads count
-`actual_positive_sources_count`            | Actual positive sources count
-`actual_negative_sources_count`            | Actual negative sources count
-`actual_positive_targets_count`            | Actual positive targets count
-`actual_negative_targets_count`            | Actual negative targets count
-`actual_heads_count`                       | Actual heads count
+`net_suboptimal_sources_rate`              | Network suboptimal sources rate
+`net_suboptimal_targets_rate`              | Network suboptimal targets rate
+`net_suboptimal_heads_rate`                | Network suboptimal heads rate
+`net_ideal_sources_count`                  | Network ideal sources count
+`net_ideal_targets_count`                  | Network ideal targets count
+`net_ideal_heads_count`                    | Network ideal heads count
+`net_actual_pos_sources_count`             | Network actual positive sources count
+`net_actual_neg_sources_count`             | Network actual negative sources count
+`net_actual_pos_targets_count`             | Network actual positive targets count
+`net_actual_neg_targets_count`             | Network actual negative targets count
+`net_actual_heads_count`                   | Network actual heads count
+`our_suboptimal_sources_rate`              | Our suboptimal sources rate
+`our_suboptimal_targets_rate`              | Our suboptimal targets rate
+`our_suboptimal_heads_rate`                | Our suboptimal heads rate
+`our_ideal_sources_count`                  | Our ideal sources count
+`our_ideal_targets_count`                  | Our ideal targets count
+`our_ideal_heads_count`                    | Our ideal heads count
+`our_actual_pos_sources_count`             | Our actual positive sources count
+`our_actual_neg_sources_count`             | Our actual negative sources count
+`our_actual_pos_targets_count`             | Our actual positive targets count
+`our_actual_neg_targets_count`             | Our actual negative targets count
+`our_actual_heads_count`                   | Our actual heads count
 
 Installation
 ------------

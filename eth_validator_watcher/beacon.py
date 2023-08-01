@@ -179,7 +179,10 @@ class Beacon:
         return result
 
     def get_rewards(
-        self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
+        self,
+        beacon_type: BeaconType,
+        epoch: int,
+        validators_index: Optional[set[int]] = None,
     ) -> Rewards:
         """Get rewards.
 
@@ -187,7 +190,8 @@ class Beacon:
         beacon_type     : Type of beacon node
         epoch           : Epoch corresponding to the rewards to retrieve
         validators_index: Set of validator indexes corresponding to the rewards to
-                          retrieve
+                          retrieve. If None, rewards for all validators will be
+                          retrieved.
         """
 
         # On Prysm, because of
@@ -214,7 +218,11 @@ class Beacon:
 
         response = self.__post(
             f"{self.__url}/eth/v1/beacon/rewards/attestations/{epoch}",
-            json=[str(index) for index in sorted(validators_index)],
+            json=(
+                [str(index) for index in sorted(validators_index)]
+                if validators_index is not None
+                else []
+            ),
             timeout=10,
         )
 
