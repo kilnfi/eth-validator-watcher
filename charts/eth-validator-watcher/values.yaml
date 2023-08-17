@@ -1,0 +1,98 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/kilnfi/eth-validator-watcher
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+# -- Specifies the arguments to the command line
+# Please refer to https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#description
+args: []
+
+env: {}
+envFrom: {}
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+livenessProbe:
+  periodSeconds: 60
+  initialDelaySeconds: 120
+  failureThreshold: 10
+  exec:
+    command:
+      - /usr/bin/python3.9
+      - /usr/local/bin/liveness_check.py
+      - /tmp/liveness
+readinessProbe:
+  periodSeconds: 60
+  initialDelaySeconds: 30
+  failureThreshold: 10
+  exec:
+    command:
+      - /usr/bin/python3.9
+      - /usr/local/bin/liveness_check.py
+      - /tmp/liveness
+startupProbe: {}
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+volumes: []
+
+volumeMounts: []
+
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  namespace: ""
+  namespaceSelector: {}
+  # Default: scrape .Release.Namespace only
+  # To scrape all, use the following:
+  # namespaceSelector:
+  #   any: true
+  scrapeInterval: 60s
+  # honorLabels: true
+  targetLabels: []
+  metricRelabelings: []
+
+# -- List of public keys to watch. See https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#command-lines-examples
+watchedKeys: []

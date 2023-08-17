@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "eth-validator-watcher.fullname" . }}
+  labels:
+    {{- include "eth-validator-watcher.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 8000
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "eth-validator-watcher.selectorLabels" . | nindent 4 }}
