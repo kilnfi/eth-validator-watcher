@@ -1,6 +1,6 @@
 # eth-validator-watcher
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for running eth-validator-watcher
 
@@ -8,55 +8,58 @@ A Helm chart for running eth-validator-watcher
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| Alluvial | <contact@alluvial.finance> | <https://alluvial.finance> |
+| Alluvial | contact@alluvial.finance | https://alluvial.finance |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| affinity | object | `{}` |  |
-| args | list | `[]` | Specifies the arguments to the command line Please refer to https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#description |
-| env | object | `{}` |  |
-| envFrom | object | `{}` |  |
-| fullnameOverride | string | `""` |  |
-| image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"ghcr.io/kilnfi/eth-validator-watcher"` |  |
-| image.tag | string | `"latest"` |  |
-| imagePullSecrets | list | `[]` |  |
-| livenessProbe.exec.command[0] | string | `"/usr/bin/python3.9"` |  |
-| livenessProbe.exec.command[1] | string | `"/usr/local/bin/liveness_check.py"` |  |
-| livenessProbe.exec.command[2] | string | `"/tmp/liveness"` |  |
-| livenessProbe.failureThreshold | int | `10` |  |
-| livenessProbe.initialDelaySeconds | int | `120` |  |
-| livenessProbe.periodSeconds | int | `60` |  |
-| nameOverride | string | `""` |  |
-| nodeSelector | object | `{}` |  |
-| podAnnotations | object | `{}` |  |
-| podSecurityContext | object | `{}` |  |
-| readinessProbe.exec.command[0] | string | `"/usr/bin/python3.9"` |  |
-| readinessProbe.exec.command[1] | string | `"/usr/local/bin/liveness_check.py"` |  |
-| readinessProbe.exec.command[2] | string | `"/tmp/liveness"` |  |
-| readinessProbe.failureThreshold | int | `10` |  |
-| readinessProbe.initialDelaySeconds | int | `30` |  |
-| readinessProbe.periodSeconds | int | `60` |  |
-| replicaCount | int | `1` |  |
-| resources | object | `{}` |  |
-| securityContext | object | `{}` |  |
-| serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
-| serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| serviceMonitor.additionalLabels | object | `{}` |  |
-| serviceMonitor.enabled | bool | `false` |  |
-| serviceMonitor.metricRelabelings | list | `[]` |  |
-| serviceMonitor.namespace | string | `""` |  |
-| serviceMonitor.namespaceSelector | object | `{}` |  |
-| serviceMonitor.scrapeInterval | string | `"60s"` |  |
-| serviceMonitor.targetLabels | list | `[]` |  |
-| startupProbe | object | `{}` |  |
-| tolerations | list | `[]` |  |
-| volumeMounts | list | `[]` |  |
-| volumes | list | `[]` |  |
 | watchedKeys | list | `[]` | List of public keys to watch. See https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#command-lines-examples |
+| watcher.affinity | object | `{}` |  |
+| watcher.config.beaconType | string | `"other"` |  |
+| watcher.config.beaconUrl | string | `"http://localhost:5052"` |  |
+| watcher.extraArgs | list | `[]` |  |
+| watcher.extraInitContainers | list | `[]` |  |
+| watcher.fullnameOverride | string | `""` |  |
+| watcher.image.pullPolicy | string | `"IfNotPresent"` |  |
+| watcher.image.repository | string | `"ghcr.io/kilnfi/eth-validator-watcher"` |  |
+| watcher.image.tag | string | `"v0.41.0"` |  |
+| watcher.imagePullSecrets | list | `[]` |  |
+| watcher.livenessProbe.failureThreshold | int | `1` |  |
+| watcher.livenessProbe.initialDelaySeconds | int | `60` |  |
+| watcher.livenessProbe.periodSeconds | int | `60` |  |
+| watcher.livenessProbe.successThreshold | int | `1` |  |
+| watcher.livenessProbe.timeoutSeconds | int | `1` |  |
+| watcher.nameOverride | string | `""` |  |
+| watcher.nodeSelector | object | `{}` |  |
+| watcher.podAnnotations | object | `{}` |  |
+| watcher.podLabels | object | `{}` |  |
+| watcher.podMonitor.additionalLabels | object | `{}` |  |
+| watcher.podMonitor.enabled | bool | `false` |  |
+| watcher.podMonitor.interval | string | `"12s"` |  |
+| watcher.podMonitor.relabelings | list | `[]` |  |
+| watcher.podMonitor.scheme | string | `"http"` |  |
+| watcher.podMonitor.tlsConfig | object | `{}` |  |
+| watcher.podSecurityContext | object | `{}` |  |
+| watcher.readinessProbe.failureThreshold | int | `1` |  |
+| watcher.readinessProbe.initialDelaySeconds | int | `60` |  |
+| watcher.readinessProbe.periodSeconds | int | `60` |  |
+| watcher.readinessProbe.successThreshold | int | `1` |  |
+| watcher.readinessProbe.timeoutSeconds | int | `1` |  |
+| watcher.replicaCount | int | `1` |  |
+| watcher.resources.limits.memory | string | `"2400Mi"` |  |
+| watcher.resources.requests.cpu | string | `"100m"` |  |
+| watcher.resources.requests.memory | string | `"1200Mi"` |  |
+| watcher.securityContext | object | `{}` |  |
+| watcher.service.port | int | `80` |  |
+| watcher.service.type | string | `"ClusterIP"` |  |
+| watcher.serviceAccount.annotations | object | `{}` |  |
+| watcher.serviceAccount.create | bool | `true` |  |
+| watcher.serviceAccount.labels | object | `{}` |  |
+| watcher.serviceAccount.name | string | `""` |  |
+| watcher.tolerations | list | `[]` |  |
+| watcher.volumeMounts | object | `{}` |  |
+| watcher.volumes | object | `{}` |  |
 
 ----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)
+Autogenerated from chart metadata using [helm-docs v1.7.0](https://github.com/norwoodj/helm-docs/releases/v1.7.0)

@@ -1,0 +1,33 @@
+{{- if .Values.watcher.podMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "ethereum-validator-watcher.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ethereum-validator-watcher.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "ethereum-validator-watcher.matchLabels" . | nindent 8 }}
+  podMetricsEndpoints:
+  - port: metrics
+    {{- if .Values.watcher.podMonitor.interval }}
+    interval: {{ .Values.watcher.podMonitor.interval }}
+    {{- end }}
+    {{- if .Values.watcher.podMonitor.additionalLabels }}
+    additionalLabels:
+      {{- toYaml .Values.watcher.podMonitor.additionalLabels | nindent 6 }}
+    {{- end }}
+    {{- if .Values.watcher.podMonitor.scheme }}
+    scheme: {{ .Values.watcher.podMonitor.scheme }}
+    {{- end }}
+    {{- if .Values.watcher.podMonitor.tlsConfig }}
+    tlsConfig:
+      {{- toYaml .Values.watcher.podMonitor.tlsConfig | nindent 6 }}
+    {{- end }}
+    {{- if .Values.watcher.podMonitor.relabelings }}
+    relabelings:
+      {{ toYaml .Values.watcher.podMonitor.relabelings | nindent 6 }}
+    {{- end }}
+{{- end }}
