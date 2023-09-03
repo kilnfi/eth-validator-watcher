@@ -2,7 +2,7 @@
 
 import functools
 
-from prometheus_client import Gauge
+from prometheus_client import Gauge, Counter
 
 from .beacon import Beacon
 from .utils import NB_SLOT_PER_EPOCH
@@ -13,6 +13,14 @@ future_block_proposals_count = Gauge(
     "future_block_proposals_count",
     "Future block proposals count",
 )
+
+key_future_block_proposals_count = Gauge(
+    "key_future_block_proposals_count",
+    "Key future block proposals",
+    ["pubkey"],
+)
+
+initialized_keys: set[str] = set()
 
 
 def process_future_blocks_proposal(
@@ -29,6 +37,16 @@ def process_future_blocks_proposal(
     slot        : Slot
     is_new_epoch: Is new epoch
     """
+
+    for _key in our_pubkeys:
+        if _key not in initialized_keys:
+            key_future_block_proposals_count.labels(pubkey=_key)
+            initialized_keys.add(_key)
+    for _key in initialized_keys:
+        if _key not in our_pubkeys:
+            initialized_keys.remove(_key)
+            key_future_block_proposals_count.remove(pubkey=_key)
+
     epoch = slot // NB_SLOT_PER_EPOCH
     proposers_duties_current_epoch = beacon.get_proposer_duties(epoch)
     proposers_duties_next_epoch = beacon.get_proposer_duties(epoch + 1)
@@ -44,6 +62,17 @@ def process_future_blocks_proposal(
     ]
 
     future_block_proposals_count.set(len(filtered))
+    print(filtered)
+    for _key in our_pubkeys:
+        key_future_block_proposals_count.labels(pubkey=_key).inc(
+            len(
+                [
+                    item
+                    for item in filtered
+                    if item.pubkey == _key
+                ]
+            )
+        )
 
     if is_new_epoch:
         for item in filtered:

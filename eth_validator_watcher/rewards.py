@@ -56,20 +56,32 @@ AreIdeal = Tuple[bool, bool, bool]  # source, target, head
     our_suboptimal_sources_rate_gauge,
     our_suboptimal_targets_rate_gauge,
     our_suboptimal_heads_rate_gauge,
+    key_suboptimal_sources_rate_gauge,
+    key_suboptimal_targets_rate_gauge,
+    key_suboptimal_heads_rate_gauge,
 ) = (
     Gauge("our_suboptimal_sources_rate", "Our suboptimal sources rate"),
     Gauge("our_suboptimal_targets_rate", "Our suboptimal targets rate"),
     Gauge("our_suboptimal_heads_rate", "Our suboptimal heads rate"),
+    Gauge("key_suboptimal_sources_rate", "Key suboptimal sources rate", ["pubkey"]),
+    Gauge("key_suboptimal_targets_rate", "Key suboptimal targets rate", ["pubkey"]),
+    Gauge("key_suboptimal_heads_rate", "Key suboptimal heads rate", ["pubkey"]),
 )
 
 (
     our_ideal_sources_count,
     our_ideal_targets_count,
     our_ideal_heads_count,
+    key_ideal_sources_count,
+    key_ideal_targets_count,
+    key_ideal_heads_count,
 ) = (
     Counter("our_ideal_sources_count", "Our ideal sources count"),
     Counter("our_ideal_targets_count", "Our ideal targets count"),
     Counter("our_ideal_heads_count", "Our ideal heads count"),
+    Counter("key_ideal_sources_count", "Key ideal sources count", ["pubkey"]),
+    Counter("key_ideal_targets_count", "Key ideal targets count", ["pubkey"]),
+    Counter("key_ideal_heads_count", "Key ideal heads count", ["pubkey"]),
 )
 
 (
@@ -78,14 +90,25 @@ AreIdeal = Tuple[bool, bool, bool]  # source, target, head
     our_actual_pos_targets_count,
     our_actual_neg_targets_count,
     our_actual_heads_count,
+    key_actual_pos_sources_count,
+    key_actual_neg_sources_count,
+    key_actual_pos_targets_count,
+    key_actual_neg_targets_count,
+    key_actual_heads_count,
 ) = (
     Counter("our_actual_pos_sources_count", "Our actual positive sources count"),
     Counter("our_actual_neg_sources_count", "Our actual negative sources count"),
     Counter("our_actual_pos_targets_count", "Our actual positive targets count"),
     Counter("our_actual_neg_targets_count", "Our actual negative targets count"),
     Counter("our_actual_heads_count", "Our actual heads count"),
+    Counter("key_actual_pos_sources_count", "Key actual positive sources count", ["pubkey"]),
+    Counter("key_actual_neg_sources_count", "Key actual negative sources count", ["pubkey"]),
+    Counter("key_actual_pos_targets_count", "Key actual positive targets count", ["pubkey"]),
+    Counter("key_actual_neg_targets_count", "Key actual negative targets count", ["pubkey"]),
+    Counter("key_actual_heads_count", "Key actual heads count", ["pubkey"]),
 )
 
+initialized_keys : set[str] = set()
 
 def _log(
     pubkeys: Tuple[str],
@@ -123,6 +146,7 @@ def process_rewards(
     epoch: int,
     net_epoch_to_index_to_validator: LimitedDict,
     our_epoch_to_index_to_validator: LimitedDict,
+    _initialized_keys: set[str],
 ) -> None:
     """Process rewards for given epoch and validators
 
@@ -142,6 +166,41 @@ def process_rewards(
             inner value           : validators
 
     """
+
+    if len(_initialized_keys) > 0:
+        for pubkey in _initialized_keys:
+            if pubkey in initialized_keys:
+                continue
+            key_suboptimal_sources_rate_gauge.labels(pubkey=pubkey)
+            key_suboptimal_targets_rate_gauge.labels(pubkey=pubkey)
+            key_suboptimal_heads_rate_gauge.labels(pubkey=pubkey)
+            key_ideal_sources_count.labels(pubkey=pubkey)
+            key_ideal_targets_count.labels(pubkey=pubkey)
+            key_ideal_heads_count.labels(pubkey=pubkey)
+            key_actual_pos_sources_count.labels(pubkey=pubkey)
+            key_actual_neg_sources_count.labels(pubkey=pubkey)
+            key_actual_pos_targets_count.labels(pubkey=pubkey)
+            key_actual_neg_targets_count.labels(pubkey=pubkey)
+            key_actual_heads_count.labels(pubkey=pubkey)
+
+            initialized_keys.add(pubkey)
+
+        for initialized_key in initialized_keys:
+            if initialized_key not in _initialized_keys:
+                key_suboptimal_sources_rate_gauge.remove(pubkey=initialized_key)
+                key_suboptimal_targets_rate_gauge.remove(pubkey=initialized_key)
+                key_suboptimal_heads_rate_gauge.remove(pubkey=initialized_key)
+                key_ideal_sources_count.remove(pubkey=initialized_key)
+                key_ideal_targets_count.remove(pubkey=initialized_key)
+                key_ideal_heads_count.remove(pubkey=initialized_key)
+                key_actual_pos_sources_count.remove(pubkey=initialized_key)
+                key_actual_neg_sources_count.remove(pubkey=initialized_key)
+                key_actual_pos_targets_count.remove(pubkey=initialized_key)
+                key_actual_neg_targets_count.remove(pubkey=initialized_key)
+                key_actual_heads_count.remove(pubkey=initialized_key)
+
+                initialized_keys.remove(initialized_key)
+
 
     # Network validators
     # ------------------
@@ -186,7 +245,7 @@ def process_rewards(
         *items
     )
 
-    _, ideal_rewards, actual_rewards, ideals = unzipped
+    pubkeys, ideal_rewards, actual_rewards, ideals = unzipped
 
     ideal_sources, ideal_targets, ideal_heads = zip(*ideal_rewards)
     actual_sources, actual_targets, actual_heads = zip(*actual_rewards)
@@ -217,6 +276,31 @@ def process_rewards(
     ).inc(abs(total_actual_targets))
 
     net_actual_heads_count.inc(total_actual_heads)
+
+
+    if len(initialized_keys) > 0:
+        for pubkey in zip(pubkeys, ideal_sources, ideal_targets, ideal_heads):
+            if pubkey not in initialized_keys:
+                continue
+            key_ideal_sources_count.labels(pubkey=pubkey).inc(ideal_sources)
+            key_ideal_targets_count.labels(pubkey=pubkey).inc(ideal_targets)
+            key_ideal_heads_count.labels(pubkey=pubkey).inc(ideal_heads)
+        
+        for pubkey in zip(pubkeys, actual_sources, actual_targets, actual_heads):
+            if pubkey not in initialized_keys:
+                continue
+            (
+                key_actual_pos_sources_count.labels(pubkey=pubkey)
+                if actual_sources >= 0
+                else key_actual_neg_sources_count.labels(pubkey=pubkey)
+            ).inc(abs(actual_sources))
+            (
+                key_actual_pos_targets_count.labels(pubkey=pubkey)
+                if actual_targets >= 0
+                else key_actual_neg_targets_count.labels(pubkey=pubkey)
+            ).inc(abs(actual_targets))
+            key_actual_heads_count.labels(pubkey=pubkey).inc(actual_heads)
+
 
     suboptimal_sources_rate = 1 - sum(are_sources_ideal) / len(are_sources_ideal)
     suboptimal_targets_rate = 1 - sum(are_targets_ideal) / len(are_targets_ideal)
@@ -280,6 +364,14 @@ def process_rewards(
     our_ideal_targets_count.inc(total_ideal_targets)
     our_ideal_heads_count.inc(total_ideal_heads)
 
+    if len(initialized_keys) > 0:
+        for pubkey, ideal_sources in zip(pubkeys, ideal_sources):
+            key_ideal_sources_count.labels(pubkey).inc(ideal_sources)
+        for pubkey, ideal_targets in zip(pubkeys, ideal_targets):
+            key_ideal_targets_count.labels(pubkey).inc(ideal_targets)
+        for pubkey, ideal_heads in zip(pubkeys, ideal_heads):
+            key_ideal_heads_count.labels(pubkey).inc(ideal_heads)
+
     total_actual_sources = sum(actual_sources)
     total_actual_targets = sum(actual_targets)
     total_actual_heads = sum(actual_heads)
@@ -305,6 +397,35 @@ def process_rewards(
     our_suboptimal_sources_rate_gauge.set(suboptimal_sources_rate)
     our_suboptimal_targets_rate_gauge.set(suboptimal_targets_rate)
     our_suboptimal_heads_rate_gauge.set(suboptimal_heads_rate)
+
+    if len(initialized_keys) > 0:
+        for pubkey in pubkeys:
+            _sum = 0
+            _cnt = 0
+            for _pubkey, _are_sources_ideal in zip(pubkeys, are_sources_ideal):
+                if _pubkey == pubkey:
+                    _sum += _are_sources_ideal
+                    _cnt += 1
+            key_suboptimal_sources_rate_gauge.labels(pubkey).set(_sum / _cnt)
+        
+        for pubkey in pubkeys:
+            _sum = 0
+            _cnt = 0
+            for _pubkey, _are_targets_ideal in zip(pubkeys, are_targets_ideal):
+                if _pubkey == pubkey:
+                    _sum += _are_targets_ideal
+                    _cnt += 1
+            key_suboptimal_targets_rate_gauge.labels(pubkey).set(_sum / _cnt)
+        
+        for pubkey in pubkeys:
+            _sum = 0
+            _cnt = 0
+            for _pubkey, _are_heads_ideal in zip(pubkeys, are_heads_ideal):
+                if _pubkey == pubkey:
+                    _sum += _are_heads_ideal
+                    _cnt += 1
+            key_suboptimal_heads_rate_gauge.labels(pubkey).set(_sum / _cnt)
+
 
     _log(pubkeys, are_sources_ideal, suboptimal_sources_rate, epoch, "🚰", "source")
     _log(pubkeys, are_targets_ideal, suboptimal_targets_rate, epoch, "🎯", "target")

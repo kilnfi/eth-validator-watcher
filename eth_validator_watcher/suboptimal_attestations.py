@@ -23,6 +23,13 @@ suboptimal_attestations_rate_gauge = Gauge(
     "Suboptimal attestations rate",
 )
 
+key_suboptimal_attestations_rate_gauge = Gauge(
+    "key_suboptimal_attestations_rate",
+    "Key suboptimal attestations",
+    ["pubkey"],
+)
+
+initialized_keys: set[str] = set()
 
 def process_suboptimal_attestations(
     beacon: Beacon,
@@ -41,6 +48,22 @@ def process_suboptimal_attestations(
       - key  : index of our active validator
       - value: public key of our active validator
     """
+    for _idx in our_active_validators_index_to_validator:
+        if our_active_validators_index_to_validator[_idx].pubkey not in initialized_keys:
+            key_suboptimal_attestations_rate_gauge.labels(
+                pubkey=our_active_validators_index_to_validator[_idx].pubkey
+            )
+            initialized_keys.add(our_active_validators_index_to_validator[_idx].pubkey)
+    for _key in initialized_keys:
+        found = False
+        for _idx in our_active_validators_index_to_validator:
+            if our_active_validators_index_to_validator[_idx].pubkey == _key:
+                found = True
+                break
+        if not found:
+            key_suboptimal_attestations_rate_gauge.remove(_key)
+            initialized_keys.remove(_key)
+
     previous_slot = slot - 1
 
     # Epoch of previous slot is NOT the previous epoch, but really the epoch
@@ -155,6 +178,15 @@ def process_suboptimal_attestations(
             f"({round(100 * suboptimal_attestations_rate, 1)} %) had not optimal attestation "
             f"inclusion at slot {previous_slot}"
         )
+
+        for _idx in our_validators_index_that_did_not_attest_optimally_during_previous_slot:
+            key_suboptimal_attestations_rate_gauge.labels(
+                pubkey=our_active_validators_index_to_validator[_idx].pubkey
+            ).set(1)
+        for _idx in our_validators_index_that_attested_optimally_during_previous_slot:
+            key_suboptimal_attestations_rate_gauge.labels(
+                pubkey=our_active_validators_index_to_validator[_idx].pubkey
+            ).set(0)
 
     return our_validators_index_that_did_not_attest_optimally_during_previous_slot
 

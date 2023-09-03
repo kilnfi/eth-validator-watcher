@@ -23,12 +23,27 @@ double_missed_attestations_count = Gauge(
     "Double missed attestations count",
 )
 
+key_missed_attestations_count = Gauge(
+    "key_missed_attestations_count",
+    "Key missed attestations",
+    ["pubkey"],
+)
+
+key_double_missed_attestations_count = Gauge(
+    "key_double_missed_attestations_count",
+    "Key double missed attestations",
+    ["pubkey"],
+)
+
+initialized_keys: set[str] = set()
+
 
 def process_missed_attestations(
     beacon: Beacon,
     beacon_type: BeaconType,
     epoch_to_index_to_validator_index: LimitedDict,
     epoch: int,
+    _initialized_keys: set[str],
 ) -> set[int]:
     """Process missed attestations.
 
@@ -41,6 +56,18 @@ def process_missed_attestations(
         inner value           : validators
     epoch                        : Epoch where the missed attestations are checked
     """
+
+    for _key in _initialized_keys:
+        if _key not in initialized_keys:
+            key_missed_attestations_count.labels(pubkey=_key)
+            key_double_missed_attestations_count.labels(pubkey=_key)
+            initialized_keys.add(_key)
+    for _key in initialized_keys:
+        if _key not in _initialized_keys:
+            initialized_keys.remove(_key)
+            key_missed_attestations_count.remove(pubkey=_key)
+            key_double_missed_attestations_count.remove(pubkey=_key)
+
     index_to_validator: dict[int, Validators.DataItem.Validator] = (
         epoch_to_index_to_validator_index[epoch - 1]
         if epoch - 1 in epoch_to_index_to_validator_index
@@ -75,6 +102,17 @@ def process_missed_attestations(
         f"{len(dead_indexes) - len(short_first_pubkeys)} more "
         f"missed attestation at epoch {epoch - 1}"
     )
+
+    for index in dead_indexes:
+        key_missed_attestations_count.labels(pubkey=index_to_validator[index].pubkey).set(1)
+    for pubkey in initialized_keys:
+        found = False
+        for index in dead_indexes:
+            if index_to_validator[index].pubkey == pubkey:
+                found = True
+                break
+        if not found:
+            key_missed_attestations_count.labels(pubkey=pubkey).set(0)
 
     return dead_indexes
 
@@ -134,5 +172,15 @@ def process_double_missed_attestations(
         )
 
         slack.send_message(message_slack)
-
+    
+    for index in double_dead_indexes:
+        key_double_missed_attestations_count.labels(pubkey=index_to_validator[index].pubkey).set(1)
+    for pubkey in initialized_keys:
+        found = False
+        for index in double_dead_indexes:
+            if index_to_validator[index].pubkey == pubkey:
+                found = True
+                break
+        if not found:
+            key_double_missed_attestations_count.labels(pubkey=pubkey).set(0)
     return double_dead_indexes

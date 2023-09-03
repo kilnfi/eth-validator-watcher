@@ -70,6 +70,11 @@ net_active_validators_gauge = Gauge(
     "Total active validators count",
 )
 
+initialized_keys : set[str] = set()
+key_specific_queued_gauge = Gauge("key_pending_queued", "Pending validator by key", labelnames=["pubkey"])
+key_specific_pending_gauge = Gauge("key_active_queued", "Active validator by key", labelnames=["pubkey"])
+
+
 
 @app.command()
 def handler(
@@ -115,6 +120,9 @@ def handler(
     ),
     liveness_file: Optional[Path] = Option(
         None, help="Liveness file", show_default=False
+    ),
+    export_key_specific_values: bool = Option(
+        False, help="Export key specific values", show_default=False
     ),
 ) -> None:
     """
@@ -176,6 +184,7 @@ def handler(
         beacon_type,
         relay_url,
         liveness_file,
+        export_key_specific_values,
     )
 
 
@@ -189,6 +198,7 @@ def _handler(
     beacon_type: BeaconType,
     relays_url: List[str],
     liveness_file: Optional[Path],
+    export_key_specific_values: bool,
 ) -> None:
     """Just a wrapper to be able to test the handler function"""
     slack_token = environ.get("SLACK_TOKEN")
@@ -253,6 +263,16 @@ def _handler(
                 our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
             except ValueError:
                 raise typer.BadParameter("Some pubkeys are invalid")
+            
+            if export_key_specific_values:
+                for pubkey in our_pubkeys:
+                    if pubkey not in initialized_keys:
+                        key_specific_queued_gauge.labels(pubkey=pubkey)
+                        initialized_keys.add(pubkey)
+                for pubkey in initialized_keys:
+                    if pubkey not in our_pubkeys:
+                        key_specific_queued_gauge.remove(pubkey)
+                        initialized_keys.remove(pubkey)
 
             # Network validators
             # ------------------
@@ -289,8 +309,22 @@ def _handler(
             }
 
             our_queued_idx2val = our_status2idx2val.get(Status.pendingQueued, {})
+
             our_queued_vals_gauge.set(len(our_queued_idx2val))
 
+            if export_key_specific_values:
+                for pubkey in our_pubkeys:
+                    if pubkey in initialized_keys:
+                        key_specific_queued_gauge.labels(pubkey=pubkey).set(
+                            len(
+                                [
+                                    validator
+                                    for validator in our_queued_idx2val.values()
+                                    if validator.pubkey == pubkey
+                                ]
+                            )
+                        )
+            
             ongoing = our_status2idx2val.get(Status.activeOngoing, {})
             active_exiting = our_status2idx2val.get(Status.activeExiting, {})
             active_slashed = our_status2idx2val.get(Status.activeSlashed, {})
@@ -298,6 +332,20 @@ def _handler(
             our_epoch2active_idx2val[epoch] = our_active_idx2val
 
             our_active_validators_gauge.set(len(our_active_idx2val))
+
+            if export_key_specific_values:
+                for pubkey in our_pubkeys:
+                    if pubkey in initialized_keys:
+                        key_specific_pending_gauge.labels(pubkey=pubkey).set(
+                            len(
+                                [
+                                    validator
+                                    for validator in our_active_idx2val.values()
+                                    if validator.pubkey == pubkey
+                                ]
+                            )
+                        )
+
             our_exited_u_idx2val = our_status2idx2val.get(Status.exitedUnslashed, {})
             our_exited_s_idx2val = our_status2idx2val.get(Status.exitedSlashed, {})
 
@@ -305,13 +353,14 @@ def _handler(
             with_done = our_status2idx2val.get(Status.withdrawalDone, {})
             our_withdrawable_idx2val = with_poss | with_done
 
-            exited_validators.process(our_exited_u_idx2val, our_withdrawable_idx2val)
+            exited_validators.process(our_exited_u_idx2val, our_withdrawable_idx2val, initialized_keys)
 
             slashed_validators.process(
                 net_exited_s_idx2val,
                 our_exited_s_idx2val,
                 net_withdrawable_idx2val,
                 our_withdrawable_idx2val,
+                initialized_keys,
             )
 
             export_entry_queue_dur_sec(net_active_vals_count, nb_total_pending_q_vals)
@@ -331,7 +380,8 @@ def _handler(
         if should_process_missed_attestations:
             our_validators_indexes_that_missed_attestation = (
                 process_missed_attestations(
-                    beacon, beacon_type, our_epoch2active_idx2val, epoch
+                    beacon, beacon_type, our_epoch2active_idx2val, epoch,
+                    initialized_keys
                 )
             )
 
@@ -358,6 +408,7 @@ def _handler(
                 epoch,
                 net_epoch2active_idx2val,
                 our_epoch2active_idx2val,
+                initialized_keys,
             )
 
             last_rewards_process_epoch = epoch

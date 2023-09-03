@@ -18,6 +18,14 @@ total_slashed_validators_count = Gauge(
     "Total slashed validators count",
 )
 
+key_slashed_validators_count = Gauge(
+    "key_slashed_validators_count",
+    "Key slashed validators",
+    ["pubkey"],
+)
+
+initialized_keys: set[str] = set()
+
 
 class SlashedValidators:
     """Slashed validators abstraction."""
@@ -40,6 +48,7 @@ class SlashedValidators:
         our_exited_slashed_index_to_validator: dict[int, Validators.DataItem.Validator],
         total_withdrawal_index_to_validator: dict[int, Validators.DataItem.Validator],
         our_withdrawal_index_to_validator: dict[int, Validators.DataItem.Validator],
+        _initialized_keys: set[str],
     ) -> None:
         """Process slashed validators.
 
@@ -57,6 +66,15 @@ class SlashedValidators:
             key  : our withdrawal validator index
             value: validator data corresponding to the validator index
         """
+        for _key in _initialized_keys:
+            if _key not in initialized_keys:
+                key_slashed_validators_count.labels(pubkey=_key)
+                initialized_keys.add(_key)
+        for _key in initialized_keys:
+            if _key not in _initialized_keys:
+                initialized_keys.remove(_key)
+                key_slashed_validators_count.remove(pubkey=_key)
+
         total_slashed_withdrawal_index_to_validator = {
             index
             for index, validator in total_withdrawal_index_to_validator.items()
@@ -117,3 +135,15 @@ class SlashedValidators:
 
         self.__total_exited_slashed_indexes = total_exited_slashed_indexes
         self.__our_exited_slashed_indexes = our_exited_slashed_indexes
+
+        for index in our_exited_slashed_indexes:
+            key_slashed_validators_count.labels(pubkey=our_exited_slashed_index_to_validator[index]).set(1)
+        for pubkey in initialized_keys:
+            found = False
+            for index in our_exited_slashed_indexes:
+                if our_exited_slashed_index_to_validator[index].pubkey == pubkey:
+                    found = True
+                    break
+            if not found:
+                key_slashed_validators_count.labels(pubkey=pubkey).set(0)
+

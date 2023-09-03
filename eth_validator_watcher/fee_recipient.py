@@ -13,6 +13,14 @@ wrong_fee_recipient_proposed_block_count = Counter(
     "Wrong fee recipient proposed block count",
 )
 
+key_wrong_fee_recipient_proposed_block_count = Counter(
+    "key_wrong_fee_recipient_proposed_block_count",
+    "Key wrong fee recipient proposed block count",
+    ["pubkey"],
+)
+
+initialized_keys: set[str] = set()
+
 
 def process_fee_recipient(
     block: Block,
@@ -32,6 +40,23 @@ def process_fee_recipient(
     expected_fee_recipient: The expected fee recipient
     slack                 : Optional slack client
     """
+
+    for _idx in index_to_validator:
+        if index_to_validator[_idx].pubkey not in initialized_keys:
+            key_wrong_fee_recipient_proposed_block_count.labels(
+                pubkey=index_to_validator[_idx].pubkey
+            )
+            initialized_keys.add(index_to_validator[_idx].pubkey)
+    for _key in initialized_keys:
+        found = False
+        for _idx in index_to_validator:
+            if index_to_validator[_idx].pubkey == _key:
+                found = True
+                break
+        if not found:
+            key_wrong_fee_recipient_proposed_block_count.remove(_key)
+            initialized_keys.remove(_key)
+
 
     # No expected fee recipient set, nothing to do
     if execution is None or expected_fee_recipient is None:
@@ -88,3 +113,5 @@ def process_fee_recipient(
         slack.send_message(message)
 
     wrong_fee_recipient_proposed_block_count.inc()
+
+    key_wrong_fee_recipient_proposed_block_count.labels(pubkey=index_to_validator[proposer_index].pubkey).inc(1)
