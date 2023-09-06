@@ -286,20 +286,20 @@ def process_rewards(
             key_ideal_targets_count.labels(pubkey=pubkey).inc(ideal_targets)
             key_ideal_heads_count.labels(pubkey=pubkey).inc(ideal_heads)
         
-        for pubkey in zip(pubkeys, actual_sources, actual_targets, actual_heads):
+        for pubkey, _actual_sources, _actual_targets, _actual_heads in zip(pubkeys, actual_sources, actual_targets, actual_heads):
             if pubkey not in initialized_keys:
                 continue
             (
                 key_actual_pos_sources_count.labels(pubkey=pubkey)
-                if actual_sources >= 0
+                if _actual_sources >= 0
                 else key_actual_neg_sources_count.labels(pubkey=pubkey)
-            ).inc(abs(actual_sources))
+            ).inc(abs(_actual_sources))
             (
                 key_actual_pos_targets_count.labels(pubkey=pubkey)
-                if actual_targets >= 0
+                if _actual_targets >= 0
                 else key_actual_neg_targets_count.labels(pubkey=pubkey)
-            ).inc(abs(actual_targets))
-            key_actual_heads_count.labels(pubkey=pubkey).inc(actual_heads)
+            ).inc(abs(_actual_targets))
+            key_actual_heads_count.labels(pubkey=pubkey).inc(_actual_heads)
 
 
     suboptimal_sources_rate = 1 - sum(are_sources_ideal) / len(are_sources_ideal)

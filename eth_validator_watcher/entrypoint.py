@@ -1,6 +1,11 @@
 """Entrypoint for the eth-validator-watcher CLI."""
 
 from os import environ
+
+# Disable created series to avoid memory leak
+environ['PROMETHEUS_DISABLE_CREATED_SERIES'] = "True"
+
+
 from pathlib import Path
 from time import sleep, time
 from typing import List, Optional
@@ -174,6 +179,9 @@ def handler(
 
     Prometheus server is automatically exposed on port 8000.
     """
+    
+
+
     _handler(  # pragma: no cover
         beacon_url,
         execution_url,
