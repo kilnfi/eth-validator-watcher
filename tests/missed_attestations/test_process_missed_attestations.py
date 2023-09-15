@@ -7,6 +7,22 @@ from eth_validator_watcher.utils import LimitedDict
 Validator = Validators.DataItem.Validator
 
 
+def test_process_missed_attestations_low_epoch() -> None:
+    class Beacon:
+        pass
+
+    actual = process_missed_attestations(
+        beacon=Beacon(),  # type: ignore
+        beacon_type=BeaconType.OLD_TEKU,
+        epoch_to_index_to_validator_index=LimitedDict(0),
+        epoch=0,
+    )
+
+    expected: set[int] = set()
+
+    assert expected == actual
+
+
 def test_process_missed_attestations_some_dead_indexes() -> None:
     class Beacon:
         @staticmethod

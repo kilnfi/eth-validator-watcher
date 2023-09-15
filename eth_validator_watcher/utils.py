@@ -207,7 +207,9 @@ class Slack:
 
 
 def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
-    next_slot = int((time() - genesis_time_sec) / NB_SECOND_PER_SLOT) + 1
+    # max(0, ...) is used to avoid negative slot number if genesis time is not yet
+    # reached
+    next_slot = max(0, int((time() - genesis_time_sec) / NB_SECOND_PER_SLOT) + 1)
 
     try:
         while True:
