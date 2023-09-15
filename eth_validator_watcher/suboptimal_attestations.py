@@ -41,6 +41,9 @@ def process_suboptimal_attestations(
       - key  : index of our active validator
       - value: public key of our active validator
     """
+    if slot < 1:
+        return set()
+
     previous_slot = slot - 1
 
     # Epoch of previous slot is NOT the previous epoch, but really the epoch

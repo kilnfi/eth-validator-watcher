@@ -21,6 +21,19 @@ from eth_validator_watcher.utils import LimitedDict
 Validator = Validators.DataItem.Validator
 
 
+def test_process_rewards_low_epoch() -> None:
+    for epoch in 0, 1:
+        # We just want to be sure it doesn't raise an exception.
+
+        process_rewards(
+            BeaconType.LIGHTHOUSE,  # type: ignore
+            "a beacon",  # type: ignore
+            epoch,
+            LimitedDict(2),
+            LimitedDict(2),
+        )
+
+
 def test_process_rewards_no_network_validator() -> None:
     net_epoch_to_index_to_validator = LimitedDict(2)
     net_epoch_to_index_to_validator[42] = {}

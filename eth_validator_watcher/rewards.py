@@ -26,11 +26,7 @@ AreIdeal = Tuple[bool, bool, bool]  # source, target, head
     Gauge("net_suboptimal_heads_rate", "Network suboptimal heads rate"),
 )
 
-(
-    net_ideal_sources_count,
-    net_ideal_targets_count,
-    net_ideal_heads_count,
-) = (
+(net_ideal_sources_count, net_ideal_targets_count, net_ideal_heads_count,) = (
     Counter("net_ideal_sources_count", "Network ideal sources count"),
     Counter("net_ideal_targets_count", "Network ideal targets count"),
     Counter("net_ideal_heads_count", "Network ideal heads count"),
@@ -62,11 +58,7 @@ AreIdeal = Tuple[bool, bool, bool]  # source, target, head
     Gauge("our_suboptimal_heads_rate", "Our suboptimal heads rate"),
 )
 
-(
-    our_ideal_sources_count,
-    our_ideal_targets_count,
-    our_ideal_heads_count,
-) = (
+(our_ideal_sources_count, our_ideal_targets_count, our_ideal_heads_count,) = (
     Counter("our_ideal_sources_count", "Our ideal sources count"),
     Counter("our_ideal_targets_count", "Our ideal targets count"),
     Counter("our_ideal_heads_count", "Our ideal heads count"),
@@ -140,8 +132,10 @@ def process_rewards(
             outer key             : epoch
             outer value, inner key: validator indexes
             inner value           : validators
-
     """
+
+    if epoch < 2:
+        return
 
     # Network validators
     # ------------------

@@ -41,6 +41,9 @@ def process_missed_attestations(
         inner value           : validators
     epoch                        : Epoch where the missed attestations are checked
     """
+    if epoch < 1:
+        return set()
+
     index_to_validator: dict[int, Validators.DataItem.Validator] = (
         epoch_to_index_to_validator_index[epoch - 1]
         if epoch - 1 in epoch_to_index_to_validator_index
@@ -102,6 +105,9 @@ def process_double_missed_attestations(
     epoch                        : Epoch where the missed attestations are checked
     slack                        : Slack instance
     """
+    if epoch < 2:
+        return set()
+
     double_dead_indexes = dead_indexes & previous_dead_indexes
     double_missed_attestations_count.set(len(double_dead_indexes))
 

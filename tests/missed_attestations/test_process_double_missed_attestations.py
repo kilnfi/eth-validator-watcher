@@ -7,6 +7,21 @@ from eth_validator_watcher.utils import LimitedDict
 Validator = Validators.DataItem.Validator
 
 
+def test_process_double_missed_attestations_low_epoch() -> None:
+    for epoch in 0, 1:
+        actual = process_double_missed_attestations(
+            {42, 43, 44, 45},
+            {40, 41, 42, 43},
+            LimitedDict(0),
+            epoch,
+            None,
+        )
+
+        expected: set[int] = set()
+
+        assert expected == actual
+
+
 def test_process_double_missed_attestations_some_dead_indexes() -> None:
     class Slack:
         def __init__(self):
