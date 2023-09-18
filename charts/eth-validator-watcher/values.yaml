@@ -3,7 +3,7 @@ watcher:
   image:
     repository: ghcr.io/kilnfi/eth-validator-watcher
     pullPolicy: IfNotPresent
-    tag: latest
+    tag: ""
 
   imagePullSecrets: []
   nameOverride: ""
@@ -12,6 +12,8 @@ watcher:
   config:
     beaconUrl: "http://localhost:5052"
     beaconType: "other"
+    # -- List of public keys to watch. See https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#command-lines-examples
+    watchedKeys: []
 
   extraArgs: []
   podAnnotations: {}
@@ -61,6 +63,3 @@ watcher:
     scheme: http
     tlsConfig: {}
     relabelings: []
-
-# -- List of public keys to watch. See https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#command-lines-examples
-watchedKeys: []

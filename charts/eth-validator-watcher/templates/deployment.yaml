@@ -5,12 +5,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
   {{- include "ethereum-validator-watcher.labels" . | nindent 4 }}
-  {{- with .Values.deploymentAnnotations }}
+  {{- with .Values.watcher.podAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.watcher.replicaCount }}
   selector:
     matchLabels:
       {{- include "ethereum-validator-watcher.matchLabels" . | nindent 6 }}
@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: validator-watcher
-        image: "{{ .Values.watcher.image.repository }}:{{ .Values.watcher.image.tag | default "latest" }}"
+        image: "{{ .Values.watcher.image.repository }}:{{ .Values.watcher.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.watcher.image.pullPolicy }}
         {{- with .Values.watcher.resources }}
         resources:
@@ -37,6 +37,9 @@ spec:
         - name: metrics
           containerPort: 8000
         args:
+          {{- if .Values.watcher.config.watchedKeys }}
+          - --pubkeys-file-path=/data/keys/watched-keys.txt
+          {{- end }}
           - --beacon-url={{ .Values.watcher.config.beaconUrl }}
           - --beacon-type={{ .Values.watcher.config.beaconType }}
           - --liveness-file=/tmp/liveness
@@ -70,10 +73,21 @@ spec:
           failureThreshold: {{ .failureThreshold }}
         {{- end }}
         volumeMounts:
+        {{- if .Values.watcher.config.watchedKeys }}
+          - name: "watched-keys"
+            mountPath: "/data/keys"
+            readOnly: true
+         {{- end }}
         {{- with .Values.watcher.volumeMounts }}
           {{- toYaml . | nindent 12 }}
         {{- end }}
       serviceAccountName: {{ include "ethereum-validator-watcher.serviceAccountName" . }}
       volumes:
-      {{- with .Values.volumes }}
+      {{- if .Values.watcher.config.watchedKeys }}
+        - name: "watched-keys"
+          configMap:
+              name: {{ include "ethereum-validator-watcher.fullname" . }}
+      {{- end }}
+      {{- with .Values.watcher.volumes }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
