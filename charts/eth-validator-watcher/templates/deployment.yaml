@@ -5,12 +5,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
   {{- include "ethereum-validator-watcher.labels" . | nindent 4 }}
-  {{- with .Values.watcher.podAnnotations }}
+  {{- with .Values.podAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.watcher.replicaCount }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "ethereum-validator-watcher.matchLabels" . | nindent 6 }}
@@ -18,18 +18,18 @@ spec:
     metadata:
       labels:
         {{- include "ethereum-validator-watcher.matchLabels" . | nindent 8 }}
-        {{- with .Values.watcher.podLabels }}
+        {{- with .Values.podLabels }}
         {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
-      {{- with .Values.watcher.podAnnotations }}
+      {{- with .Values.podAnnotations }}
       annotations: {{ tpl (toYaml .) $ | nindent 8 }}
       {{- end }}
     spec:
       containers:
       - name: validator-watcher
-        image: "{{ .Values.watcher.image.repository }}:{{ .Values.watcher.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: {{ .Values.watcher.image.pullPolicy }}
-        {{- with .Values.watcher.resources }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- with .Values.resources }}
         resources:
           {{- toYaml . | nindent 10 }}
         {{- end }}
@@ -37,16 +37,16 @@ spec:
         - name: metrics
           containerPort: 8000
         args:
-          {{- if .Values.watcher.config.watchedKeys }}
+          {{- if .Values.config.watchedKeys }}
           - --pubkeys-file-path=/data/keys/watched-keys.txt
           {{- end }}
-          - --beacon-url={{ .Values.watcher.config.beaconUrl }}
-          - --beacon-type={{ .Values.watcher.config.beaconType }}
+          - --beacon-url={{ .Values.config.beaconUrl }}
+          - --beacon-type={{ .Values.config.beaconType }}
           - --liveness-file=/tmp/liveness
-          {{- with .Values.watcher.extraArgs }}
+          {{- with .Values.extraArgs }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
-        {{- with .Values.watcher.livenessProbe }}
+        {{- with .Values.livenessProbe }}
         livenessProbe:
           exec:
             command:
@@ -59,7 +59,7 @@ spec:
           successThreshold: {{ .successThreshold }}
           failureThreshold: {{ .failureThreshold }}
         {{- end }}
-        {{- with .Values.watcher.readinessProbe }}
+        {{- with .Values.readinessProbe }}
         readinessProbe:
           exec:
             command:
@@ -73,21 +73,21 @@ spec:
           failureThreshold: {{ .failureThreshold }}
         {{- end }}
         volumeMounts:
-        {{- if .Values.watcher.config.watchedKeys }}
+        {{- if .Values.config.watchedKeys }}
           - name: "watched-keys"
             mountPath: "/data/keys"
             readOnly: true
          {{- end }}
-        {{- with .Values.watcher.volumeMounts }}
+        {{- with .Values.volumeMounts }}
           {{- toYaml . | nindent 12 }}
         {{- end }}
       serviceAccountName: {{ include "ethereum-validator-watcher.serviceAccountName" . }}
       volumes:
-      {{- if .Values.watcher.config.watchedKeys }}
+      {{- if .Values.config.watchedKeys }}
         - name: "watched-keys"
           configMap:
               name: {{ include "ethereum-validator-watcher.fullname" . }}
       {{- end }}
-      {{- with .Values.watcher.volumes }}
+      {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

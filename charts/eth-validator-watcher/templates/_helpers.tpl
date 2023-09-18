@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "ethereum-validator-watcher.name" -}}
-{{- default .Chart.Name .Values.watcher.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -11,10 +11,10 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "ethereum-validator-watcher.fullname" -}}
-{{- if .Values.watcher.fullnameOverride }}
-{{- .Values.watcher.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
-{{- $name := default .Chart.Name .Values.watcher.nameOverride }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
 {{- if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -34,11 +34,11 @@ Create chart name and version as used by the chart label.
 Create the name of the service account to use
 */}}
 {{- define "ethereum-validator-watcher.serviceAccountName" -}}
-{{- if .Values.watcher.serviceAccount.create }}
-{{- default (include "ethereum-validator-watcher.fullname" .) .Values.watcher.serviceAccount.name }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "ethereum-validator-watcher.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 
-{{- default "default" .Values.watcher.serviceAccount.name }}
+{{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 

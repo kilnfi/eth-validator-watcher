@@ -1,65 +1,64 @@
-watcher:
-  replicaCount: 1
-  image:
-    repository: ghcr.io/kilnfi/eth-validator-watcher
-    pullPolicy: IfNotPresent
-    tag: ""
+replicaCount: 1
+image:
+  repository: ghcr.io/kilnfi/eth-validator-watcher
+  pullPolicy: IfNotPresent
+  tag: ""
 
-  imagePullSecrets: []
-  nameOverride: ""
-  fullnameOverride: ""
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
 
-  config:
-    beaconUrl: "http://localhost:5052"
-    beaconType: "other"
-    # -- List of public keys to watch. See https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#command-lines-examples
-    watchedKeys: []
+config:
+  beaconUrl: "http://localhost:5052"
+  beaconType: "other"
+  # -- List of public keys to watch. See https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#command-lines-examples
+  watchedKeys: []
 
-  extraArgs: []
-  podAnnotations: {}
-  podLabels: {}
-  podSecurityContext: {}
-  securityContext: {}
+extraArgs: []
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
 
-  resources:
-    requests:
-      cpu: 100m
-      memory: 1200Mi
-    limits:
-      memory: 2400Mi
+resources:
+  requests:
+    cpu: 100m
+    memory: 1200Mi
+  limits:
+    memory: 2400Mi
 
-  livenessProbe:
-    periodSeconds: 60
-    initialDelaySeconds: 60
-    timeoutSeconds: 1
-    failureThreshold: 1
-    successThreshold: 1
-  readinessProbe:
-    periodSeconds: 60
-    initialDelaySeconds: 60
-    timeoutSeconds: 1
-    failureThreshold: 1
-    successThreshold: 1
+livenessProbe:
+  periodSeconds: 60
+  initialDelaySeconds: 60
+  timeoutSeconds: 1
+  failureThreshold: 1
+  successThreshold: 1
+readinessProbe:
+  periodSeconds: 60
+  initialDelaySeconds: 60
+  timeoutSeconds: 1
+  failureThreshold: 1
+  successThreshold: 1
 
-  extraInitContainers: []
-  volumeMounts: {}
-  volumes: {}
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
-  serviceAccount:
-    create: true
-    annotations: {}
-    name: ""
-    labels: {}
-  service:
-    type: ClusterIP
-    port: 80
+extraInitContainers: []
+volumeMounts: {}
+volumes: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  labels: {}
+service:
+  type: ClusterIP
+  port: 80
 
-  podMonitor:
-    enabled: false
-    interval: 12s
-    additionalLabels: {}
-    scheme: http
-    tlsConfig: {}
-    relabelings: []
+podMonitor:
+  enabled: false
+  interval: 12s
+  additionalLabels: {}
+  scheme: http
+  tlsConfig: {}
+  relabelings: []

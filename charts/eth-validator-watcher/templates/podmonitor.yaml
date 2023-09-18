@@ -1,4 +1,4 @@
-{{- if .Values.watcher.podMonitor.enabled }}
+{{- if .Values.podMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
@@ -12,22 +12,22 @@ spec:
       {{- include "ethereum-validator-watcher.matchLabels" . | nindent 8 }}
   podMetricsEndpoints:
   - port: metrics
-    {{- if .Values.watcher.podMonitor.interval }}
-    interval: {{ .Values.watcher.podMonitor.interval }}
+    {{- if .Values.podMonitor.interval }}
+    interval: {{ .Values.podMonitor.interval }}
     {{- end }}
-    {{- if .Values.watcher.podMonitor.additionalLabels }}
+    {{- if .Values.podMonitor.additionalLabels }}
     additionalLabels:
-      {{- toYaml .Values.watcher.podMonitor.additionalLabels | nindent 6 }}
+      {{- toYaml .Values.podMonitor.additionalLabels | nindent 6 }}
     {{- end }}
-    {{- if .Values.watcher.podMonitor.scheme }}
-    scheme: {{ .Values.watcher.podMonitor.scheme }}
+    {{- if .Values.podMonitor.scheme }}
+    scheme: {{ .Values.podMonitor.scheme }}
     {{- end }}
-    {{- if .Values.watcher.podMonitor.tlsConfig }}
+    {{- if .Values.podMonitor.tlsConfig }}
     tlsConfig:
-      {{- toYaml .Values.watcher.podMonitor.tlsConfig | nindent 6 }}
+      {{- toYaml .Values.podMonitor.tlsConfig | nindent 6 }}
     {{- end }}
-    {{- if .Values.watcher.podMonitor.relabelings }}
+    {{- if .Values.podMonitor.relabelings }}
     relabelings:
-      {{ toYaml .Values.watcher.podMonitor.relabelings | nindent 6 }}
+      {{ toYaml .Values.podMonitor.relabelings | nindent 6 }}
     {{- end }}
 {{- end }}
