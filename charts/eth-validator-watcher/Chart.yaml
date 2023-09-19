@@ -3,7 +3,7 @@ description: A Helm chart for running eth-validator-watcher
 name: eth-validator-watcher
 type: application
 version: 1.1.0
-appVersion: latest
+appVersion: v0.4.2
 maintainers:
   - name: Alluvial
     email: contact@alluvial.finance
