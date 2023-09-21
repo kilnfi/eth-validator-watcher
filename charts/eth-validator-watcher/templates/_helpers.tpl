@@ -49,7 +49,6 @@ Common labels
 app.kubernetes.io/name: {{ include "ethereum-validator-watcher.name" . }}
 helm.sh/chart: {{ include "ethereum-validator-watcher.chart" . }}
 app.kubernetes.io/instance: ethereum-validator-watcher
-app.kubernetes.io/client-type: {{ .Values.clientType }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
@@ -62,5 +61,4 @@ Selector labels
 {{- define "ethereum-validator-watcher.matchLabels" -}}
 app.kubernetes.io/name: {{ include "ethereum-validator-watcher.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/client-type: {{ .Values.clientType }}
 {{- end -}}
