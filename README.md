@@ -49,12 +49,12 @@ Finally, this program exports the following sets of data from:
 - Prometheus (you can use this Grafana dashboard to monitor your validators)
 - Slack
 - logs
-  
+
 Prometheus server is automatically exposed on port 8000.
 
 Command line options
 --------------------
- 
+
 ```
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ *  --beacon-url               TEXT                                      URL of beacon node [required]                                                    │
