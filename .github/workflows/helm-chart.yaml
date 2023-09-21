@@ -68,7 +68,7 @@ jobs:
 
       - name: 'helm:package:create'
         run: |
-          helm package charts/
+          helm package charts/eth-validator-watcher/
 
       - name: 'helm:package:get_artifcat_name'
         run: |
