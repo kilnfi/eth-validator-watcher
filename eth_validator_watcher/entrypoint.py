@@ -22,25 +22,23 @@ from .missed_attestations import (
 from .missed_blocks import process_missed_blocks
 from .models import BeaconType, Validators
 from .next_blocks_proposal import process_future_blocks_proposal
+from .relays import Relays
+from .rewards import process_rewards
 from .slashed_validators import SlashedValidators
 from .suboptimal_attestations import process_suboptimal_attestations
 from .utils import (
-    BLOCK_NOT_ORPHANED_TIME_SEC,
+    MISSED_BLOCK_TIMEOUT_SEC,
     NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
     LimitedDict,
     Slack,
+    eth1_address_0x_prefixed,
     get_our_pubkeys,
     slots,
     write_liveness_file,
-    eth1_address_0x_prefixed,
 )
-
-from .rewards import process_rewards
 from .web3signer import Web3Signer
-
-from .relays import Relays
 
 Status = Validators.DataItem.StatusEnum
 
@@ -364,7 +362,7 @@ def _handler(
 
         process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
 
-        delta_sec = BLOCK_NOT_ORPHANED_TIME_SEC - (time() - slot_start_time_sec)
+        delta_sec = MISSED_BLOCK_TIMEOUT_SEC - (time() - slot_start_time_sec)
         sleep(max(0, delta_sec))
 
         potential_block = beacon.get_potential_block(slot)
