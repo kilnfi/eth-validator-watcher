@@ -12,4 +12,4 @@ def test_get_bucket_index_nominal() -> None:
 
 def test_get_bucket_index_raise() -> None:
     with raises(RuntimeError):
-        get_bucket_index(1_310_724)
+        get_bucket_index(3_000_000)

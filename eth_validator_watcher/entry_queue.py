@@ -64,20 +64,6 @@ def compute_validators_churn(nb_active_validators: int) -> int:
     return max(MIN_PER_EPOCH_CHURN_LIMIT, nb_active_validators // CHURN_LIMIT_QUOTIENT)
 
 
-def compute_pessimistic_duration_sec(
-    nb_active_validators: int, position_in_entry_queue: int
-) -> int:
-    """Compute a pessimistic estimation of when a validator will exit the entry queue.
-
-    Parameters:
-    nb_active_validators: The number of currently active validators
-    position_in_entry_queue: The position of the validator in the entry queue
-    """
-    return (
-        position_in_entry_queue // compute_validators_churn(nb_active_validators)
-    ) * NB_SECONDS_PER_EPOCH
-
-
 def get_bucket_index(validator_index: int) -> int:
     """Get the bucket index of a validator.
 
@@ -91,10 +77,11 @@ def get_bucket_index(validator_index: int) -> int:
     raise RuntimeError("Validator index is too high")
 
 
-def compute_optimistic_duration_sec(
+def compute_duration_sec(
     nb_active_validators: int, position_in_entry_queue: int
 ) -> int:
-    """Compute an optimistic estimation of when a validator will exit the entry queue.
+    """Compute the remaining time before a validator is active if no validator wants to
+    exit.
 
     Parameters:
     nb_active_validators   : The number of currently active validators
@@ -104,10 +91,9 @@ def compute_optimistic_duration_sec(
     stop_bucket_index = get_bucket_index(nb_active_validators + position_in_entry_queue)
 
     if start_bucket_index == stop_bucket_index:
-        return compute_pessimistic_duration_sec(
-            nb_active_validators, position_in_entry_queue
-        )
-
+        return (
+            position_in_entry_queue // compute_validators_churn(nb_active_validators)
+        ) * NB_SECONDS_PER_EPOCH
     # Compute the number of validators in the first bucket
     start_limit, _ = BUCKETS[start_bucket_index + 1]
     number_validators_in_start_bucket = start_limit - nb_active_validators
@@ -116,7 +102,7 @@ def compute_optimistic_duration_sec(
     stop_limit, _ = BUCKETS[stop_bucket_index]
 
     number_validators_in_stop_bucket = (
-        nb_active_validators + position_in_entry_queue - stop_limit + 1
+        nb_active_validators + position_in_entry_queue + 1 - stop_limit
     )
 
     def fill_bucket(index: int) -> int:
@@ -153,11 +139,6 @@ def export_duration_sec(
     nb_active_validators   : The number of currently active validators
     position_in_entry_queue: The position of the validator in the entry queue
     """
-    result = (
-        compute_optimistic_duration_sec(nb_active_validators, position_in_entry_queue)
-        + compute_pessimistic_duration_sec(
-            nb_active_validators, position_in_entry_queue
-        )
-    ) // 2
 
-    entry_queue_duration_sec.set(result)
+    duration_sec = compute_duration_sec(nb_active_validators, position_in_entry_queue)
+    entry_queue_duration_sec.set(duration_sec)
