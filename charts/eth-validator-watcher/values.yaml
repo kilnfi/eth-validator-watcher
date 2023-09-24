@@ -14,6 +14,8 @@ config:
   # -- List of public keys to watch. See https://github.com/kilnfi/eth-validator-watcher/blob/main/README.md#command-lines-examples
   watchedKeys: []
 
+env: {}
+envFrom: {}
 extraArgs: []
 podAnnotations: {}
 podLabels: {}

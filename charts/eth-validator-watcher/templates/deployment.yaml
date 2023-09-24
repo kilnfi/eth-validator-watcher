@@ -46,6 +46,19 @@ spec:
           {{- with .Values.extraArgs }}
           {{- toYaml . | nindent 10 }}
           {{- end }}
+        env:
+        {{- with .Values.envFrom }}
+        {{- range $key, $value := . }}
+          - name: {{ $key }}
+                  {{- toYaml $value | nindent 12 }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.env }}
+        {{- range $key, $value := . }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
         {{- with .Values.livenessProbe }}
         livenessProbe:
           exec:
