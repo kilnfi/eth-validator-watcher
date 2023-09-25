@@ -17,6 +17,29 @@ SLOT_FOR_REWARDS_PROCESS = 17
 ETH1_ADDRESS_LEN = 40
 ETH2_ADDRESS_LEN = 96
 
+CHUCK_NORRIS = [
+    "Chuck Norris doesn't stake Ethers; he stares at the blockchain, and it instantly "
+    "produces new coins.",
+    "When Chuck Norris sends Ethers, it doesn't need confirmations. The Ethereum "
+    "network just knows better than to mess with Chuck.",
+    "Chuck Norris once hacked into a smart contract without using a computer. He just "
+    "stared at the code, and it fixed itself.",
+    "Ethereum's gas fees are afraid of Chuck Norris. They lower themselves just to "
+    "avoid his wrath.",
+    "Chuck Norris doesn't need a private key to access his Ethereum wallet. He just "
+    "flexes his biceps, and it opens.",
+    "When Chuck Norris trades on a decentralized exchange, the price slippage goes in "
+    "his favor, no matter what.",
+    "Vitalik Buterin once challenged Chuck Norris to a coding contest. Chuck won by "
+    "writing Ethereum's whitepaper with his eyes closed.",
+    "Chuck Norris's Ethereum nodes are so fast that they can process transactions "
+    "before they even happen.",
+    'The Ethereum community calls Chuck Norris the "Smart Contract Whisperer" '
+    "because he can make any contract do his bidding.",
+    "When Chuck Norris checks his Ethereum balance, the wallet interface just says, "
+    '"Infinite."',
+]
+
 keys_count = Gauge(
     "keys_count",
     "Keys count",
@@ -207,9 +230,7 @@ class Slack:
 
 
 def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
-    # max(0, ...) is used to avoid negative slot number if genesis time is not yet
-    # reached
-    next_slot = max(0, int((time() - genesis_time_sec) / NB_SECOND_PER_SLOT) + 1)
+    next_slot = int((time() - genesis_time_sec) / NB_SECOND_PER_SLOT) + 1
 
     try:
         while True:
@@ -222,6 +243,15 @@ def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
             next_slot += 1
     except KeyboardInterrupt:
         pass  # pragma: no cover
+
+
+def convert_seconds_to_dhms(seconds: int) -> tuple[int, int, int, int]:
+    # Calculate days, hours, minutes, and seconds
+    days, seconds = divmod(seconds, 86400)  # 1 day = 24 hours * 60 minutes * 60 seconds
+    hours, seconds = divmod(seconds, 3600)  # 1 hour = 60 minutes * 60 seconds
+    minutes, seconds = divmod(seconds, 60)  # 1 minute = 60 seconds
+
+    return days, hours, minutes, seconds
 
 
 def eth1_address_0x_prefixed(address: str) -> str:

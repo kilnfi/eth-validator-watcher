@@ -1,5 +1,6 @@
 """Entrypoint for the eth-validator-watcher CLI."""
 
+import functools
 from os import environ
 from pathlib import Path
 from time import sleep, time
@@ -27,12 +28,15 @@ from .rewards import process_rewards
 from .slashed_validators import SlashedValidators
 from .suboptimal_attestations import process_suboptimal_attestations
 from .utils import (
+    CHUCK_NORRIS,
     MISSED_BLOCK_TIMEOUT_SEC,
+    NB_SECOND_PER_SLOT,
     NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
     LimitedDict,
     Slack,
+    convert_seconds_to_dhms,
     eth1_address_0x_prefixed,
     get_our_pubkeys,
     slots,
@@ -40,8 +44,9 @@ from .utils import (
 )
 from .web3signer import Web3Signer
 
-Status = Validators.DataItem.StatusEnum
+print = functools.partial(print, flush=True)
 
+Status = Validators.DataItem.StatusEnum
 
 app = typer.Typer(add_completion=False)
 
@@ -238,6 +243,23 @@ def _handler(
     genesis = beacon.get_genesis()
 
     for slot, slot_start_time_sec in slots(genesis.data.genesis_time):
+        if slot < 0:
+            chain_start_in_sec = -slot * NB_SECOND_PER_SLOT
+            days, hours, minutes, seconds = convert_seconds_to_dhms(chain_start_in_sec)
+
+            print(
+                f"⏱️     The chain will start in {days:2} days, {hours:2} hours, "
+                f"{minutes:2} minutes and {seconds:2} seconds."
+            )
+
+            if slot % NB_SLOT_PER_EPOCH == 0:
+                print(f"💪     {CHUCK_NORRIS[slot%len(CHUCK_NORRIS)]}")
+
+            if liveness_file is not None:
+                write_liveness_file(liveness_file)
+
+            continue
+
         epoch = slot // NB_SLOT_PER_EPOCH
         slot_in_epoch = slot % NB_SLOT_PER_EPOCH
 
