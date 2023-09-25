@@ -104,6 +104,55 @@ def test_invalid_pubkeys() -> None:
         )
 
 
+def test_invalid_chain_not_ready() -> None:
+    class Beacon:
+        def __init__(self, url: str) -> None:
+            assert url == "http://localhost:5052"
+
+        def get_genesis(self) -> Genesis:
+            return Genesis(
+                data=Genesis.Data(
+                    genesis_time=0,
+                )
+            )
+
+    def get_our_pubkeys(pubkeys_file_path: Path, web3signer: None) -> set[str]:
+        return {"0x12345", "0x67890"}
+
+    def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
+        assert genesis_time == 0
+        yield -32, 1664
+
+    def convert_seconds_to_dhms(seconds: int) -> Tuple[int, int, int, int]:
+        assert seconds == 384
+        return 42, 42, 42, 42
+
+    def write_liveness_file(liveness_file: Path) -> None:
+        assert liveness_file == Path("/path/to/liveness")
+
+    def start_http_server(_: int) -> None:
+        pass
+
+    entrypoint.get_our_pubkeys = get_our_pubkeys
+    entrypoint.Beacon = Beacon
+    entrypoint.slots = slots
+    entrypoint.convert_seconds_to_dhms = convert_seconds_to_dhms
+    entrypoint.write_liveness_file = write_liveness_file
+    entrypoint.start_http_server = start_http_server
+
+    _handler(
+        beacon_url="http://localhost:5052",
+        execution_url=None,
+        pubkeys_file_path=Path("/path/to/pubkeys"),
+        web3signer_url=None,
+        fee_recipient=None,
+        slack_channel=None,
+        beacon_type=BeaconType.OLD_TEKU,
+        relays_url=[],
+        liveness_file=Path("/path/to/liveness"),
+    )
+
+
 @freeze_time("2023-01-01 00:00:00", auto_tick_seconds=15)
 def test_nominal() -> None:
     class Beacon:
@@ -263,7 +312,7 @@ def test_nominal() -> None:
         epoch: int,
         net_epoch2active_idx2val: dict[int, Validator],
         our_epoch2active_idx2val: dict[int, Validator],
-    ):
+    ) -> None:
         assert isinstance(beacon, Beacon)
         assert isinstance(beacon_type, BeaconType)
         assert epoch == 1
