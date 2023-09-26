@@ -50,7 +50,7 @@ spec:
         {{- with .Values.envFrom }}
         {{- range $key, $value := . }}
           - name: {{ $key }}
-                  {{- toYaml $value | nindent 12 }}
+          {{- toYaml $value | nindent 12 }}
         {{- end }}
         {{- end }}
         {{- with .Values.env }}
