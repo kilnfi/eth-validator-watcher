@@ -206,6 +206,7 @@ You proposed a block with a non-allowed relay. | ```🟧 Block proposed with unk
 You did not had ideal source rewards. | ```🚰 Our validator 0x8012aba2, 0x8012cdb1, 0x803f3b39, 0x8054cda1, 0x8055bb56 and 0 more had not ideal rewards on source at epoch 215201```
 You did not had ideal target rewards. | ```🎯 Our validator 0x8000118f, 0x80a238ea, 0x80e5809d, 0x80ec3c2d, 0x80f4487d and 0 more had not ideal rewards on target at epoch 215201```
 You did not had ideal head rewards. | ```🗣️ Our validator 0x8005f5e8, 0x801910e5, 0x80193dd5, 0x801a26e9, 0x80285258 and 0 more had not ideal rewards on head  at epoch 215200```
+The chain is not yet started.       | ```⏱️     The chain will start in  1 days,  1 hours,  3 minutes and 48 seconds.```
 
 Slack messages
 --------------
