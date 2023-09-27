@@ -3,17 +3,17 @@ from typing import Optional
 
 from eth_validator_watcher.models import BeaconType, Rewards, Validators
 from eth_validator_watcher.rewards import (
+    our_actual_heads_count,
+    our_actual_neg_sources_count,
+    our_actual_neg_targets_count,
+    our_actual_pos_sources_count,
+    our_actual_pos_targets_count,
+    our_ideal_heads_count,
     our_ideal_sources_count,
     our_ideal_targets_count,
-    our_ideal_heads_count,
-    our_actual_neg_sources_count,
-    our_actual_pos_sources_count,
-    our_actual_neg_targets_count,
-    our_actual_pos_targets_count,
-    our_actual_heads_count,
+    our_suboptimal_heads_rate_gauge,
     our_suboptimal_sources_rate_gauge,
     our_suboptimal_targets_rate_gauge,
-    our_suboptimal_heads_rate_gauge,
     process_rewards,
 )
 from eth_validator_watcher.utils import LimitedDict

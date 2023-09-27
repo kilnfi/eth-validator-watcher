@@ -119,7 +119,7 @@ class CoinbaseTrade(BaseModel):
 class BeaconType(str, Enum):
     LIGHTHOUSE = "lighthouse"
     NIMBUS = "nimbus"
-    PRYSM = "prysm"
+    OLD_PRYSM = "old-prysm"
     OLD_TEKU = "old-teku"
     OTHER = "other"
 

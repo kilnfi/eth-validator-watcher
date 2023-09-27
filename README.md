@@ -56,33 +56,35 @@ Command line options
 --------------------
 
 ```
-╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --beacon-url               TEXT                                      URL of beacon node [required]                                                    │
-│    --execution-url            TEXT                                      URL of execution node                                                            │
-│    --pubkeys-file-path        FILE                                      File containing the list of public keys to watch                                 │
-│    --web3signer-url           TEXT                                      URL to web3signer managing keys to watch                                         │
-│    --fee-recipient            TEXT                                      Fee recipient address - --execution-url must be set                              │
-│    --slack-channel            TEXT                                      Slack channel to send alerts - SLACK_TOKEN env var must be set                   │
-│    --beacon-type              [lighthouse|nimbus|prysm|old-teku|other]  Use this option if connected to a Teku < 23.6.0, Prysm, Lighthouse or Nimbus     │
-│                                                                         beacon node. See https://github.com/ConsenSys/teku/issues/7204 for Teku <        │
-│                                                                         23.6.0, https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm,           │
-│                                                                         https://github.com/sigp/lighthouse/issues/4243 for Lighthouse,                   │
-│                                                                         https://github.com/status-im/nimbus-eth2/issues/5019 and                         │
-│                                                                         https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus.                 │
-│    --relay-url                TEXT                                      URL of allow listed relay                                                        │
-│    --liveness-file            PATH                                      Liveness file                                                                    │
-│    --help                                                               Show this message and exit.                                                      │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --beacon-url               TEXT                                          URL of beacon node [required]                                                    │
+│    --execution-url            TEXT                                          URL of execution node                                                            │
+│    --pubkeys-file-path        FILE                                          File containing the list of public keys to watch                                 │
+│    --web3signer-url           TEXT                                          URL to web3signer managing keys to watch                                         │
+│    --fee-recipient            TEXT                                          Fee recipient address - --execution-url must be set                              │
+│    --slack-channel            TEXT                                          Slack channel to send alerts - SLACK_TOKEN env var must be set                   │
+│    --beacon-type              [lighthouse|nimbus|old-prysm|old-teku|other]  Use this option if connected to a Teku < 23.6.0, Prysm < 4.0.8, Lighthouse or    │
+│                                                                             Nimbus beacon node. See https://github.com/ConsenSys/teku/issues/7204 for Teku < │
+│                                                                             23.6.0, https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm < 4.0.8,   │
+│                                                                             https://github.com/sigp/lighthouse/issues/4243 for Lighthouse,                   │
+│                                                                             https://github.com/status-im/nimbus-eth2/issues/5019 and                         │
+│                                                                             https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus.                 │
+│                                                                             [default: BeaconType.OTHER]                                                      │
+│    --relay-url                TEXT                                          URL of allow listed relay                                                        │
+│    --liveness-file            PATH                                          Liveness file                                                                    │
+│    --help                                                                   Show this message and exit.                                                      │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 Beacon nodes compatibility
 --------------------------
 Beacon type      | Compatibility
 -----------------|----------------------------------------------------------------------------------------------------------
-Prysm            | Partial with `--beacon-type=prysm` - Rewards computation disabled. See https://github.com/prysmaticlabs/prysm/issues/11581 for more details.
+Lighthouse       | Full with `--beacon-type=lighthouse`. See https://github.com/sigp/lighthouse/issues/4243 for more details.
+Prysm `>= 4.0.8` | Full.
+Prysm `< 4.0.8 ` | Partial with `--beacon-type=old-prysm` - Rewards computation disabled. See https://github.com/prysmaticlabs/prysm/issues/11581 for more details.
 Teku `>= 23.6.0` | Full. You need to activate the [beacon-liveness-tracking-enabled](https://docs.teku.consensys.net/reference/cli#options) flag on your beacon node.
 Teku `< 23.6.0 ` | Full with `--beacon-type=old-teku`. See https://github.com/ConsenSys/teku/pull/7212 for more details. You need to activate the [beacon-liveness-tracking-enabled](https://docs.teku.consensys.net/reference/cli#options) flag on your beacon node.
-Lighthouse       | Full with `--beacon-type=lighthouse`. See https://github.com/sigp/lighthouse/issues/4243 for more details.
 Nimbus           | Partial with `--beacon-type=nimbus` - Missed attestations detection and rewards computation disabled. See https://github.com/status-im/nimbus-eth2/issues/5019 and https://github.com/status-im/nimbus-eth2/issues/5138 for more details.
 Lodestar         | Not (yet) tested.
 

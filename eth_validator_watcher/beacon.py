@@ -202,13 +202,14 @@ class Beacon:
         # https://github.com/status-im/nimbus-eth2/issues/5138,
         # we just assume there is no rewards at all
 
-        if beacon_type in {BeaconType.NIMBUS, BeaconType.PRYSM}:
+        if beacon_type in {BeaconType.NIMBUS, BeaconType.OLD_PRYSM}:
             if self.__first_rewards_call:
                 self.__first_rewards_call = False
                 print(
                     (
-                        "⚠️ You are using Prysm or Nimbus. Rewards will be ignored. "
-                        "See https://github.com/prysmaticlabs/prysm/issues/11581 "
+                        "⚠️ You are using Prysm < 4.0.8 or Nimbus. Rewards will be "
+                        "ignored. See "
+                        "https://github.com/prysmaticlabs/prysm/issues/11581 "
                         "(Prysm) & https://github.com/status-im/nimbus-eth2/issues/5138 "
                         "(Nimbus) for more information."
                     )
@@ -261,7 +262,7 @@ class Beacon:
 
         beacon_type_to_function = {
             BeaconType.LIGHTHOUSE: self.__get_validators_liveness_lighthouse,
-            BeaconType.PRYSM: self.__get_validators_liveness_beacon_api,
+            BeaconType.OLD_PRYSM: self.__get_validators_liveness_beacon_api,
             BeaconType.OLD_TEKU: self.__get_validators_liveness_old_teku,
             BeaconType.OTHER: self.__get_validators_liveness_beacon_api,
         }
