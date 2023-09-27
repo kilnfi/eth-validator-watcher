@@ -103,15 +103,15 @@ def handler(
         BeaconType.OTHER,
         case_sensitive=False,
         help=(
-            "Use this option if connected to a Teku < 23.6.0, Prysm, Lighthouse or "
-            "Nimbus beacon node. "
+            "Use this option if connected to a Teku < 23.6.0, Prysm < 4.0.8, "
+            "Lighthouse or Nimbus beacon node. "
             "See https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0, "
-            "https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm, "
+            "https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm < 4.0.8, "
             "https://github.com/sigp/lighthouse/issues/4243 for Lighthouse, "
             "https://github.com/status-im/nimbus-eth2/issues/5019 and "
             "https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus."
         ),
-        show_default=False,
+        show_default=True,
     ),
     relay_url: List[str] = Option(
         [], help="URL of allow listed relay", show_default=False

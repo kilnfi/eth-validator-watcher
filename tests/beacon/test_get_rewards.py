@@ -13,7 +13,7 @@ def test_get_rewards_not_supported() -> None:
 
     expected = Rewards(data=Rewards.Data(ideal_rewards=[], total_rewards=[]))
 
-    actual = beacon.get_rewards(BeaconType.PRYSM, 42, {8499, 8500})
+    actual = beacon.get_rewards(BeaconType.OLD_PRYSM, 42, {8499, 8500})
     assert expected == actual
 
     actual = beacon.get_rewards(BeaconType.NIMBUS, 42, {8499, 8500})
