@@ -48,7 +48,11 @@ def process_fee_recipient(
     epoch = slot // NB_SLOT_PER_EPOCH
 
     # First, we check if the beacon block fee recipient is the one expected
-    actual_fee_recipient = block.data.message.body.execution_payload.fee_recipient
+    # `.lower()` is here just in case the execution client returns a fee recipient in
+    # checksum casing
+    actual_fee_recipient = (
+        block.data.message.body.execution_payload.fee_recipient.lower()
+    )
 
     if actual_fee_recipient == expected_fee_recipient:
         # Allright, we're good
@@ -65,9 +69,12 @@ def process_fee_recipient(
     try:
         *_, last_transaction = transactions
 
+        # `.lower()` is here just in case the execution client returns transacion "to"
+        # in checksum casing
+
         if (
             last_transaction.to is not None
-            and expected_fee_recipient == last_transaction.to
+            and expected_fee_recipient == last_transaction.to.lower()
         ):
             # The last transaction is to the expected fee recipient
             return
