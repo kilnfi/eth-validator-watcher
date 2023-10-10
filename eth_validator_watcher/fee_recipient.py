@@ -54,7 +54,7 @@ def process_fee_recipient(
         # Allright, we're good
         return
 
-    # If not, it may be because the block was builded by an external builder that
+    # If not, it may be because the block was built by an external builder that
     # set its own fee recipient. In this case, we need to check if the last transaction
     # in the execution block is a transaction to the expected fee recipient.
 
