@@ -1,4 +1,85 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    },
+    {
+      "name": "DS_EXPRESSION",
+      "label": "Expression",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "__expr__"
+    },
+    {
+      "name": "DS_LOKI",
+      "label": "Loki",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "loki",
+      "pluginName": "Loki"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "datasource",
+      "id": "__expr__",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.0.2"
+    },
+    {
+      "type": "panel",
+      "id": "logs",
+      "name": "Logs",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "loki",
+      "name": "Loki",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -24,7 +105,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1881,
+  "id": null,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -44,7 +125,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "In next two epochs",
       "fieldConfig": {
@@ -96,7 +177,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(future_block_proposals_count)",
@@ -112,7 +193,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -164,7 +245,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_usd)",
@@ -176,7 +257,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_active_validators_count)",
@@ -187,9 +268,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$A * $B * 32",
           "hide": false,
@@ -203,7 +283,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -254,7 +334,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_usd)",
@@ -266,7 +346,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(total_active_validators_count)",
@@ -277,9 +357,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$A*$B*32",
           "hide": false,
@@ -293,7 +372,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "h": 7,
@@ -317,7 +396,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "gridPos": {
         "h": 4,
@@ -342,7 +421,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -393,7 +472,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_slashed_validators_count)",
@@ -408,7 +487,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -459,7 +538,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(total_slashed_validators_count)",
@@ -474,7 +553,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Ethereum epoch",
       "fieldConfig": {
@@ -526,7 +605,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(epoch)",
@@ -542,7 +621,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Ethereum slot",
       "fieldConfig": {
@@ -594,7 +673,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(slot)",
@@ -610,7 +689,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -660,7 +739,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_pending_queued_validators_count)",
@@ -675,7 +754,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -725,7 +804,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(total_pending_queued_validators_count)",
@@ -740,7 +819,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -792,7 +871,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_pending_queued_validators_count)",
@@ -804,7 +883,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(total_pending_queued_validators_count)",
@@ -815,9 +894,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "100*$A/$B",
           "hide": false,
@@ -831,7 +909,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Average between Minimum and Maximum entry queue time.\nhttps://docs.google.com/spreadsheets/d/1gufxMdWPLgKl-qRsSfAhvvBOra0BsQmeukcWJY9Fsi8/edit#gid=600135599",
       "fieldConfig": {
@@ -884,7 +962,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(entry_queue_duration_sec)",
@@ -899,7 +977,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -950,7 +1028,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_usd)",
@@ -965,7 +1043,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1015,7 +1093,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_exited_validators_count)",
@@ -1030,7 +1108,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1079,7 +1157,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(slot) % 32",
@@ -1094,7 +1172,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1146,7 +1224,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_active_validators_count)",
@@ -1162,7 +1240,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1212,7 +1290,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(total_active_validators_count)",
@@ -1227,7 +1305,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1280,7 +1358,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_active_validators_count)",
@@ -1292,7 +1370,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(total_active_validators_count)",
@@ -1303,9 +1381,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "100*$A/$B",
           "hide": false,
@@ -1319,7 +1396,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1367,7 +1444,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_sources_count_total[24h]))",
@@ -1379,7 +1456,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_targets_count_total[24h]))",
@@ -1391,7 +1468,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_heads_count_total[24h]))",
@@ -1402,9 +1479,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "($A+$B+$C)/10**9",
           "hide": false,
@@ -1418,7 +1494,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1469,7 +1545,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_pos_sources_count_total[24h]))",
@@ -1481,7 +1557,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_neg_sources_count_total[24h]))",
@@ -1493,7 +1569,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_pos_targets_count_total[24h]))",
@@ -1505,7 +1581,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_neg_targets_count_total[24h]))",
@@ -1517,7 +1593,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_heads_count_total[24h]))",
@@ -1528,9 +1604,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "($A-$B+$C-$D+$E)/10**9",
           "hide": false,
@@ -1544,7 +1619,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1596,7 +1671,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_sources_count_total[24h]))",
@@ -1608,7 +1683,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_targets_count_total[24h]))",
@@ -1620,7 +1695,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_heads_count_total[24h]))",
@@ -1632,7 +1707,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_pos_sources_count_total[24h]))",
@@ -1644,7 +1719,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_neg_sources_count_total[24h]))",
@@ -1656,7 +1731,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_pos_targets_count_total[24h]))",
@@ -1668,7 +1743,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_neg_targets_count_total[24h]))",
@@ -1680,7 +1755,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_heads_count_total[24h]))",
@@ -1691,9 +1766,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$A+$B+$C",
           "hide": true,
@@ -1702,9 +1776,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$D-$E+$F-$G+$H",
           "hide": true,
@@ -1713,9 +1786,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "($J-$I)/10**9",
           "hide": false,
@@ -1729,7 +1801,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1788,7 +1860,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_sources_count_total[24h]))",
@@ -1800,7 +1872,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_targets_count_total[24h]))",
@@ -1812,7 +1884,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_ideal_heads_count_total[24h]))",
@@ -1824,7 +1896,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_pos_sources_count_total[24h]))",
@@ -1836,7 +1908,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_neg_sources_count_total[24h]))",
@@ -1848,7 +1920,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_pos_targets_count_total[24h]))",
@@ -1860,7 +1932,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_neg_targets_count_total[24h]))",
@@ -1872,7 +1944,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(our_actual_heads_count_total[24h]))",
@@ -1883,9 +1955,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$A+$B+$C",
           "hide": true,
@@ -1894,9 +1965,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$D-$E+$F-$G+$H",
           "hide": true,
@@ -1905,9 +1975,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$J/$I",
           "hide": false,
@@ -1921,7 +1990,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1969,7 +2038,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_sources_count_total[24h]))",
@@ -1981,7 +2050,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_targets_count_total[24h]))",
@@ -1993,7 +2062,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_heads_count_total[24h]))",
@@ -2004,9 +2073,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "($A+$B+$C)/10**9",
           "hide": false,
@@ -2020,7 +2088,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2071,7 +2139,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_pos_sources_count_total[24h]))",
@@ -2083,7 +2151,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_neg_sources_count_total[24h]))",
@@ -2095,7 +2163,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_pos_targets_count_total[24h]))",
@@ -2107,7 +2175,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_neg_targets_count_total[24h]))",
@@ -2119,7 +2187,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_heads_count_total[24h]))",
@@ -2130,9 +2198,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "($A-$B+$C-$D+$E)/10**9",
           "hide": false,
@@ -2146,7 +2213,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2198,7 +2265,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_sources_count_total[24h]))",
@@ -2210,7 +2277,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_targets_count_total[24h]))",
@@ -2222,7 +2289,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_heads_count_total[24h]))",
@@ -2234,7 +2301,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_pos_sources_count_total[24h]))",
@@ -2246,7 +2313,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_neg_sources_count_total[24h]))",
@@ -2258,7 +2325,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_pos_targets_count_total[24h]))",
@@ -2270,7 +2337,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_neg_targets_count_total[24h]))",
@@ -2282,7 +2349,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_heads_count_total[24h]))",
@@ -2293,9 +2360,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$A+$B+$C",
           "hide": true,
@@ -2304,9 +2370,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$D-$E+$F-$G+$H",
           "hide": true,
@@ -2315,9 +2380,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "($J-$I)/10**9",
           "hide": false,
@@ -2331,7 +2395,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2390,7 +2454,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_sources_count_total[24h]))",
@@ -2402,7 +2466,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_targets_count_total[24h]))",
@@ -2414,7 +2478,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_ideal_heads_count_total[24h]))",
@@ -2426,7 +2490,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_pos_sources_count_total[24h]))",
@@ -2438,7 +2502,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_neg_sources_count_total[24h]))",
@@ -2450,7 +2514,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_pos_targets_count_total[24h]))",
@@ -2462,7 +2526,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_neg_targets_count_total[24h]))",
@@ -2474,7 +2538,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "sum(increase(net_actual_heads_count_total[24h]))",
@@ -2485,9 +2549,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$A+$B+$C",
           "hide": true,
@@ -2496,9 +2559,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$D-$E+$F-$G+$H",
           "hide": true,
@@ -2507,9 +2569,8 @@
         },
         {
           "datasource": {
-            "name": "Expression",
             "type": "__expr__",
-            "uid": "__expr__"
+            "uid": "${DS_EXPRESSION}"
           },
           "expression": "$J/$I",
           "hide": false,
@@ -2523,7 +2584,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "${DS_LOKI}"
       },
       "gridPos": {
         "h": 13,
@@ -2546,7 +2607,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "${DS_LOKI}"
           },
           "editorMode": "code",
           "expr": "{app=\"ethereum-validator-watcher\"}",
@@ -2560,7 +2621,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -2667,7 +2728,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -2681,7 +2742,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(min_over_time(suboptimal_attestations_rate[2m]))",
@@ -2697,7 +2758,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2771,7 +2832,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(round(increase(bad_relay_count_total[24h]), 1))",
@@ -2787,7 +2848,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -2865,7 +2926,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -2883,7 +2944,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -2974,7 +3035,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(net_suboptimal_targets_rate)",
@@ -2985,7 +3046,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_suboptimal_targets_rate)",
@@ -3002,7 +3063,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -3109,7 +3170,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -3123,7 +3184,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(double_missed_attestations_count)",
@@ -3139,7 +3200,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -3230,7 +3291,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(net_suboptimal_heads_rate)",
@@ -3241,7 +3302,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_suboptimal_heads_rate)",
@@ -3258,7 +3319,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -3349,7 +3410,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(net_suboptimal_sources_rate)",
@@ -3360,7 +3421,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(our_suboptimal_sources_rate)",
