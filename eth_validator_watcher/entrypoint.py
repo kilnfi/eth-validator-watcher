@@ -37,7 +37,7 @@ from .utils import (
     LimitedDict,
     Slack,
     convert_seconds_to_dhms,
-    eth1_address_0x_prefixed,
+    eth1_address_lower_0x_prefixed,
     get_our_pubkeys,
     slots,
     write_liveness_file,
@@ -203,7 +203,7 @@ def _handler(
 
     if fee_recipient is not None:
         try:
-            fee_recipient = eth1_address_0x_prefixed(fee_recipient)
+            fee_recipient = eth1_address_lower_0x_prefixed(fee_recipient)
         except ValueError:
             raise typer.BadParameter("`fee-recipient` should be a valid ETH1 address")
 

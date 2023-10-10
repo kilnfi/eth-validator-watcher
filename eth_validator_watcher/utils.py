@@ -178,7 +178,9 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
         Returns the corresponding set of public keys.
     """
     with path.open() as file_descriptor:
-        return set((eth2_address_0x_prefixed(line.strip()) for line in file_descriptor))
+        return set(
+            (eth2_address_lower_0x_prefixed(line.strip()) for line in file_descriptor)
+        )
 
 
 def get_our_pubkeys(
@@ -254,24 +256,28 @@ def convert_seconds_to_dhms(seconds: int) -> tuple[int, int, int, int]:
     return days, hours, minutes, seconds
 
 
-def eth1_address_0x_prefixed(address: str) -> str:
-    if not re.match(f"^(0x)?[0-9a-fA-F]{{{ETH1_ADDRESS_LEN}}}$", address):
-        raise ValueError(f"Invalid ETH1 address: {address}")
+def eth1_address_lower_0x_prefixed(address: str) -> str:
+    address_lower = address.lower()
+
+    if not re.match(f"^(0x)?[0-9a-f]{{{ETH1_ADDRESS_LEN}}}$", address_lower):
+        raise ValueError(f"Invalid ETH1 address: {address_lower}")
 
     if len(address) == ETH1_ADDRESS_LEN:
-        return f"0x{address}"
+        return f"0x{address_lower}"
 
-    return address
+    return address_lower
 
 
-def eth2_address_0x_prefixed(address: str) -> str:
-    if not re.match(f"^(0x)?[0-9a-fA-F]{{{ETH2_ADDRESS_LEN}}}$", address):
-        raise ValueError(f"Invalid ETH2 address: {address}")
+def eth2_address_lower_0x_prefixed(address: str) -> str:
+    address_lower = address.lower()
+
+    if not re.match(f"^(0x)?[0-9a-f]{{{ETH2_ADDRESS_LEN}}}$", address_lower):
+        raise ValueError(f"Invalid ETH2 address: {address_lower}")
 
     if len(address) == ETH2_ADDRESS_LEN:
-        return f"0x{address}"
+        return f"0x{address_lower}"
 
-    return address
+    return address_lower
 
 
 class LimitedDict:
