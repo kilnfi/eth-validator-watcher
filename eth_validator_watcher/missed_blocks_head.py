@@ -1,4 +1,4 @@
-"""Contains functions to handle missed block proposals detection"""
+"""Contains functions to handle missed block proposals detection on head"""
 
 import functools
 from typing import Optional
@@ -11,25 +11,25 @@ from .utils import NB_SLOT_PER_EPOCH, Slack
 
 print = functools.partial(print, flush=True)
 
-missed_block_proposals_count = Counter(
-    "missed_block_proposals_count",
-    "Missed block proposals count",
+missed_block_proposals_head_count = Counter(
+    "missed_block_proposals_head_count",
+    "Missed block proposals head count",
 )
-missed_block_proposals_count_details = Counter(
-    "missed_block_proposals_count_details",
-    "Missed block proposals count_details",
+missed_block_proposals_head_count_details = Counter(
+    "missed_block_proposals_head_count_details",
+    "Missed block proposals head count details",
     ["slot", "epoch"],
 )
 
 
-def process_missed_blocks(
+def process_missed_blocks_head(
     beacon: Beacon,
     potential_block: Optional[Block],
     slot: int,
     our_pubkeys: set[str],
     slack: Optional[Slack],
 ) -> bool:
-    """Process missed block proposals detection
+    """Process missed block proposals detection at head
 
     Parameters:
     beacon         : Beacon
@@ -88,7 +88,7 @@ def process_missed_blocks(
         slack.send_message(message_slack)
 
     if is_our_validator and missed:
-        missed_block_proposals_count.inc()
-        missed_block_proposals_count_details.labels(slot=slot, epoch=epoch).inc()
+        missed_block_proposals_head_count.inc()
+        missed_block_proposals_head_count_details.labels(slot=slot, epoch=epoch).inc()
 
     return is_our_validator
