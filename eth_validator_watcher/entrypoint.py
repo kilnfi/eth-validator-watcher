@@ -20,7 +20,7 @@ from .missed_attestations import (
     process_double_missed_attestations,
     process_missed_attestations,
 )
-from .missed_blocks import process_missed_blocks
+from .missed_blocks_head import process_missed_blocks_head
 from .models import BeaconType, Validators
 from .next_blocks_proposal import process_future_blocks_proposal
 from .relays import Relays
@@ -403,7 +403,7 @@ def _handler(
                 block, our_active_idx2val, execution, fee_recipient, slack
             )
 
-        is_our_validator = process_missed_blocks(
+        is_our_validator = process_missed_blocks_head(
             beacon,
             potential_block,
             slot,

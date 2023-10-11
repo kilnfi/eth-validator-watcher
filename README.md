@@ -19,7 +19,7 @@ Description
 -----------
 **Ethereum Validator Watcher** monitors the Ethereum beacon chain in real-time and notifies you when any of your validators:
 - are going to propose a block in the next two epochs
-- missed a block proposal
+- missed a block proposal on head
 - did not optimally attest
 - missed an attestation
 - missed two attestations in a row
@@ -133,48 +133,48 @@ eth-validator-watcher --beacon-url http://localhost:3500 --web3signer-url http:/
 Exported Prometheus metrics
 ---------------------------
 
-name                                       | description
--------------------------------------------|------------
-`eth_usd`                                  | ETH/USD conversion rate
-`entry_queue_duration_sec`                 | Entry queue duration in seconds
-`our_pending_queued_validators_count`      | Our pending queued validators count
-`total_pending_queued_validators_count`    | Total pending queued validators count
-`our_active_validators_count`              | Our active validators count
-`total_active_validators_count`            | Total active validators count
-`our_exited_validators_count`              | Our exited validators count
-`wrong_fee_recipient_proposed_block_count` | Wrong fee recipient proposed block count
-`missed_attestations_count`                | Missed attestations count
-`double_missed_attestations_count`         | Double missed attestations count
-`missed_block_proposals_count`             | Missed block proposals count
-`missed_block_proposals_count_details`     | Missed block proposals count with slot and epoch labels
-`future_block_proposals_count`             | Future block proposals count
-`our_slashed_validators_count`             | Our slashed validators count
-`total_slashed_validators_count`           | Total slashed validators count
-`suboptimal_attestations_rate`             | Suboptimal attestations rate
-`keys_count`                               | Keys count
-`bad_relay_count`                          | Bad relay count
-`net_suboptimal_sources_rate`              | Network suboptimal sources rate
-`net_suboptimal_targets_rate`              | Network suboptimal targets rate
-`net_suboptimal_heads_rate`                | Network suboptimal heads rate
-`net_ideal_sources_count`                  | Network ideal sources count
-`net_ideal_targets_count`                  | Network ideal targets count
-`net_ideal_heads_count`                    | Network ideal heads count
-`net_actual_pos_sources_count`             | Network actual positive sources count
-`net_actual_neg_sources_count`             | Network actual negative sources count
-`net_actual_pos_targets_count`             | Network actual positive targets count
-`net_actual_neg_targets_count`             | Network actual negative targets count
-`net_actual_heads_count`                   | Network actual heads count
-`our_suboptimal_sources_rate`              | Our suboptimal sources rate
-`our_suboptimal_targets_rate`              | Our suboptimal targets rate
-`our_suboptimal_heads_rate`                | Our suboptimal heads rate
-`our_ideal_sources_count`                  | Our ideal sources count
-`our_ideal_targets_count`                  | Our ideal targets count
-`our_ideal_heads_count`                    | Our ideal heads count
-`our_actual_pos_sources_count`             | Our actual positive sources count
-`our_actual_neg_sources_count`             | Our actual negative sources count
-`our_actual_pos_targets_count`             | Our actual positive targets count
-`our_actual_neg_targets_count`             | Our actual negative targets count
-`our_actual_heads_count`                   | Our actual heads count
+name                                        | description
+--------------------------------------------|------------
+`eth_usd`                                   | ETH/USD conversion rate
+`entry_queue_duration_sec`                  | Entry queue duration in seconds
+`our_pending_queued_validators_count`       | Our pending queued validators count
+`total_pending_queued_validators_count`     | Total pending queued validators count
+`our_active_validators_count`               | Our active validators count
+`total_active_validators_count`             | Total active validators count
+`our_exited_validators_count`               | Our exited validators count
+`wrong_fee_recipient_proposed_block_count`  | Wrong fee recipient proposed block count
+`missed_attestations_count`                 | Missed attestations count
+`double_missed_attestations_count`          | Double missed attestations count
+`missed_block_proposals_count_head`         | Missed block proposals count
+`missed_block_proposals_count_head_details` | Missed block proposals count with slot and epoch labels
+`future_block_proposals_count`              | Future block proposals count
+`our_slashed_validators_count`              | Our slashed validators count
+`total_slashed_validators_count`            | Total slashed validators count
+`suboptimal_attestations_rate`              | Suboptimal attestations rate
+`keys_count`                                | Keys count
+`bad_relay_count`                           | Bad relay count
+`net_suboptimal_sources_rate`               | Network suboptimal sources rate
+`net_suboptimal_targets_rate`               | Network suboptimal targets rate
+`net_suboptimal_heads_rate`                 | Network suboptimal heads rate
+`net_ideal_sources_count`                   | Network ideal sources count
+`net_ideal_targets_count`                   | Network ideal targets count
+`net_ideal_heads_count`                     | Network ideal heads count
+`net_actual_pos_sources_count`              | Network actual positive sources count
+`net_actual_neg_sources_count`              | Network actual negative sources count
+`net_actual_pos_targets_count`              | Network actual positive targets count
+`net_actual_neg_targets_count`              | Network actual negative targets count
+`net_actual_heads_count`                    | Network actual heads count
+`our_suboptimal_sources_rate`               | Our suboptimal sources rate
+`our_suboptimal_targets_rate`               | Our suboptimal targets rate
+`our_suboptimal_heads_rate`                 | Our suboptimal heads rate
+`our_ideal_sources_count`                   | Our ideal sources count
+`our_ideal_targets_count`                   | Our ideal targets count
+`our_ideal_heads_count`                     | Our ideal heads count
+`our_actual_pos_sources_count`              | Our actual positive sources count
+`our_actual_neg_sources_count`              | Our actual negative sources count
+`our_actual_pos_targets_count`              | Our actual positive targets count
+`our_actual_neg_targets_count`              | Our actual negative targets count
+`our_actual_heads_count`                    | Our actual heads count
 
 Installation
 ------------

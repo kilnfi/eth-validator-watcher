@@ -339,7 +339,7 @@ def test_nominal() -> None:
     entrypoint.slots = slots  # type: ignore
     entrypoint.process_future_blocks_proposal = process_future_blocks_proposal  # type: ignore
     entrypoint.process_suboptimal_attestations = process_suboptimal_attestations  # type: ignore
-    entrypoint.process_missed_blocks = process_missed_blocks  # type: ignore
+    entrypoint.process_missed_blocks_head = process_missed_blocks  # type: ignore
     entrypoint.process_rewards = process_rewards  # type: ignore
     entrypoint.write_liveness_file = write_liveness_file  # type: ignore
 
