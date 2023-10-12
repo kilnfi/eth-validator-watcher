@@ -104,7 +104,7 @@ def test_invalid_pubkeys() -> None:
         )
 
 
-def test_invalid_chain_not_ready() -> None:
+def test_chain_not_ready() -> None:
     class Beacon:
         def __init__(self, url: str) -> None:
             assert url == "http://localhost:5052"
@@ -274,6 +274,21 @@ def test_nominal() -> None:
 
         return 1
 
+    def process_missed_blocks_finalized(
+        beacon: Beacon,
+        last_processed_finalized_slot: int,
+        slot: int,
+        pubkeys: set[str],
+        slack: Slack,
+    ) -> int:
+        assert isinstance(beacon, Beacon)
+        assert last_processed_finalized_slot == 63
+        assert slot in {63, 64}
+        assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
+        assert isinstance(slack, Slack)
+
+        return 63
+
     def process_suboptimal_attestations(
         beacon: Beacon,
         potential_block: Optional[str],
@@ -338,6 +353,7 @@ def test_nominal() -> None:
 
     entrypoint.slots = slots  # type: ignore
     entrypoint.process_future_blocks_proposal = process_future_blocks_proposal  # type: ignore
+    entrypoint.process_missed_blocks_finalized = process_missed_blocks_finalized  # type: ignore
     entrypoint.process_suboptimal_attestations = process_suboptimal_attestations  # type: ignore
     entrypoint.process_missed_blocks_head = process_missed_blocks  # type: ignore
     entrypoint.process_rewards = process_rewards  # type: ignore

@@ -2,8 +2,7 @@ import json
 from pathlib import Path
 
 from pytest import raises
-from requests import Response
-from requests.exceptions import RetryError
+from requests import HTTPError, Response, codes
 from requests_mock import Mocker
 
 from eth_validator_watcher.beacon import Beacon, NoBlockError
@@ -29,7 +28,10 @@ def test_get_block_exists() -> None:
 def test_get_block_does_not_exist() -> None:
     def get(url: str, **_) -> Response:
         assert url == "http://beacon-node:5052/eth/v2/beacon/blocks/42"
-        raise RetryError
+        response = Response()
+        response.status_code = codes.NOT_FOUND
+
+        raise HTTPError(response=response)
 
     beacon = Beacon("http://beacon-node:5052")
     beacon._Beacon__http.get = get  # type: ignore
