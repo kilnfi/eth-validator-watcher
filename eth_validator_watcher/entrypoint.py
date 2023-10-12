@@ -20,7 +20,7 @@ from .missed_attestations import (
     process_double_missed_attestations,
     process_missed_attestations,
 )
-from .missed_blocks_head import process_missed_blocks_head
+from .missed_blocks import process_missed_blocks_finalized, process_missed_blocks_head
 from .models import BeaconType, Validators
 from .next_blocks_proposal import process_future_blocks_proposal
 from .relays import Relays
@@ -126,7 +126,8 @@ def handler(
     \b
     Ethereum Validator Watcher monitors the Ethereum beacon chain in real-time and notifies you when any of your validators:
     - are going to propose a block in the next two epochs
-    - missed a block proposal
+    - missed a block proposal at head
+    - missed a block proposal at finalized
     - did not optimally attest
     - missed an attestation
     - missed two attestations in a row
@@ -169,17 +170,20 @@ def handler(
 
     Prometheus server is automatically exposed on port 8000.
     """
-    _handler(  # pragma: no cover
-        beacon_url,
-        execution_url,
-        pubkeys_file_path,
-        web3signer_url,
-        fee_recipient,
-        slack_channel,
-        beacon_type,
-        relay_url,
-        liveness_file,
-    )
+    try:  # pragma: no cover
+        _handler(
+            beacon_url,
+            execution_url,
+            pubkeys_file_path,
+            web3signer_url,
+            fee_recipient,
+            slack_channel,
+            beacon_type,
+            relay_url,
+            liveness_file,
+        )
+    except KeyboardInterrupt:  # pragma: no cover
+        print("👋     Bye!")
 
 
 def _handler(
@@ -240,6 +244,8 @@ def _handler(
     last_rewards_process_epoch: Optional[int] = None
 
     previous_epoch: Optional[int] = None
+    last_processed_finalized_slot: Optional[int] = None
+
     genesis = beacon.get_genesis()
 
     for slot, slot_start_time_sec in slots(genesis.data.genesis_time):
@@ -267,6 +273,9 @@ def _handler(
         epoch_gauge.set(epoch)
 
         is_new_epoch = previous_epoch is None or previous_epoch != epoch
+
+        if last_processed_finalized_slot is None:
+            last_processed_finalized_slot = slot
 
         if is_new_epoch:
             try:
@@ -383,6 +392,10 @@ def _handler(
             last_rewards_process_epoch = epoch
 
         process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
+
+        last_processed_finalized_slot = process_missed_blocks_finalized(
+            beacon, last_processed_finalized_slot, slot, our_pubkeys, slack
+        )
 
         delta_sec = MISSED_BLOCK_TIMEOUT_SEC - (time() - slot_start_time_sec)
         sleep(max(0, delta_sec))

@@ -1,4 +1,4 @@
-from eth_validator_watcher.missed_blocks_head import (
+from eth_validator_watcher.missed_blocks import (
     missed_block_proposals_head_count,
     missed_block_proposals_head_count_details,
     process_missed_blocks_head,

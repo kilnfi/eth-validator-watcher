@@ -2637,7 +2637,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 72,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -2774,7 +2774,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 27,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -2865,7 +2865,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 27,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -2900,7 +2900,23 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Head"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
@@ -2914,7 +2930,7 @@
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
-          "showLegend": false
+          "showLegend": true
         },
         "tooltip": {
           "mode": "single",
@@ -2930,12 +2946,25 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max(increase(missed_block_proposals_count_total[24h]))",
+          "expr": "max(increase(missed_block_proposals_head_count_total[24h]))",
           "format": "time_series",
           "instant": false,
-          "legendFormat": "Missed blocks",
+          "legendFormat": "Head",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "max(increase(missed_block_proposals_finalized_count_total[24h]))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Finalized",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Kiln missed block proposals in the last 24H",
@@ -2960,7 +2989,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 27,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -3080,7 +3109,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 27,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -3216,7 +3245,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 27,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -3335,7 +3364,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 27,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -3444,13 +3473,13 @@
     "list": []
   },
   "time": {
-    "from": "now-60m",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Ethereum Validator Watcher OSS",
   "uid": "acc6771c-f2fb-4735-b747-6eb197064745",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }

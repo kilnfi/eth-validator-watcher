@@ -39,6 +39,19 @@ class Genesis(BaseModel):
     data: Data
 
 
+class Header(BaseModel):
+    class Data(BaseModel):
+        class Header(BaseModel):
+            class Message(BaseModel):
+                slot: int
+
+            message: Message
+
+        header: Header
+
+    data: Data
+
+
 class Block(BaseModel):
     class Data(BaseModel):
         class Message(BaseModel):
@@ -122,6 +135,12 @@ class BeaconType(str, Enum):
     OLD_PRYSM = "old-prysm"
     OLD_TEKU = "old-teku"
     OTHER = "other"
+
+
+class BlockIdentierType(str, Enum):
+    HEAD = "head"
+    GENESIS = "genesis"
+    FINALIZED = "finalized"
 
 
 class EthGetBlockByHashRequest(BaseModel):
