@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from pytest import raises
-from requests import HTTPError, Response, codes
+from requests import HTTPError, Response, codes, exceptions
 from requests_mock import Mocker
 
 from eth_validator_watcher.beacon import Beacon, NoBlockError
@@ -47,3 +47,18 @@ def test_get_header_does_not_exist() -> None:
 
     with raises(NoBlockError):
         beacon.get_header(42)
+
+
+def test_get_header_invalid_query() -> None:
+    def get(url: str, **_) -> Response:
+        assert url == "http://beacon-node:5052/eth/v1/beacon/headers/-42"
+        response = Response()
+        response.status_code = codes.INTERNAL_SERVER_ERROR
+
+        raise HTTPError(response=response)
+
+    beacon = Beacon("http://beacon-node:5052")
+    beacon._Beacon__http.get = get  # type: ignore
+
+    with raises(exceptions.RequestException):
+        beacon.get_header(-42)
