@@ -1,6 +1,5 @@
 """Contains the logic to check if the fee recipient is the one expected."""
 
-from typing import Optional
 
 from prometheus_client import Counter
 
@@ -17,9 +16,9 @@ wrong_fee_recipient_proposed_block_count = Counter(
 def process_fee_recipient(
     block: Block,
     index_to_validator: dict[int, Validators.DataItem.Validator],
-    execution: Optional[Execution],
-    expected_fee_recipient: Optional[str],
-    slack: Optional[Slack],
+    execution: Execution | None,
+    expected_fee_recipient: str | None,
+    slack: Slack | None,
 ) -> None:
     """Check if the fee recipient is the one expected.
 

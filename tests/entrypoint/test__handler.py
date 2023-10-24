@@ -2,15 +2,14 @@ from os import environ
 from pathlib import Path
 from typing import Iterator, Optional, Tuple
 
-from freezegun import freeze_time
-from pytest import raises
-from typer import BadParameter
-
 from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
 from eth_validator_watcher.models import BeaconType, Genesis, Validators
 from eth_validator_watcher.utils import LimitedDict, Slack
 from eth_validator_watcher.web3signer import Web3Signer
+from freezegun import freeze_time
+from pytest import raises
+from typer import BadParameter
 
 StatusEnum = Validators.DataItem.StatusEnum
 Validator = Validators.DataItem.Validator
@@ -199,7 +198,7 @@ def test_nominal() -> None:
                 },
             }
 
-        def get_potential_block(self, slot: int) -> Optional[str]:
+        def get_potential_block(self, slot: int) -> str | None:
             assert slot in {63, 64}
             return "A BLOCK"
 
@@ -291,7 +290,7 @@ def test_nominal() -> None:
 
     def process_suboptimal_attestations(
         beacon: Beacon,
-        potential_block: Optional[str],
+        potential_block: str | None,
         slot: int,
         index_to_validator: dict[int, Validator],
     ) -> set[int]:
@@ -308,7 +307,7 @@ def test_nominal() -> None:
 
     def process_missed_blocks(
         beacon: Beacon,
-        potential_block: Optional[str],
+        potential_block: str | None,
         slot: int,
         pubkeys: set[str],
         slack: Slack,

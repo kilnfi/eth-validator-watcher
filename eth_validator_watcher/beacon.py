@@ -240,7 +240,7 @@ class Beacon:
         self,
         beacon_type: BeaconType,
         epoch: int,
-        validators_index: Optional[set[int]] = None,
+        validators_index: set[int] | None = None,
     ) -> Rewards:
         """Get rewards.
 
@@ -333,7 +333,7 @@ class Beacon:
 
         return {item.index: item.is_live for item in validators_liveness.data}
 
-    def get_potential_block(self, slot) -> Optional[Block]:
+    def get_potential_block(self, slot) -> Block | None:
         """Get a block if it exists, otherwise return None.
 
         Parameters:

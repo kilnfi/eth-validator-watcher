@@ -1,8 +1,5 @@
 """Contains the SlashedValidators class, which is responsible for managing the slashed
 validators."""
-
-from typing import Optional
-
 from prometheus_client import Gauge
 
 from .models import Validators
@@ -22,14 +19,14 @@ total_slashed_validators_count = Gauge(
 class SlashedValidators:
     """Slashed validators abstraction."""
 
-    def __init__(self, slack: Optional[Slack]) -> None:
+    def __init__(self, slack: Slack | None) -> None:
         """Slashed validators
 
         Parameters:
         slack: Optional slack client
         """
-        self.__total_exited_slashed_indexes: Optional[set[int]] = None
-        self.__our_exited_slashed_indexes: Optional[set[int]] = None
+        self.__total_exited_slashed_indexes: set[int] | None = None
+        self.__our_exited_slashed_indexes: set[int] | None = None
         self.__slack = slack
 
     def process(
