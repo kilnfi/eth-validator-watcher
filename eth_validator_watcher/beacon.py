@@ -121,9 +121,6 @@ class Beacon:
                           retrieve
         """
         try:
-            if isinstance(block_identifier, BlockIdentierType):
-                block_identifier = block_identifier.value
-
             response = self.__get(
                 f"{self.__url}/eth/v1/beacon/headers/{block_identifier}", timeout=5
             )

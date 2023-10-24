@@ -1,6 +1,6 @@
 """Contains the models for the validator watcher."""
 
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 
 from pydantic import BaseModel
@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 class Validators(BaseModel):
     class DataItem(BaseModel):
-        class StatusEnum(str, Enum):
+        class StatusEnum(StrEnum):
             pendingInitialized = "pending_initialized"
             pendingQueued = "pending_queued"
             activeOngoing = "active_ongoing"
@@ -129,7 +129,7 @@ class CoinbaseTrade(BaseModel):
     side: str
 
 
-class BeaconType(str, Enum):
+class BeaconType(StrEnum):
     LIGHTHOUSE = "lighthouse"
     NIMBUS = "nimbus"
     OLD_PRYSM = "old-prysm"
@@ -137,7 +137,7 @@ class BeaconType(str, Enum):
     OTHER = "other"
 
 
-class BlockIdentierType(str, Enum):
+class BlockIdentierType(StrEnum):
     HEAD = "head"
     GENESIS = "genesis"
     FINALIZED = "finalized"
