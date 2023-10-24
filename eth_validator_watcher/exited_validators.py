@@ -1,7 +1,6 @@
 """Contains the ExitedValidators class, which is responsible for managing the exited
 validators."""
 
-from typing import Optional
 
 from prometheus_client import Gauge
 
@@ -17,13 +16,13 @@ our_exited_validators_count = Gauge(
 class ExitedValidators:
     """Exited validators abstraction."""
 
-    def __init__(self, slack: Optional[Slack]) -> None:
+    def __init__(self, slack: Slack | None) -> None:
         """Exited validators
 
         Parameters:
         slack: Optional slack client
         """
-        self.__our_exited_unslashed_indexes: Optional[set[int]] = None
+        self.__our_exited_unslashed_indexes: set[int] | None = None
         self.__slack = slack
 
     def process(

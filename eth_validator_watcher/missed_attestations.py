@@ -1,7 +1,6 @@
 """Contains the logic to check if the validators missed attestations."""
 
 import functools
-from typing import Optional, Set
 
 from prometheus_client import Gauge
 
@@ -87,8 +86,8 @@ def process_double_missed_attestations(
     previous_dead_indexes: set[int],
     epoch_to_index_to_validator_index: LimitedDict,
     epoch: int,
-    slack: Optional[Slack],
-) -> Set[int]:
+    slack: Slack | None,
+) -> set[int]:
     """Process double missed attestations.
 
     Parameters:

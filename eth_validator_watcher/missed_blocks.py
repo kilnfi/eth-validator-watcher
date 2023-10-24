@@ -1,7 +1,6 @@
 """Contains functions to handle missed block proposals detection on head"""
 
 import functools
-from typing import Optional
 
 from prometheus_client import Counter
 
@@ -36,10 +35,10 @@ missed_block_proposals_finalized_count_details = Counter(
 
 def process_missed_blocks_head(
     beacon: Beacon,
-    potential_block: Optional[Block],
+    potential_block: Block | None,
     slot: int,
     our_pubkeys: set[str],
-    slack: Optional[Slack],
+    slack: Slack | None,
 ) -> bool:
     """Process missed block proposals detection at head
 
@@ -111,7 +110,7 @@ def process_missed_blocks_finalized(
     last_processed_finalized_slot: int,
     slot: int,
     our_pubkeys: set[str],
-    slack: Optional[Slack],
+    slack: Slack | None,
 ) -> int:
     """Process missed block proposals detection at finalized
 

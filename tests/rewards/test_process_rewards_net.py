@@ -1,5 +1,4 @@
 from math import isclose
-from typing import Optional
 
 from eth_validator_watcher.models import BeaconType, Rewards, Validators
 from eth_validator_watcher.rewards import (
@@ -53,7 +52,7 @@ def test_process_rewards_all_net_validators_are_ideal() -> None:
             self,
             beacon_type: BeaconType,
             epoch: int,
-            validators_index: Optional[set[int]] = None,
+            validators_index: set[int] | None = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
@@ -184,7 +183,7 @@ def test_process_rewards_some_net_validators_are_ideal() -> None:
             self,
             beacon_type: BeaconType,
             epoch: int,
-            validators_index: Optional[set[int]] = None,
+            validators_index: set[int] | None = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
@@ -375,7 +374,7 @@ def test_process_rewards_no_net_validator_is_ideal() -> None:
             self,
             beacon_type: BeaconType,
             epoch: int,
-            validators_index: Optional[set[int]] = None,
+            validators_index: set[int] | None = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40

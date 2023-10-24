@@ -78,7 +78,8 @@ net_active_validators_gauge = Gauge(
 def handler(
     beacon_url: str = Option(..., help="URL of beacon node", show_default=False),
     execution_url: str = Option(None, help="URL of execution node", show_default=False),
-    pubkeys_file_path: Optional[Path] = Option(
+    pubkeys_file_path: Path
+    | None = Option(
         None,
         help="File containing the list of public keys to watch",
         exists=True,
@@ -86,15 +87,18 @@ def handler(
         dir_okay=False,
         show_default=False,
     ),
-    web3signer_url: Optional[str] = Option(
+    web3signer_url: str
+    | None = Option(
         None, help="URL to web3signer managing keys to watch", show_default=False
     ),
-    fee_recipient: Optional[str] = Option(
+    fee_recipient: str
+    | None = Option(
         None,
         help="Fee recipient address - --execution-url must be set",
         show_default=False,
     ),
-    slack_channel: Optional[str] = Option(
+    slack_channel: str
+    | None = Option(
         None,
         help="Slack channel to send alerts - SLACK_TOKEN env var must be set",
         show_default=False,
@@ -116,9 +120,7 @@ def handler(
     relay_url: List[str] = Option(
         [], help="URL of allow listed relay", show_default=False
     ),
-    liveness_file: Optional[Path] = Option(
-        None, help="Liveness file", show_default=False
-    ),
+    liveness_file: Path | None = Option(None, help="Liveness file", show_default=False),
 ) -> None:
     """
     🚨 Ethereum Validator Watcher 🚨
@@ -188,14 +190,14 @@ def handler(
 
 def _handler(
     beacon_url: str,
-    execution_url: Optional[str],
-    pubkeys_file_path: Optional[Path],
-    web3signer_url: Optional[str],
-    fee_recipient: Optional[str],
-    slack_channel: Optional[str],
+    execution_url: str | None,
+    pubkeys_file_path: Path | None,
+    web3signer_url: str | None,
+    fee_recipient: str | None,
+    slack_channel: str | None,
     beacon_type: BeaconType,
     relays_url: List[str],
-    liveness_file: Optional[Path],
+    liveness_file: Path | None,
 ) -> None:
     """Just a wrapper to be able to test the handler function"""
     slack_token = environ.get("SLACK_TOKEN")
@@ -240,11 +242,11 @@ def _handler(
     exited_validators = ExitedValidators(slack)
     slashed_validators = SlashedValidators(slack)
 
-    last_missed_attestations_process_epoch: Optional[int] = None
-    last_rewards_process_epoch: Optional[int] = None
+    last_missed_attestations_process_epoch: int | None = None
+    last_rewards_process_epoch: int | None = None
 
-    previous_epoch: Optional[int] = None
-    last_processed_finalized_slot: Optional[int] = None
+    previous_epoch: int | None = None
+    last_processed_finalized_slot: int | None = None
 
     genesis = beacon.get_genesis()
 

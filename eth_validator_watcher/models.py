@@ -1,7 +1,6 @@
 """Contains the models for the validator watcher."""
 
 from enum import StrEnum
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -153,7 +152,7 @@ class EthGetBlockByHashRequest(BaseModel):
 class ExecutionBlock(BaseModel):
     class Result(BaseModel):
         class Transaction(BaseModel):
-            to: Optional[str]
+            to: str | None
 
         transactions: list[Transaction]
 

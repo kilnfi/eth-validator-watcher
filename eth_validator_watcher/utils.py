@@ -184,8 +184,8 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
 
 
 def get_our_pubkeys(
-    pubkeys_file_path: Optional[Path],
-    web3signer: Optional[Web3Signer],
+    pubkeys_file_path: Path | None,
+    web3signer: Web3Signer | None,
 ) -> set[str]:
     """Get our pubkeys
 
