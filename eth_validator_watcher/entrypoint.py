@@ -78,8 +78,7 @@ net_active_validators_gauge = Gauge(
 def handler(
     beacon_url: str = Option(..., help="URL of beacon node", show_default=False),
     execution_url: str = Option(None, help="URL of execution node", show_default=False),
-    pubkeys_file_path: Path
-    | None = Option(
+    pubkeys_file_path: Optional[Path] = Option(
         None,
         help="File containing the list of public keys to watch",
         exists=True,
@@ -87,18 +86,15 @@ def handler(
         dir_okay=False,
         show_default=False,
     ),
-    web3signer_url: str
-    | None = Option(
+    web3signer_url: Optional[str] = Option(
         None, help="URL to web3signer managing keys to watch", show_default=False
     ),
-    fee_recipient: str
-    | None = Option(
+    fee_recipient: Optional[str] = Option(
         None,
         help="Fee recipient address - --execution-url must be set",
         show_default=False,
     ),
-    slack_channel: str
-    | None = Option(
+    slack_channel: Optional[str] = Option(
         None,
         help="Slack channel to send alerts - SLACK_TOKEN env var must be set",
         show_default=False,
@@ -120,7 +116,9 @@ def handler(
     relay_url: List[str] = Option(
         [], help="URL of allow listed relay", show_default=False
     ),
-    liveness_file: Path | None = Option(None, help="Liveness file", show_default=False),
+    liveness_file: Optional[Path] = Option(
+        None, help="Liveness file", show_default=False
+    ),
 ) -> None:
     """
     🚨 Ethereum Validator Watcher 🚨

@@ -219,6 +219,16 @@ You did not had ideal target rewards. | ```🎯 Our validator 0x8000118f, 0x80a2
 You did not had ideal head rewards. | ```🗣️ Our validator 0x8005f5e8, 0x801910e5, 0x80193dd5, 0x801a26e9, 0x80285258 and 0 more had not ideal rewards on head  at epoch 215200```
 The chain is not yet started.       | ```⏱️     The chain will start in  1 days,  1 hours,  3 minutes and 48 seconds.```
 
+If you see this kind of message:
+```
+❓     Missed attestations detection is disabled for epoch 238030.
+❓     You can ignore this message if the watcher just started less than one epoch ago. Otherwise, please check that you used the correct `--beacon-type`` option (currently set to `other`).
+❓     Use `--help` for more details.
+```
+
+If you just started the watcher less than one epoch ago (and especially, if you started the watcher during the few last slots of the epoch), then you can safely ignore this message.
+Otherwise, please check you uses the correct `--beacon-type` option.
+
 Slack messages
 --------------
 If a Slack channel is specified, the slack messages are sent according to the following events:

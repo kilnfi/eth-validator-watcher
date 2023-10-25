@@ -338,9 +338,16 @@ class Beacon:
             # If we are here, it means the requested epoch is too old, which
             # could be normal if the watcher just started
             print(
-                f"👵     Liveness requested epoch is too old: {epoch}. "
-                "This message should be displayed only at the watcher start."
+                f"❓     Missed attestations detection is disabled for epoch {epoch}. "
             )
+
+            print(
+                "❓     You can ignore this message if the watcher just started less "
+                "than one epoch ago. Otherwise, please check that you used the correct "
+                f"`--beacon-type` option (currently set to `{beacon_type}`). "
+            )
+
+            print("❓     Use `--help` for more details.")
 
             return {index: True for index in validators_index}
 
