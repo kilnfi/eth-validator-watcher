@@ -94,6 +94,9 @@ Teku `< 23.6.0 ` | Full with `--beacon-type=old-teku`. See https://github.com/Co
 Nimbus           | Partial with `--beacon-type=nimbus` - Missed attestations detection and rewards computation disabled. See https://github.com/status-im/nimbus-eth2/issues/5019 and https://github.com/status-im/nimbus-eth2/issues/5138 for more details.
 Lodestar         | Not (yet) tested.
 
+The beacon type is relative to the beacon node connected to the watcher, **not to the beacon node connected to the validator client containing a validator key you want to watch**.
+(The watcher is agnostic of the infrastructure mananing validators keys you want to watch.)
+
 Command lines examples
 ----------------------
 
