@@ -273,7 +273,7 @@ livenessProbe:
   failureThreshold: 1
   exec:
     command:
-    - /usr/bin/python3.9
+    - /usr/bin/python3.11
     - /usr/local/bin/liveness_check.py
     - <path-to-a-file>
 ```
