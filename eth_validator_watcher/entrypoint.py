@@ -222,8 +222,6 @@ def _handler(
         else None
     )
 
-    start_http_server(8000)
-
     beacon = Beacon(beacon_url)
     execution = Execution(execution_url) if execution_url is not None else None
     coinbase = Coinbase()
@@ -248,7 +246,7 @@ def _handler(
 
     genesis = beacon.get_genesis()
 
-    for slot, slot_start_time_sec in slots(genesis.data.genesis_time):
+    for idx, (slot, slot_start_time_sec) in enumerate(slots(genesis.data.genesis_time)):
         if slot < 0:
             chain_start_in_sec = -slot * NB_SECOND_PER_SLOT
             days, hours, minutes, seconds = convert_seconds_to_dhms(chain_start_in_sec)
@@ -438,3 +436,6 @@ def _handler(
 
         if liveness_file is not None:
             write_liveness_file(liveness_file)
+
+        if idx == 0:
+            start_http_server(8000)
