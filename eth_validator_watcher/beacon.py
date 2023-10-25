@@ -1,9 +1,9 @@
 """Contains the Beacon class which is used to interact with the consensus layer node."""
 
 
+import functools
 from collections import defaultdict
 from functools import lru_cache
-from http.client import HTTPException
 from typing import Any, Optional, Union
 
 from requests import HTTPError, Response, Session, codes
@@ -27,6 +27,8 @@ from .models import (
 )
 
 StatusEnum = Validators.DataItem.StatusEnum
+
+print = functools.partial(print, flush=True)
 
 
 class NoBlockError(Exception):
@@ -327,7 +329,21 @@ class Beacon:
 
         response = beacon_type_to_function[beacon_type](epoch, validators_index)
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            if e.response.status_code != codes.bad_request:
+                raise
+
+            # If we are here, it means the requested epoch is too old, which
+            # could be normal if the watcher just started
+            print(
+                f"👵     Liveness requested epoch is too old: {epoch}. "
+                "This message should be displayed only at the watcher start."
+            )
+
+            return {index: True for index in validators_index}
+
         validators_liveness_dict = response.json()
         validators_liveness = ValidatorsLivenessResponse(**validators_liveness_dict)
 
