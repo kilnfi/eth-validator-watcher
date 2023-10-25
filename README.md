@@ -204,14 +204,14 @@ You are going to propose a block in the next two epochs. | ```💍 Our validator
 Someone [proposed](https://beaconcha.in/slot/6716776) a block. | ```✅     validator 0xb9d2439f proposed block at epoch 209899 - slot 6716776 ✅```
 You [proposed](https://beaconcha.in/slot/6716781) a block. | ```✨ Our validator 0xa6cdd026 proposed block at epoch 209899 - slot 6716781 ✨```
 You proposed a block with the wrong fee recipient. | ```🚩 Our validator 0x00000000 proposed block at epoch 209952 - slot 6718495 with the wrong fee recipient```
-You [did not had](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/666dad82-2f67-432d-97eb-9f99ef6c106a) optimal attestation inclusion. | ```☣️ Our validator 0x98a5bad4, 0x8116a5f8, 0xa2fff7bd, 0x87cd0fd3, 0x978ebbdb and 1 more (1.2 %) had not optimal attestation inclusion at slot 6716778```
+You [did not had](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/666dad82-2f67-432d-97eb-9f99ef6c106a) optimal attestation inclusion. | ```❗ Our validator 0x98a5bad4, 0x8116a5f8, 0xa2fff7bd, 0x87cd0fd3, 0x978ebbdb and 1 more (1.2 %) had not optimal attestation inclusion at slot 6716778```
 Someone [missed](https://beaconcha.in/validator/399279#blocks) a block proposal.  | ```💩     validator 0xa3dbc635 missed   block at epoch 209894 - slot 6716637 💩```
 You [missed](https://sepolia.beaconcha.in/slot/3454352) a block proposal (head). | ```🔺 Our validator 0xb09d7c4e missed   block at head at epoch 107948 - slot 3454352 🔺```
 You [missed](https://sepolia.beaconcha.in/slot/3454352) a block proposal (finalized). | ```❌ Our validator 0xb09d7c4e missed block at finalized at epoch 107948 - slot 3454352 ❌```
-You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/9bed8b53-5c53-4cf0-818d-066434660004) an attestation. | ```☹️ Our validator 0xa672f362, 0xb5f46214, 0xac81b7f4 and 0 more missed attestation at epoch 209894```
-You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/74326f4f-d3f5-405d-87ce-9576f9ed79a0) 2 attestations in a row. | ```😱  Our validator 0x8c9bfca1, 0xa68f7c5d and 0 more missed 2 attestations in a row from epoch 209367```
+You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/9bed8b53-5c53-4cf0-818d-066434660004) an attestation. | ```🙁 Our validator 0xa672f362, 0xb5f46214, 0xac81b7f4 and 0 more missed attestation at epoch 209894```
+You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/74326f4f-d3f5-405d-87ce-9576f9ed79a0) 2 attestations in a row. | ```😱 Our validator 0x8c9bfca1, 0xa68f7c5d and 0 more missed 2 attestations in a row from epoch 209367```
 You [exited](https://beaconcha.in/validator/491565). | ```🚶 Our validator 0xaeb82c90 is exited```
-Someone [got](https://beaconcha.in/validator/647102) slashed. | ```✂️     validator 0xb3a608a7 is slashed```
+Someone [got](https://beaconcha.in/validator/647102) slashed. | ```🔪     validator 0xb3a608a7 is slashed```
 You got slashed (you don't want to see this one). | ```🔕 Our validator 0x00000000 is slashed```
 You proposed a block with a non-allowed relay. | ```🟧 Block proposed with unknown builder (may be a locally built block)```
 You did not had ideal source rewards. | ```🚰 Our validator 0x8012aba2, 0x8012cdb1, 0x803f3b39, 0x8054cda1, 0x8055bb56 and 0 more had not ideal rewards on source at epoch 215201```

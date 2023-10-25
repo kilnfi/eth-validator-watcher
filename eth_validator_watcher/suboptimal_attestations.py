@@ -153,7 +153,7 @@ def process_suboptimal_attestations(
         short_first_pubkeys_str = ", ".join(short_first_pubkeys)
 
         print(
-            f"☣️ Our validator {short_first_pubkeys_str} and "
+            f"❗ Our validator {short_first_pubkeys_str} and "
             f"{len(our_validators_index_that_did_not_attest_optimally_during_previous_slot) - len(short_first_pubkeys)} more "
             f"({round(100 * suboptimal_attestations_rate, 1)} %) had not optimal attestation "
             f"inclusion at slot {previous_slot}"

@@ -73,7 +73,7 @@ def process_missed_attestations(
     short_first_pubkeys_str = ", ".join(short_first_pubkeys)
 
     print(
-        f"☹️ Our validator {short_first_pubkeys_str} and "
+        f"🙁 Our validator {short_first_pubkeys_str} and "
         f"{len(dead_indexes) - len(short_first_pubkeys)} more "
         f"missed attestation at epoch {epoch - 1}"
     )
