@@ -15,21 +15,9 @@ missed_block_proposals_head_count = Counter(
     "Missed block proposals head count",
 )
 
-missed_block_proposals_head_count_details = Counter(
-    "missed_block_proposals_head_count_details",
-    "Missed block proposals head count details",
-    ["slot", "epoch"],
-)
-
 missed_block_proposals_finalized_count = Counter(
     "missed_block_proposals_finalized_count",
     "Missed block proposals finalized count",
-)
-
-missed_block_proposals_finalized_count_details = Counter(
-    "missed_block_proposals_finalized_count_details",
-    "Missed block proposals finalized count details",
-    ["slot", "epoch"],
 )
 
 
@@ -100,7 +88,6 @@ def process_missed_blocks_head(
 
     if is_our_validator and missed:
         missed_block_proposals_head_count.inc()
-        missed_block_proposals_head_count_details.labels(slot=slot, epoch=epoch).inc()
 
     return is_our_validator
 
@@ -179,9 +166,5 @@ def process_missed_blocks_finalized(
                 slack.send_message(message_slack)
 
             missed_block_proposals_finalized_count.inc()
-
-            missed_block_proposals_finalized_count_details.labels(
-                slot=slot_, epoch=epoch
-            ).inc()
 
     return last_finalized_slot
