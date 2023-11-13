@@ -1,4 +1,3 @@
-
 """Entrypoint for the eth-validator-watcher CLI."""
 
 import functools
