@@ -150,9 +150,7 @@ name                                             | description
 `missed_attestations_count`                      | Missed attestations count
 `double_missed_attestations_count`               | Double missed attestations count
 `missed_block_proposals_head_count`              | Missed block proposals on head count
-`missed_block_proposals_head_count_details`      | Missed block proposals on head count with slot and epoch labels
 `missed_block_proposals_finalized_count`         | Missed block proposals on finalized count
-`missed_block_proposals_finalized_count_details` | Missed block proposals on finalized count with slot and epoch labels
 `future_block_proposals_count`                   | Future block proposals count
 `our_slashed_validators_count`                   | Our slashed validators count
 `total_slashed_validators_count`                 | Total slashed validators count
