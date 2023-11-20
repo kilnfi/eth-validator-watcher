@@ -49,7 +49,7 @@ BUCKETS: list[tuple[int, int]] = [
     (2_621_440, 40),
 ]
 
-entry_queue_duration_sec = Gauge(
+metric_entry_queue_duration_sec = Gauge(
     "entry_queue_duration_sec",
     "Entry queue duration in seconds",
 )
@@ -141,4 +141,4 @@ def export_duration_sec(
     """
 
     duration_sec = compute_duration_sec(nb_active_validators, position_in_entry_queue)
-    entry_queue_duration_sec.set(duration_sec)
+    metric_entry_queue_duration_sec.set(duration_sec)
