@@ -1,13 +1,13 @@
 from .models import BeaconType
-from dataclasses import dataclass, field
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Any, List, Optional
 
 import os
 import yaml
 
 
-@dataclass
-class WatchedKeyConfig:
+class WatchedKeyConfig(BaseModel):
     """Configuration of a watched key.
     """
     public_key: str
@@ -15,34 +15,29 @@ class WatchedKeyConfig:
     fee_recipient: Optional[str] = None
 
 
-@dataclass
-class Config:
+class Config(BaseSettings):
     """Configuration of the Ethereum Validator Watcher.
-
-    Everything can be configured via a configuration file, there is
-    the possibility to override parts of the configuration with
-    environment variables, which ca be useful for secrets.
-
-    Settings here are split in two groups: the ones that can be overriden,
-    and the more complex ones that can't.
     """
-    beacon_url: Optional[str] = os.getenv('ETH_WATCHER_BEACON_URL')
-    beacon_type: Optional[str] = os.getenv('ETH_WATCHER_BEACON_TYPE', BeaconType.OTHER)
-    execution_url: Optional[str] = os.getenv('ETH_WATCHER_EXEC_URL')
-    config_file: Optional[str] = os.getenv('ETH_WATCHER_CONFIG_FILE', 'etc/config.local.yaml')
-    web3signer_url: Optional[str] = os.getenv('ETH_WATCHER_WEB3SIGNER_URL')
-    default_fee_recipient: Optional[str] = os.getenv('ETH_WATCHER_DEFAULT_FEE_RECIPIENT')
-    slack_channel: Optional[str] = os.getenv('ETH_WATCHER_SLACK_CHANNEL')
-    slack_token: Optional[str] = os.getenv('ETH_WATCHER_SLACK_TOKEN')
-    relays: Optional[List[str]] = field(default_factory=lambda: list(filter(bool, os.getenv('ETH_WATCHER_RELAY_URL', '').split(','))))
-    liveness_file: Optional[str] = os.getenv('ETH_WATCHER_LIVENESS_FILE')
+    model_config = SettingsConfigDict(case_sensitive=True, env_prefix='eth_watcher_')
 
-    watched_keys: List[WatchedKeyConfig] = field(default_factory=list)
+    beacon_url: Optional[str] = None
+    beacon_type: Optional[BeaconType] = None
+    execution_url: Optional[str] = None
+    web3signer_url: Optional[str] = None
+    default_fee_recipient: Optional[str] = None
+    slack_channel: Optional[str] = None
+    slack_token: Optional[str] = None
+    relays: Optional[List[str]] = None
+    liveness_file: Optional[str] = None
+    watched_keys: Optional[List[WatchedKeyConfig]] = None
 
 
 def load_config(config_file: str) -> Config:
-    """Loads the configuration file
+    """Loads the configuration file from environment and configfile.
 
+    Environment variables have priority (can be used to set secrets
+    and override the config file).
+    
     Parameters:
     config_file : path to the YAML configuration file
 
@@ -50,32 +45,12 @@ def load_config(config_file: str) -> Config:
     The effective configuration used by the watcher
     """
     with open(config_file, 'r') as fh:
-        yml = yaml.safe_load(fh)
-        config = Config()
+        config = yaml.safe_load(fh)
+        
+        from_env = Config().model_dump()
+        from_yaml = Config(**config).model_dump()
 
-        def get_value(value: Any, key: str) -> Any:
-            if value is not None:
-                return value
-            return yml.get(key)
+        merged = from_yaml.copy()
+        merged.update({k: v for k, v in from_env.items() if v})
 
-        # Settings that can be overriden via environment.
-        config.beacon_url = get_value(config.beacon_url, 'beacon_url')
-        config.execution_url = get_value(config.execution_url, 'execution_url')
-        config.web3signer_url = get_value(config.web3signer_url, 'web3signer_url')
-        config.default_fee_recipient = get_value(config.default_fee_recipient, 'default_fee_recipient')
-        config.slack_channel = get_value(config.slack_channel, 'slack_channel')
-        config.slack_token = get_value(config.slack_token, 'slack_token')
-        config.beacon_type = get_value(config.beacon_type, 'beacon_type')
-        config.relays = get_value(config.relays or None, 'relays')
-        config.liveness_file = get_value(config.liveness_file, 'liveness_file')
-
-        # More complex settings that can't.
-        config.watched_keys = [
-            WatchedKeyConfig(
-                public_key=config_key.get('public_key'),
-                labels=config_key.get('label'),
-                fee_recipient=config_key.get('fee_recipient', config.default_fee_recipient),
-            ) for config_key in yml.get('watched_keys') or ()
-        ]
-
-        return config
+        return Config(**merged)
