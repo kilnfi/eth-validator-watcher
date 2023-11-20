@@ -5,7 +5,7 @@ import pytest
 
 from eth_validator_watcher.beacon import NoBlockError
 from eth_validator_watcher.missed_blocks import (
-    missed_block_proposals_finalized_count,
+    metric_missed_block_proposals_finalized_count,
     process_missed_blocks_finalized,
 )
 from eth_validator_watcher.models import BlockIdentierType, Header, ProposerDuties
@@ -174,7 +174,7 @@ def test_process_missed_blocks_finalized_nominal() -> None:
     beacon = Beacon()
     slack = Slack()
 
-    counter_before = missed_block_proposals_finalized_count.collect()[0].samples[0].value  # type: ignore
+    counter_before = metric_missed_block_proposals_finalized_count.collect()[0].samples[0].value  # type: ignore
 
     assert (
         process_missed_blocks_finalized(
@@ -198,7 +198,7 @@ def test_process_missed_blocks_finalized_nominal() -> None:
         == 100
     )
 
-    counter_after = missed_block_proposals_finalized_count.collect()[0].samples[0].value  # type: ignore
+    counter_after = metric_missed_block_proposals_finalized_count.collect()[0].samples[0].value  # type: ignore
     delta = counter_after - counter_before
     assert delta == 2
     assert slack.counter == 2
