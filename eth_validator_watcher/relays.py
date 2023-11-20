@@ -10,7 +10,7 @@ from requests.exceptions import ConnectionError
 MAX_TRIALS = 5
 WAIT_SEC = 0.5
 
-bad_relay_count = Counter(
+metric_bad_relay_count = Counter(
     "bad_relay_count",
     "Bad relay count",
 )
@@ -54,7 +54,7 @@ class Relays:
                 for relay_url in self.__urls
             )
         ):
-            bad_relay_count.inc()
+            metric_bad_relay_count.inc()
             print(
                 "🟧 Block proposed with unknown builder (may be a locally built block)"
             )
