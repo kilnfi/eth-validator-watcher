@@ -1,12 +1,13 @@
 import re
 from pathlib import Path
 from time import sleep, time
-from typing import Any, Iterator, Optional, Tuple
+from typing import Any, Iterator, List, Optional, Tuple
 
 from more_itertools import chunked
 from prometheus_client import Gauge
 from slack_sdk import WebClient
 
+from .config import WatchedKeyConfig
 from .web3signer import Web3Signer
 
 NB_SLOT_PER_EPOCH = 32
@@ -184,13 +185,13 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
 
 
 def get_our_pubkeys(
-    pubkeys_file_path: Path | None,
+    watched_keys: List[WatchedKeyConfig] | None,
     web3signer: Web3Signer | None,
 ) -> set[str]:
     """Get our pubkeys
 
     Parameters:
-    pubkeys_file_path: The path of file containing keys to watch
+    watched_keys     : The list of validator keys we want to watch
     web3signer       : Web3Signer instance signing for the keys to watch
 
     Query pubkeys from either file path or Web3Signer instance.
@@ -198,18 +199,16 @@ def get_our_pubkeys(
     returns `our_pubkeys`.
     """
 
-    # Get public keys to watch from file
-    pubkeys_from_file: set[str] = (
-        load_pubkeys_from_file(pubkeys_file_path)
-        if pubkeys_file_path is not None
-        else set()
+    # Get public keys from config
+    pubkeys_from_config: set[str] = set(
+        k.public_key for k in watched_keys
     )
 
     pubkeys_from_web3signer = (
         web3signer.load_pubkeys() if web3signer is not None else set()
     )
 
-    our_pubkeys = pubkeys_from_file | pubkeys_from_web3signer
+    our_pubkeys = pubkeys_from_config | pubkeys_from_web3signer
     metric_keys_count.set(len(our_pubkeys))
     return our_pubkeys
 

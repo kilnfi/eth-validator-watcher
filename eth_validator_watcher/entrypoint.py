@@ -11,6 +11,7 @@ from prometheus_client import Gauge, start_http_server
 from typer import Option
 
 from .beacon import Beacon
+from .config import load_config, WatchedKeyConfig
 from .coinbase import Coinbase
 from .entry_queue import export_duration_sec as export_entry_queue_dur_sec
 from .execution import Execution
@@ -76,48 +77,13 @@ metric_net_active_validators_gauge = Gauge(
 
 @app.command()
 def handler(
-    beacon_url: str = Option(..., help="URL of beacon node", show_default=False),
-    execution_url: str = Option(None, help="URL of execution node", show_default=False),
-    pubkeys_file_path: Optional[Path] = Option(
-        None,
-        help="File containing the list of public keys to watch",
+    config: Optional[Path] = Option(
+        'etc/config.local.yaml',
+        help="File containing the Ethereum Validator Watcher configuration file.",
         exists=True,
         file_okay=True,
         dir_okay=False,
-        show_default=False,
-    ),
-    web3signer_url: Optional[str] = Option(
-        None, help="URL to web3signer managing keys to watch", show_default=False
-    ),
-    fee_recipient: Optional[str] = Option(
-        None,
-        help="Fee recipient address - --execution-url must be set",
-        show_default=False,
-    ),
-    slack_channel: Optional[str] = Option(
-        None,
-        help="Slack channel to send alerts - SLACK_TOKEN env var must be set",
-        show_default=False,
-    ),
-    beacon_type: BeaconType = Option(
-        BeaconType.OTHER,
-        case_sensitive=False,
-        help=(
-            "Use this option if connected to a Teku < 23.6.0, Prysm < 4.0.8, "
-            "Lighthouse or Nimbus beacon node. "
-            "See https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0, "
-            "https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm < 4.0.8, "
-            "https://github.com/sigp/lighthouse/issues/4243 for Lighthouse, "
-            "https://github.com/status-im/nimbus-eth2/issues/5019 and "
-            "https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus."
-        ),
         show_default=True,
-    ),
-    relay_url: List[str] = Option(
-        [], help="URL of allow listed relay", show_default=False
-    ),
-    liveness_file: Optional[Path] = Option(
-        None, help="Liveness file", show_default=False
     ),
 ) -> None:
     """
@@ -170,17 +136,20 @@ def handler(
 
     Prometheus server is automatically exposed on port 8000.
     """
+    cfg = load_config(config)
+    
     try:  # pragma: no cover
         _handler(
-            beacon_url,
-            execution_url,
-            pubkeys_file_path,
-            web3signer_url,
-            fee_recipient,
-            slack_channel,
-            beacon_type,
-            relay_url,
-            liveness_file,
+            cfg.beacon_url,
+            cfg.execution_url,
+            cfg.watched_keys,
+            cfg.web3signer_url,
+            cfg.default_fee_recipient,
+            cfg.slack_channel,
+            cfg.slack_token,
+            cfg.beacon_type,
+            cfg.relay_url,
+            cfg.liveness_file,
         )
     except KeyboardInterrupt:  # pragma: no cover
         print("👋     Bye!")
@@ -189,31 +158,31 @@ def handler(
 def _handler(
     beacon_url: str,
     execution_url: str | None,
-    pubkeys_file_path: Path | None,
+    watched_keys: List[WatchedKeyConfig] | None,
     web3signer_url: str | None,
-    fee_recipient: str | None,
+    default_fee_recipient: str | None,
     slack_channel: str | None,
+    slack_token: str | None,
     beacon_type: BeaconType,
     relays_url: List[str],
     liveness_file: Path | None,
 ) -> None:
     """Just a wrapper to be able to test the handler function"""
-    slack_token = environ.get("SLACK_TOKEN")
 
-    if fee_recipient is not None and execution_url is None:
+    if default_fee_recipient is not None and execution_url is None:
         raise typer.BadParameter(
-            "`execution-url` must be set if you want to use `fee-recipient`"
+            "`execution_url` must be set if you want to use `default_fee_recipient`"
         )
 
-    if fee_recipient is not None:
+    if default_fee_recipient is not None:
         try:
-            fee_recipient = eth1_address_lower_0x_prefixed(fee_recipient)
+            default_fee_recipient = eth1_address_lower_0x_prefixed(default_fee_recipient)
         except ValueError:
-            raise typer.BadParameter("`fee-recipient` should be a valid ETH1 address")
+            raise typer.BadParameter("`default_fee_recipient` should be a valid ETH1 address")
 
     if slack_channel is not None and slack_token is None:
         raise typer.BadParameter(
-            "SLACK_TOKEN env var must be set if you want to use `slack-channel`"
+            "slack_token var must be set if you want to use `slack_channel`"
         )
 
     slack = (
@@ -277,7 +246,7 @@ def _handler(
 
         if is_new_epoch:
             try:
-                our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
+                our_pubkeys = get_our_pubkeys(watched_keys, web3signer)
             except ValueError:
                 raise typer.BadParameter("Some pubkeys are invalid")
 
