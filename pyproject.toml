@@ -2,7 +2,7 @@
 name = "eth-validator-watcher"
 version = "0.1.0"
 description = "Ethereum Validator Watcher"
-authors = ["Manu NALEPA <emmanuel.nalepa@kiln.fi>"]
+authors = ["Manu NALEPA <emmanuel.nalepa@kiln.fi>, Sébastien Rannou <mxs@kiln.fi>"]
 readme = "README.md"
 packages = [{include = "eth_validator_watcher"}]
 
