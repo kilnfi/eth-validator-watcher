@@ -7,7 +7,7 @@ from prometheus_client import Gauge
 from .models import Validators
 from .utils import Slack
 
-our_exited_validators_count = Gauge(
+metric_our_exited_validators_count = Gauge(
     "our_exited_validators_count",
     "Our exited validators count",
 )
@@ -52,7 +52,7 @@ class ExitedValidators:
             our_unslashed_withdrawal_index_to_validator
         )
 
-        our_exited_validators_count.set(len(our_exited_indexes))
+        metric_our_exited_validators_count.set(len(our_exited_indexes))
 
         if self.__our_exited_unslashed_indexes is None:
             self.__our_exited_unslashed_indexes = our_exited_unslashed_indexes

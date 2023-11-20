@@ -1,6 +1,6 @@
 from eth_validator_watcher.exited_validators import (
     ExitedValidators,
-    our_exited_validators_count,
+    metric_our_exited_validators_count,
 )
 from eth_validator_watcher.models import Validators
 
@@ -33,7 +33,7 @@ def test_process_exited_validators():
         our_exited_unslashed_index_to_validator, our_withdrawal_index_to_validator
     )
 
-    assert our_exited_validators_count.collect()[0].samples[0].value == 3  # type: ignore
+    assert metric_our_exited_validators_count.collect()[0].samples[0].value == 3  # type: ignore
     assert slack.counter == 0
 
     assert (
@@ -50,7 +50,7 @@ def test_process_exited_validators():
         our_exited_unslashed_index_to_validator, our_withdrawal_index_to_validator
     )
 
-    assert our_exited_validators_count.collect()[0].samples[0].value == 4  # type: ignore
+    assert metric_our_exited_validators_count.collect()[0].samples[0].value == 4  # type: ignore
     assert slack.counter == 1
 
     assert (
