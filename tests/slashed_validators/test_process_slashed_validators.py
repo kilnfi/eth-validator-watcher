@@ -1,8 +1,8 @@
 from eth_validator_watcher.models import Validators
 from eth_validator_watcher.slashed_validators import (
     SlashedValidators,
-    our_slashed_validators_count,
-    total_slashed_validators_count,
+    metric_our_slashed_validators_count,
+    metric_total_slashed_validators_count,
 )
 
 Validator = Validators.DataItem.Validator
@@ -52,8 +52,8 @@ def test_process_slashed_validators():
         our_withdrawal_index_to_validator,
     )
 
-    assert total_slashed_validators_count.collect()[0].samples[0].value == 7  # type: ignore
-    assert our_slashed_validators_count.collect()[0].samples[0].value == 3  # type: ignore
+    assert metric_total_slashed_validators_count.collect()[0].samples[0].value == 7  # type: ignore
+    assert metric_our_slashed_validators_count.collect()[0].samples[0].value == 3  # type: ignore
     assert slack.counter == 0
 
     assert (
@@ -88,8 +88,8 @@ def test_process_slashed_validators():
         our_withdrawal_index_to_validator,
     )
 
-    assert total_slashed_validators_count.collect()[0].samples[0].value == 8  # type: ignore
-    assert our_slashed_validators_count.collect()[0].samples[0].value == 4  # type: ignore
+    assert metric_total_slashed_validators_count.collect()[0].samples[0].value == 8  # type: ignore
+    assert metric_our_slashed_validators_count.collect()[0].samples[0].value == 4  # type: ignore
     assert slack.counter == 1
 
     assert (
