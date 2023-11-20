@@ -5,12 +5,12 @@ from prometheus_client import Gauge
 from .models import Validators
 from .utils import Slack
 
-our_slashed_validators_count = Gauge(
+metric_our_slashed_validators_count = Gauge(
     "our_slashed_validators_count",
     "Our slashed validators count",
 )
 
-total_slashed_validators_count = Gauge(
+metric_total_slashed_validators_count = Gauge(
     "total_slashed_validators_count",
     "Total slashed validators count",
 )
@@ -74,8 +74,8 @@ class SlashedValidators:
             our_slashed_withdrawal_index_to_validator
         )
 
-        total_slashed_validators_count.set(len(total_slashed_indexes))
-        our_slashed_validators_count.set(len(our_slashed_indexes))
+        metric_total_slashed_validators_count.set(len(total_slashed_indexes))
+        metric_our_slashed_validators_count.set(len(our_slashed_indexes))
 
         total_exited_slashed_indexes = set(total_exited_slashed_index_to_validator)
         our_exited_slashed_indexes = set(our_exited_slashed_index_to_validator)
