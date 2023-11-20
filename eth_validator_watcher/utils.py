@@ -40,7 +40,7 @@ CHUCK_NORRIS = [
     '"Infinite."',
 ]
 
-keys_count = Gauge(
+metric_keys_count = Gauge(
     "keys_count",
     "Keys count",
 )
@@ -210,7 +210,7 @@ def get_our_pubkeys(
     )
 
     our_pubkeys = pubkeys_from_file | pubkeys_from_web3signer
-    keys_count.set(len(our_pubkeys))
+    metric_keys_count.set(len(our_pubkeys))
     return our_pubkeys
 
 
