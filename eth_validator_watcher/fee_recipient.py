@@ -7,7 +7,7 @@ from .execution import Execution
 from .models import Block, Validators
 from .utils import NB_SLOT_PER_EPOCH, Slack
 
-wrong_fee_recipient_proposed_block_count = Counter(
+metric_wrong_fee_recipient_proposed_block_count = Counter(
     "wrong_fee_recipient_proposed_block_count",
     "Wrong fee recipient proposed block count",
 )
@@ -93,4 +93,4 @@ def process_fee_recipient(
     if slack is not None:
         slack.send_message(message)
 
-    wrong_fee_recipient_proposed_block_count.inc()
+    metric_wrong_fee_recipient_proposed_block_count.inc()

@@ -5,7 +5,7 @@ from pytest import fixture
 
 from eth_validator_watcher.fee_recipient import (
     process_fee_recipient,
-    wrong_fee_recipient_proposed_block_count,
+    metric_wrong_fee_recipient_proposed_block_count,
 )
 from eth_validator_watcher.models import Block, ExecutionBlock, Validators
 from tests.fee_recipient import assets
@@ -56,7 +56,7 @@ def block() -> Block:
 
 def test_execution_is_none():
     slack = Slack()
-    counter_before = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_before = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
 
     process_fee_recipient(
         block="A block",  # type: ignore
@@ -66,7 +66,7 @@ def test_execution_is_none():
         slack=slack,  # type: ignore
     )
 
-    counter_after = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_after = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
     assert counter_after == counter_before
 
     assert slack.counter == 0
@@ -74,7 +74,7 @@ def test_execution_is_none():
 
 def test_fee_recipient_is_none():
     slack = Slack()
-    counter_before = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_before = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
 
     process_fee_recipient(
         block="A block",  # type: ignore
@@ -89,7 +89,7 @@ def test_fee_recipient_is_none():
 
 def test_not_our_validator(block: Block):
     slack = Slack()
-    counter_before = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_before = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
 
     process_fee_recipient(
         block=block,
@@ -99,7 +99,7 @@ def test_not_our_validator(block: Block):
         slack=slack,  # type: ignore
     )
 
-    counter_after = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_after = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
     assert counter_after == counter_before
 
     assert slack.counter == 0
@@ -107,7 +107,7 @@ def test_not_our_validator(block: Block):
 
 def test_our_validator_allright(block: Block):
     slack = Slack()
-    counter_before = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_before = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
 
     process_fee_recipient(
         block=block,
@@ -121,7 +121,7 @@ def test_our_validator_allright(block: Block):
         slack=slack,  # type: ignore
     )
 
-    counter_after = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_after = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
     assert counter_after == counter_before
 
     assert slack.counter == 0
@@ -129,7 +129,7 @@ def test_our_validator_allright(block: Block):
 
 def test_our_validator_ok_in_last_tx(block: Block):
     slack = Slack()
-    counter_before = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_before = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
 
     process_fee_recipient(
         block=block,
@@ -143,7 +143,7 @@ def test_our_validator_ok_in_last_tx(block: Block):
         slack=slack,  # type: ignore
     )
 
-    counter_after = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_after = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
     assert counter_after == counter_before
 
     assert slack.counter == 0
@@ -151,7 +151,7 @@ def test_our_validator_ok_in_last_tx(block: Block):
 
 def test_our_validator_not_ok_empty_block(block: Block):
     slack = Slack()
-    counter_before = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_before = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
 
     process_fee_recipient(
         block=block,
@@ -165,7 +165,7 @@ def test_our_validator_not_ok_empty_block(block: Block):
         slack=slack,  # type: ignore
     )
 
-    counter_after = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_after = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
     assert counter_after == counter_before + 1
 
     assert slack.counter == 1
@@ -173,7 +173,7 @@ def test_our_validator_not_ok_empty_block(block: Block):
 
 def test_our_validator_not_ok(block: Block):
     slack = Slack()
-    counter_before = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_before = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
 
     process_fee_recipient(
         block=block,
@@ -187,7 +187,7 @@ def test_our_validator_not_ok(block: Block):
         slack=slack,  # type: ignore
     )
 
-    counter_after = wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
+    counter_after = metric_wrong_fee_recipient_proposed_block_count.collect()[0].samples[0].value  # type: ignore
     assert counter_after == counter_before + 1
 
     assert slack.counter == 1
