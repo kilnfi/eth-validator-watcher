@@ -34,10 +34,10 @@ class Config:
     default_fee_recipient: Optional[str] = os.getenv('ETH_WATCHER_DEFAULT_FEE_RECIPIENT')
     slack_channel: Optional[str] = os.getenv('ETH_WATCHER_SLACK_CHANNEL')
     slack_token: Optional[str] = os.getenv('ETH_WATCHER_SLACK_TOKEN')
-    relay_url: Optional[List[str]] = field(default_factory=lambda: os.getenv('ETH_WATCHER_RELAY_URL', '').split(','))
+    relays: Optional[List[str]] = field(default_factory=lambda: list(filter(bool, os.getenv('ETH_WATCHER_RELAY_URL', '').split(','))))
     liveness_file: Optional[str] = os.getenv('ETH_WATCHER_LIVENESS_FILE')
 
-    watched_keys: Optional[List[WatchedKeyConfig]] = None
+    watched_keys: List[WatchedKeyConfig] = field(default_factory=list)
 
 
 def load_config(config_file: str) -> Config:
@@ -66,7 +66,7 @@ def load_config(config_file: str) -> Config:
         config.slack_channel = get_value(config.slack_channel, 'slack_channel')
         config.slack_token = get_value(config.slack_token, 'slack_token')
         config.beacon_type = get_value(config.beacon_type, 'beacon_type')
-        config.relay_url = get_value(config.relay_url, 'relay_url')
+        config.relays = get_value(config.relays or None, 'relays')
         config.liveness_file = get_value(config.liveness_file, 'liveness_file')
 
         # More complex settings that can't.
@@ -75,7 +75,7 @@ def load_config(config_file: str) -> Config:
                 public_key=config_key.get('public_key'),
                 labels=config_key.get('label'),
                 fee_recipient=config_key.get('fee_recipient', config.default_fee_recipient),
-            ) for config_key in yml.get('watched_keys')
+            ) for config_key in yml.get('watched_keys') or ()
         ]
 
         return config
