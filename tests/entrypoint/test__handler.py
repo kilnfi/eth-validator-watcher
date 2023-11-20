@@ -1,8 +1,9 @@
 from os import environ
 from pathlib import Path
-from typing import Iterator, Optional, Tuple
+from typing import Iterator, List, Optional, Tuple
 
 from eth_validator_watcher import entrypoint
+from eth_validator_watcher.config import WatchedKeyConfig
 from eth_validator_watcher.entrypoint import _handler
 from eth_validator_watcher.models import BeaconType, Genesis, Validators
 from eth_validator_watcher.utils import LimitedDict, Slack
@@ -20,10 +21,11 @@ def test_fee_recipient_set_while_execution_url_not_set() -> None:
         _handler(
             beacon_url="",
             execution_url=None,
-            pubkeys_file_path=None,
+            watched_keys=None,
             web3signer_url=None,
-            fee_recipient="something",
+            default_fee_recipient="something",
             slack_channel="MY SLACK CHANNEL",
+            slack_token=None,
             beacon_type=BeaconType.OLD_TEKU,
             relays_url=[],
             liveness_file=None,
@@ -35,10 +37,11 @@ def test_fee_recipient_not_valid() -> None:
         _handler(
             beacon_url="",
             execution_url="http://localhost:8545",
-            pubkeys_file_path=None,
+            watched_keys=None,
             web3signer_url=None,
-            fee_recipient="something",
+            default_fee_recipient="something",
             slack_channel="MY SLACK CHANNEL",
+            slack_token=None,
             beacon_type=BeaconType.OLD_TEKU,
             relays_url=[],
             liveness_file=None,
@@ -50,57 +53,16 @@ def test_slack_token_not_defined() -> None:
         _handler(
             beacon_url="",
             execution_url=None,
-            pubkeys_file_path=None,
+            watched_keys=None,
             web3signer_url=None,
-            fee_recipient=None,
+            default_fee_recipient=None,
             slack_channel="MY SLACK CHANNEL",
+            slack_token=None,
             beacon_type=BeaconType.OLD_TEKU,
             relays_url=[],
             liveness_file=None,
         )
 
-
-def test_invalid_pubkeys() -> None:
-    class Beacon:
-        def __init__(self, url: str) -> None:
-            assert url == "http://localhost:5052"
-
-        def get_genesis(self) -> Genesis:
-            return Genesis(
-                data=Genesis.Data(
-                    genesis_time=0,
-                )
-            )
-
-    def get_our_pubkeys(pubkeys_file_path: Path, web3signer: None) -> set[str]:
-        assert pubkeys_file_path == Path("/path/to/pubkeys")
-        raise ValueError("Invalid pubkeys")
-
-    def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
-        assert genesis_time == 0
-        yield 63, 1664
-        yield 64, 1676
-
-    def start_http_server(_: int) -> None:
-        pass
-
-    entrypoint.get_our_pubkeys = get_our_pubkeys  # type: ignore
-    entrypoint.Beacon = Beacon  # type: ignore
-    entrypoint.slots = slots  # type: ignore
-    entrypoint.start_http_server = start_http_server  # type: ignore
-
-    with raises(BadParameter):
-        _handler(
-            beacon_url="http://localhost:5052",
-            execution_url=None,
-            pubkeys_file_path=Path("/path/to/pubkeys"),
-            web3signer_url=None,
-            fee_recipient=None,
-            slack_channel=None,
-            beacon_type=BeaconType.OLD_TEKU,
-            relays_url=[],
-            liveness_file=None,
-        )
 
 
 def test_chain_not_ready() -> None:
@@ -142,10 +104,11 @@ def test_chain_not_ready() -> None:
     _handler(
         beacon_url="http://localhost:5052",
         execution_url=None,
-        pubkeys_file_path=Path("/path/to/pubkeys"),
+        watched_keys=None,
         web3signer_url=None,
-        fee_recipient=None,
+        default_fee_recipient=None,
         slack_channel=None,
+        slack_token=None,
         beacon_type=BeaconType.OLD_TEKU,
         relays_url=[],
         liveness_file=Path("/path/to/liveness"),
@@ -221,8 +184,8 @@ def test_nominal() -> None:
         yield 63, 1664
         yield 64, 1676
 
-    def get_our_pubkeys(pubkeys_file_path: Path, web3signer: Web3Signer) -> set[str]:
-        assert pubkeys_file_path == Path("/path/to/pubkeys")
+    def get_our_pubkeys(watched_keys: List[WatchedKeyConfig], web3signer: Web3Signer) -> set[str]:
+        assert watched_keys == [WatchedKeyConfig(public_key="0xfff")]
         assert isinstance(web3signer, Web3Signer)
 
         return {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
@@ -358,15 +321,14 @@ def test_nominal() -> None:
     entrypoint.process_rewards = process_rewards  # type: ignore
     entrypoint.write_liveness_file = write_liveness_file  # type: ignore
 
-    environ["SLACK_TOKEN"] = "my_slack_token"
-
     _handler(
         beacon_url="http://localhost:5052",
         execution_url=None,
-        pubkeys_file_path=Path("/path/to/pubkeys"),
+        watched_keys=[WatchedKeyConfig(public_key="0xfff")],
         web3signer_url="http://localhost:9000",
-        fee_recipient=None,
+        default_fee_recipient=None,
         slack_channel="my slack channel",
+        slack_token="my_slack_token",
         beacon_type=BeaconType.OLD_TEKU,
         relays_url=["http://my-awesome-relay.com"],
         liveness_file=Path("/path/to/liveness"),

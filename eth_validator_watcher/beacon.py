@@ -349,10 +349,8 @@ class Beacon:
             print(
                 "❓     You can ignore this message if the watcher just started less "
                 "than one epoch ago. Otherwise, please check that you used the correct "
-                f"`--beacon-type` option (currently set to `{beacon_type}`). "
+                f"`beacon_type` option (currently set to `{beacon_type}`). "
             )
-
-            print("❓     Use `--help` for more details.")
 
             return {index: True for index in validators_index}
 
