@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from eth_validator_watcher.config import WatchedKeyConfig
 from eth_validator_watcher.utils import get_our_pubkeys
 from tests.utils import assets
 
@@ -15,7 +16,11 @@ class Web3Signer:
 
 
 def test_get_our_pubkeys() -> None:
-    pubkey_path = Path(assets.__file__).parent / "pubkeys.txt"
+    watched_keys = [
+        WatchedKeyConfig(public_key="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
+        WatchedKeyConfig(public_key="0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
+        WatchedKeyConfig(public_key="0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"),
+    ]
     web3signer = Web3Signer()
 
     expected = {
@@ -26,4 +31,4 @@ def test_get_our_pubkeys() -> None:
         "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
     }
-    assert get_our_pubkeys(pubkey_path, web3signer) == expected  # type: ignore
+    assert get_our_pubkeys(watched_keys, web3signer) == expected  # type: ignore

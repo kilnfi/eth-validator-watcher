@@ -1,3 +1,4 @@
+from .models import BeaconType
 from dataclasses import dataclass, field
 from typing import Any, List, Optional
 
@@ -26,7 +27,7 @@ class Config:
     and the more complex ones that can't.
     """
     beacon_url: Optional[str] = os.getenv('ETH_WATCHER_BEACON_URL')
-    beacon_type: Optional[str] = os.getenv('ETH_WATCHER_BEACON_TYPE')
+    beacon_type: Optional[str] = os.getenv('ETH_WATCHER_BEACON_TYPE', BeaconType.OTHER)
     execution_url: Optional[str] = os.getenv('ETH_WATCHER_EXEC_URL')
     config_file: Optional[str] = os.getenv('ETH_WATCHER_CONFIG_FILE', 'etc/config.local.yaml')
     web3signer_url: Optional[str] = os.getenv('ETH_WATCHER_WEB3SIGNER_URL')
@@ -44,6 +45,9 @@ def load_config(config_file: str) -> Config:
 
     Parameters:
     config_file : path to the YAML configuration file
+
+    Returns:
+    The effective configuration used by the watcher
     """
     with open(config_file, 'r') as fh:
         yml = yaml.safe_load(fh)

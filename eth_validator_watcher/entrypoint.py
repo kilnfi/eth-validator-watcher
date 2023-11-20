@@ -163,7 +163,7 @@ def _handler(
     default_fee_recipient: str | None,
     slack_channel: str | None,
     slack_token: str | None,
-    beacon_type: BeaconType,
+    beacon_type: BeaconType | None,
     relays_url: List[str],
     liveness_file: Path | None,
 ) -> None:
@@ -380,7 +380,7 @@ def _handler(
             )
 
             process_fee_recipient(
-                block, our_active_idx2val, execution, fee_recipient, slack
+                block, our_active_idx2val, execution, default_fee_recipient, slack
             )
 
         is_our_validator = process_missed_blocks_head(
