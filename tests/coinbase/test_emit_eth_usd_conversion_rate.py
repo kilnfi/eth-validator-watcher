@@ -1,6 +1,6 @@
 from requests_mock import Mocker
 
-from eth_validator_watcher.coinbase import Coinbase, eth_usd_gauge
+from eth_validator_watcher.coinbase import Coinbase, metric_eth_usd_gauge
 
 
 def test_emit_eth_usd_conversion_rate_success() -> None:
@@ -21,7 +21,7 @@ def test_emit_eth_usd_conversion_rate_success() -> None:
         )
 
         coinbase.emit_eth_usd_conversion_rate()
-        assert eth_usd_gauge.collect()[0].samples[0].value == 1791.86  # type: ignore
+        assert metric_eth_usd_gauge.collect()[0].samples[0].value == 1791.86  # type: ignore
 
 
 def test_emit_eth_usd_conversion_rate_error() -> None:
