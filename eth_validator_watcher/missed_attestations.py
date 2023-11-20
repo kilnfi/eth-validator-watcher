@@ -12,12 +12,12 @@ from .utils import LimitedDict, Slack
 
 print = functools.partial(print, flush=True)
 
-missed_attestations_count = Gauge(
+metric_missed_attestations_count = Gauge(
     "missed_attestations_count",
     "Missed attestations count",
 )
 
-double_missed_attestations_count = Gauge(
+metric_double_missed_attestations_count = Gauge(
     "double_missed_attestations_count",
     "Double missed attestations count",
 )
@@ -58,7 +58,7 @@ def process_missed_attestations(
         index for index, liveness in validators_liveness.items() if not liveness
     }
 
-    missed_attestations_count.set(len(dead_indexes))
+    metric_missed_attestations_count.set(len(dead_indexes))
 
     if len(dead_indexes) == 0:
         return set()
@@ -108,7 +108,7 @@ def process_double_missed_attestations(
         return set()
 
     double_dead_indexes = dead_indexes & previous_dead_indexes
-    double_missed_attestations_count.set(len(double_dead_indexes))
+    metric_double_missed_attestations_count.set(len(double_dead_indexes))
 
     if len(double_dead_indexes) == 0:
         return set()
