@@ -50,8 +50,8 @@ Status = Validators.DataItem.StatusEnum
 
 app = typer.Typer(add_completion=False)
 
-slot_gauge = Gauge("slot", "Slot")
-epoch_gauge = Gauge("epoch", "Epoch")
+metric_slot_gauge = Gauge("slot", "Slot")
+metric_epoch_gauge = Gauge("epoch", "Epoch")
 
 our_queued_vals_gauge = Gauge(
     "our_pending_queued_validators_count",
@@ -267,8 +267,8 @@ def _handler(
         epoch = slot // NB_SLOT_PER_EPOCH
         slot_in_epoch = slot % NB_SLOT_PER_EPOCH
 
-        slot_gauge.set(slot)
-        epoch_gauge.set(epoch)
+        metric_slot_gauge.set(slot)
+        metric_epoch_gauge.set(epoch)
 
         is_new_epoch = previous_epoch is None or previous_epoch != epoch
 
