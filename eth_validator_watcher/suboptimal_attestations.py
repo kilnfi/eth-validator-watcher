@@ -18,7 +18,7 @@ from .utils import (
 
 print = functools.partial(print, flush=True)
 
-suboptimal_attestations_rate_gauge = Gauge(
+metric_suboptimal_attestations_rate_gauge = Gauge(
     "suboptimal_attestations_rate",
     "Suboptimal attestations rate",
 )
@@ -133,7 +133,7 @@ def process_suboptimal_attestations(
     )
 
     if suboptimal_attestations_rate is not None:
-        suboptimal_attestations_rate_gauge.set(100 * suboptimal_attestations_rate)
+        metric_suboptimal_attestations_rate_gauge.set(100 * suboptimal_attestations_rate)
 
     if len(our_validators_index_that_did_not_attest_optimally_during_previous_slot) > 0:
         assert suboptimal_attestations_rate is not None

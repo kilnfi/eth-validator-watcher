@@ -1,7 +1,7 @@
 from eth_validator_watcher import models, suboptimal_attestations
 from eth_validator_watcher.suboptimal_attestations import (
     process_suboptimal_attestations,
-    suboptimal_attestations_rate_gauge,
+    metric_suboptimal_attestations_rate_gauge,
 )
 
 Validator = models.Validators.DataItem.Validator
@@ -149,4 +149,4 @@ def test_our_pubkeys() -> None:
     )
 
     assert expected == actual
-    assert suboptimal_attestations_rate_gauge.collect()[0].samples[0].value == 50.0  # type: ignore
+    assert metric_suboptimal_attestations_rate_gauge.collect()[0].samples[0].value == 50.0  # type: ignore
