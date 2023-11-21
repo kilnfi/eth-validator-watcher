@@ -2,7 +2,6 @@ from pathlib import Path
 
 from eth_validator_watcher.config import WatchedKeyConfig
 from eth_validator_watcher.utils import get_our_pubkeys
-from tests.utils import assets
 
 
 class Web3Signer:
