@@ -2,15 +2,17 @@ from os import environ
 from pathlib import Path
 from typing import Iterator, List, Optional, Tuple
 
-from eth_validator_watcher import entrypoint
-from eth_validator_watcher.config import WatchedKeyConfig
-from eth_validator_watcher.entrypoint import _handler
-from eth_validator_watcher.models import BeaconType, Genesis, Validators
-from eth_validator_watcher.utils import LimitedDict, Slack
-from eth_validator_watcher.web3signer import Web3Signer
 from freezegun import freeze_time
 from pytest import raises
 from typer import BadParameter
+
+from eth_validator_watcher import entrypoint
+from eth_validator_watcher.config import WatchedKeyConfig
+from eth_validator_watcher.entrypoint import handler, _handler
+from eth_validator_watcher.models import BeaconType, Genesis, Validators
+from eth_validator_watcher.utils import LimitedDict, Slack
+from eth_validator_watcher.web3signer import Web3Signer
+from tests.entrypoint import assets
 
 StatusEnum = Validators.DataItem.StatusEnum
 Validator = Validators.DataItem.Validator
@@ -335,3 +337,10 @@ def test_nominal() -> None:
     )
 
     assert Coinbase.nb_calls == 2
+
+
+def test_invalid_config() -> None:
+    path = Path(assets.__file__).parent / "invalid_config.yaml"
+
+    with raises(BadParameter):
+        handler(path)
