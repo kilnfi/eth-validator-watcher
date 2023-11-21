@@ -21,7 +21,7 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(case_sensitive=True, env_prefix='eth_watcher_')
 
     beacon_url: Optional[str] = None
-    beacon_type: Optional[BeaconType] = None
+    beacon_type: BeaconType = BeaconType.OTHER
     execution_url: Optional[str] = None
     web3signer_url: Optional[str] = None
     default_fee_recipient: Optional[str] = None
@@ -46,7 +46,7 @@ def load_config(config_file: str) -> Config:
     """
     with open(config_file, 'r') as fh:
         config = yaml.safe_load(fh)
-        
+
         from_env = Config().model_dump()
         from_yaml = Config(**config).model_dump()
 

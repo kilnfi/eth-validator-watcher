@@ -16,7 +16,7 @@ def test_empty_config() -> None:
     assert config.default_fee_recipient is None
     assert config.slack_channel is None
     assert config.slack_token is None
-    assert config.beacon_type is None
+    assert config.beacon_type == BeaconType.OTHER
     assert config.relays is None
     assert config.liveness_file is None
     assert config.watched_keys is None
