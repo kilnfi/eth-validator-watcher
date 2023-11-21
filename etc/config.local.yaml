@@ -1,7 +1,7 @@
 # Example config file for the Ethereum watcher.
 
 beacon_url: http://localhost:5051/
-beacon_type: ~
+beacon_type: other
 execution_url: ~
 web3signer_url: ~
 default_fee_recipient: ~

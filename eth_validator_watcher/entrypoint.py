@@ -145,6 +145,7 @@ def handler(
     try:  # pragma: no cover
         _handler(
             cfg.beacon_url,
+            cfg.beacon_timeout_sec,
             cfg.execution_url,
             cfg.watched_keys,
             cfg.web3signer_url,
@@ -161,6 +162,7 @@ def handler(
 
 def _handler(
     beacon_url: str,
+    beacon_timeout_sec: int,
     execution_url: str | None,
     watched_keys: List[WatchedKeyConfig] | None,
     web3signer_url: str | None,
@@ -195,7 +197,7 @@ def _handler(
         else None
     )
 
-    beacon = Beacon(beacon_url)
+    beacon = Beacon(beacon_url, beacon_timeout_sec)
     execution = Execution(execution_url) if execution_url is not None else None
     coinbase = Coinbase()
     web3signer = Web3Signer(web3signer_url) if web3signer_url is not None else None

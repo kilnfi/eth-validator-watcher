@@ -15,7 +15,7 @@ def test_get_block_exists() -> None:
     with block_path.open() as file_descriptor:
         block_dict = json.load(file_descriptor)
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
 
     with Mocker() as mock:
         mock.get(
@@ -33,7 +33,7 @@ def test_get_block_does_not_exist() -> None:
 
         raise HTTPError(response=response)
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
     beacon._Beacon__http.get = get  # type: ignore
 
     with raises(NoBlockError):
@@ -48,7 +48,7 @@ def test_get_block_invalid_request() -> None:
 
         raise HTTPError(response=response)
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
     beacon._Beacon__http.get = get  # type: ignore
 
     with raises(exceptions.RequestException):
