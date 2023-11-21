@@ -245,10 +245,7 @@ def _handler(
             last_processed_finalized_slot = slot
 
         if is_new_epoch:
-            try:
-                our_pubkeys = get_our_pubkeys(watched_keys, web3signer)
-            except ValueError:
-                raise typer.BadParameter("Some pubkeys are invalid")
+            our_pubkeys = get_our_pubkeys(watched_keys, web3signer)
 
             # Network validators
             # ------------------
