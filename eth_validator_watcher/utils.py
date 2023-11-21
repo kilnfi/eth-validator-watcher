@@ -170,20 +170,6 @@ def apply_mask(items: list[Any], mask: list[bool]) -> set[Any]:
     return set(item for item, bit in zip(items, mask) if bit)
 
 
-def load_pubkeys_from_file(path: Path) -> set[str]:
-    """Load public keys from a file.
-
-    Parameters:
-    path: A path to a file containing a list of public keys.
-
-        Returns the corresponding set of public keys.
-    """
-    with path.open() as file_descriptor:
-        return set(
-            (eth2_address_lower_0x_prefixed(line.strip()) for line in file_descriptor)
-        )
-
-
 def get_our_pubkeys(
     watched_keys: List[WatchedKeyConfig] | None,
     web3signer: Web3Signer | None,
