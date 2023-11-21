@@ -9,6 +9,7 @@ from typing import List, Optional
 import typer
 from prometheus_client import Gauge, start_http_server
 from typer import Option
+from pydantic import ValidationError
 
 from .beacon import Beacon
 from .config import load_config, WatchedKeyConfig
@@ -136,7 +137,10 @@ def handler(
 
     Prometheus server is automatically exposed on port 8000.
     """
-    cfg = load_config(config)
+    try:
+        cfg = load_config(config)
+    except ValidationError as err:
+        raise typer.BadParameter(f'Invalid configuration file: {err}')
     
     try:  # pragma: no cover
         _handler(
@@ -148,7 +152,7 @@ def handler(
             cfg.slack_channel,
             cfg.slack_token,
             cfg.beacon_type,
-            cfg.relay_url,
+            cfg.relays,
             cfg.liveness_file,
         )
     except KeyboardInterrupt:  # pragma: no cover
