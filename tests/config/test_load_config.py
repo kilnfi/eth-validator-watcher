@@ -6,6 +6,22 @@ from eth_validator_watcher.models import BeaconType
 from tests.config import assets
 
 
+def test_null_config() -> None:
+    path = Path(assets.__file__).parent / "config.null.yaml"
+    config = load_config(path)
+
+    assert config.beacon_url is None
+    assert config.execution_url is None
+    assert config.web3signer_url is None
+    assert config.default_fee_recipient is None
+    assert config.slack_channel is None
+    assert config.slack_token is None
+    assert config.beacon_type == BeaconType.OTHER
+    assert config.relays is None
+    assert config.liveness_file is None
+    assert config.watched_keys is None
+
+
 def test_empty_config() -> None:
     path = Path(assets.__file__).parent / "config.empty.yaml"
     config = load_config(path)
