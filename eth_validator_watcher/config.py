@@ -22,6 +22,7 @@ class Config(BaseSettings):
 
     beacon_url: Optional[str] = None
     beacon_type: BeaconType = BeaconType.OTHER
+    beacon_timeout_sec: int = 90
     execution_url: Optional[str] = None
     web3signer_url: Optional[str] = None
     default_fee_recipient: Optional[str] = None

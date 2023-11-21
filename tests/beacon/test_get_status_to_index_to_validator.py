@@ -17,7 +17,7 @@ def test_get_status_to_index_to_validator() -> None:
     with asset_path.open() as file_descriptor:
         validators = json.load(file_descriptor)
 
-    beacon = Beacon("http://localhost:5052")
+    beacon = Beacon("http://localhost:5052", 90)
     expected = {
         StatusEnum.activeOngoing: {
             0: Validator(

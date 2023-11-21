@@ -26,7 +26,7 @@ def test_get_duty_slot_to_committee_index_to_validators_index():
             json=committees,
         )
 
-        beacon = Beacon(beacon_url)
+        beacon = Beacon(beacon_url, 90)
 
         assert (
             beacon.get_duty_slot_to_committee_index_to_validators_index(epoch)

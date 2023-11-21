@@ -1,6 +1,5 @@
 """Contains the Beacon class which is used to interact with the consensus layer node."""
 
-
 import functools
 from collections import defaultdict
 from functools import lru_cache
@@ -26,11 +25,8 @@ from .models import (
     ValidatorsLivenessResponse,
 )
 
+
 StatusEnum = Validators.DataItem.StatusEnum
-
-
-# Hard-coded for now, will need to move this to a config.
-TIMEOUT_BEACON_SEC = 90
 
 
 print = functools.partial(print, flush=True)
@@ -43,13 +39,15 @@ class NoBlockError(Exception):
 class Beacon:
     """Beacon node abstraction."""
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, timeout_sec: int) -> None:
         """Beacon
 
         Parameters:
-        url: URL where the beacon can be reached
+        url        : URL where the beacon can be reached
+        timeout_sec: timeout in seconds used to query the beacon
         """
         self.__url = url
+        self.__timeout_sec = timeout_sec
         self.__http_retry_not_found = Session()
         self.__http = Session()
         self.__first_liveness_call = True
@@ -114,7 +112,7 @@ class Beacon:
     def get_genesis(self) -> Genesis:
         """Get genesis data."""
         response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/beacon/genesis", timeout=TIMEOUT_BEACON_SEC
+            f"{self.__url}/eth/v1/beacon/genesis", timeout=self.__timeout_sec
         )
         response.raise_for_status()
         genesis_dict = response.json()
@@ -129,7 +127,7 @@ class Beacon:
         """
         try:
             response = self.__get(
-                f"{self.__url}/eth/v1/beacon/headers/{block_identifier}", timeout=TIMEOUT_BEACON_SEC
+                f"{self.__url}/eth/v1/beacon/headers/{block_identifier}", timeout=self.__timeout_sec
             )
 
             response.raise_for_status()
@@ -153,7 +151,7 @@ class Beacon:
         """
         try:
             response = self.__get(
-                f"{self.__url}/eth/v2/beacon/blocks/{slot}", timeout=TIMEOUT_BEACON_SEC
+                f"{self.__url}/eth/v2/beacon/blocks/{slot}", timeout=self.__timeout_sec
             )
 
             response.raise_for_status()
@@ -176,7 +174,7 @@ class Beacon:
         epoch: Epoch corresponding to the proposer duties to retrieve
         """
         response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}", timeout=TIMEOUT_BEACON_SEC
+            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}", timeout=self.__timeout_sec
         )
 
         response.raise_for_status()
@@ -193,7 +191,7 @@ class Beacon:
         inner value             : Validator
         """
         response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/beacon/states/head/validators", timeout=TIMEOUT_BEACON_SEC
+            f"{self.__url}/eth/v1/beacon/states/head/validators", timeout=self.__timeout_sec
         )
 
         response.raise_for_status()
@@ -226,7 +224,7 @@ class Beacon:
         response = self.__get_retry_not_found(
             f"{self.__url}/eth/v1/beacon/states/head/committees",
             params=dict(epoch=epoch),
-            timeout=TIMEOUT_BEACON_SEC,
+            timeout=self.__timeout_sec,
         )
 
         response.raise_for_status()
@@ -289,7 +287,7 @@ class Beacon:
                 if validators_index is not None
                 else []
             ),
-            timeout=TIMEOUT_BEACON_SEC,
+            timeout=self.__timeout_sec,
         )
 
         response.raise_for_status()
@@ -390,7 +388,7 @@ class Beacon:
             json=ValidatorsLivenessRequestLighthouse(
                 epoch=epoch, indices=sorted(list(validators_index))
             ).model_dump(),
-            timeout=TIMEOUT_BEACON_SEC,
+            timeout=self.__timeout_sec,
         )
 
     def __get_validators_liveness_old_teku(
@@ -410,7 +408,7 @@ class Beacon:
             json=ValidatorsLivenessRequestTeku(
                 indices=sorted(list(validators_index))
             ).model_dump(),
-            timeout=TIMEOUT_BEACON_SEC,
+            timeout=self.__timeout_sec,
         )
 
     def __get_validators_liveness_beacon_api(
@@ -431,5 +429,5 @@ class Beacon:
                 str(validator_index)
                 for validator_index in sorted(list(validators_index))
             ],
-            timeout=TIMEOUT_BEACON_SEC,
+            timeout=self.__timeout_sec,
         )

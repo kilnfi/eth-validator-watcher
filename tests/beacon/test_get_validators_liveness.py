@@ -33,7 +33,7 @@ def test_get_validators_liveness_lighthouse():
             additional_matcher=match_request,
             json=liveness_response,
         )
-        beacon = Beacon(beacon_url)
+        beacon = Beacon(beacon_url, 90)
         expected = {42: True, 44: False, 46: True}
 
         assert (
@@ -48,7 +48,7 @@ def test_get_validators_liveness_lighthouse():
 
 def test_get_validators_liveness_nimbus():
     beacon_url = "http://beacon:5052"
-    beacon = Beacon(beacon_url)
+    beacon = Beacon(beacon_url, 90)
 
     assert beacon.get_validators_liveness(
         beacon_type=BeaconType.NIMBUS, epoch=1664, validators_index={42, 44, 46}
@@ -76,7 +76,7 @@ def test_get_validators_liveness_teku():
             additional_matcher=match_request,
             json=liveness_response,
         )
-        beacon = Beacon(beacon_url)
+        beacon = Beacon(beacon_url, 90)
         expected = {42: True, 44: False, 46: True}
 
         assert (
@@ -113,7 +113,7 @@ def test_get_validators_liveness_beacon_api():
             additional_matcher=match_request,
             json=liveness_response,
         )
-        beacon = Beacon(beacon_url)
+        beacon = Beacon(beacon_url, 90)
         expected = {42: True, 44: False, 46: True}
 
         assert (
@@ -134,7 +134,7 @@ def test_get_validators_liveness_beacon_api_bad_request():
 
         return response
 
-    beacon = Beacon(beacon_url)
+    beacon = Beacon(beacon_url, 90)
     beacon._Beacon__http_retry_not_found.post = post  # type: ignore
 
     expected = {42: True, 44: True, 46: True}
@@ -154,7 +154,7 @@ def test_get_validators_liveness_beacon_api_no_extended():
 
         return response
 
-    beacon = Beacon(beacon_url)
+    beacon = Beacon(beacon_url, 90)
     beacon._Beacon__http_retry_not_found.post = post  # type: ignore
 
     with raises(HTTPError):

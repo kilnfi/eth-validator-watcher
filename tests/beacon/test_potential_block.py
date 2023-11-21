@@ -7,7 +7,7 @@ def test_get_block_exists() -> None:
         assert slot == 42
         return "a fake block"  # type: ignore
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
     beacon.get_block = get_block  # type: ignore
 
     assert beacon.get_potential_block(42) == "a fake block"
@@ -18,7 +18,7 @@ def test_get_block_not_exists() -> None:
         assert slot == 42
         raise NoBlockError
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
     beacon.get_block = get_block  # type: ignore
 
     assert beacon.get_potential_block(42) is None

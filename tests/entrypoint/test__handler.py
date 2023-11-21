@@ -22,6 +22,7 @@ def test_fee_recipient_set_while_execution_url_not_set() -> None:
     with raises(BadParameter):
         _handler(
             beacon_url="",
+            beacon_timeout_sec=90,
             execution_url=None,
             watched_keys=None,
             web3signer_url=None,
@@ -38,6 +39,7 @@ def test_fee_recipient_not_valid() -> None:
     with raises(BadParameter):
         _handler(
             beacon_url="",
+            beacon_timeout_sec=90,
             execution_url="http://localhost:8545",
             watched_keys=None,
             web3signer_url=None,
@@ -54,6 +56,7 @@ def test_slack_token_not_defined() -> None:
     with raises(BadParameter):
         _handler(
             beacon_url="",
+            beacon_timeout_sec=90,
             execution_url=None,
             watched_keys=None,
             web3signer_url=None,
@@ -69,8 +72,9 @@ def test_slack_token_not_defined() -> None:
 
 def test_chain_not_ready() -> None:
     class Beacon:
-        def __init__(self, url: str) -> None:
+        def __init__(self, url: str, timeout_sec: int) -> None:
             assert url == "http://localhost:5052"
+            assert timeout_sec == 90
 
         def get_genesis(self) -> Genesis:
             return Genesis(
@@ -105,6 +109,7 @@ def test_chain_not_ready() -> None:
 
     _handler(
         beacon_url="http://localhost:5052",
+        beacon_timeout_sec=90,
         execution_url=None,
         watched_keys=None,
         web3signer_url=None,
@@ -120,8 +125,9 @@ def test_chain_not_ready() -> None:
 @freeze_time("2023-01-01 00:00:00", auto_tick_seconds=15)
 def test_nominal() -> None:
     class Beacon:
-        def __init__(self, url: str) -> None:
+        def __init__(self, url: str, timeout_sec: int) -> None:
             assert url == "http://localhost:5052"
+            assert timeout_sec == 90
 
         def get_genesis(self) -> Genesis:
             return Genesis(
@@ -325,6 +331,7 @@ def test_nominal() -> None:
 
     _handler(
         beacon_url="http://localhost:5052",
+        beacon_timeout_sec=90,
         execution_url=None,
         watched_keys=[WatchedKeyConfig(public_key="0xfff")],
         web3signer_url="http://localhost:9000",

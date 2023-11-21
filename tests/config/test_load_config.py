@@ -11,6 +11,7 @@ def test_null_config() -> None:
     config = load_config(path)
 
     assert config.beacon_url is None
+    assert config.beacon_timeout_sec == 90
     assert config.execution_url is None
     assert config.web3signer_url is None
     assert config.default_fee_recipient is None
@@ -27,6 +28,7 @@ def test_empty_config() -> None:
     config = load_config(path)
 
     assert config.beacon_url is None
+    assert config.beacon_timeout_sec == 90
     assert config.execution_url is None
     assert config.web3signer_url is None
     assert config.default_fee_recipient is None
@@ -43,6 +45,7 @@ def test_filled_config() -> None:
     config = load_config(path)
 
     assert config.beacon_url == 'http://localhost:5051/'
+    assert config.beacon_timeout_sec == 90
     assert config.execution_url == 'http://localhost:8545/'
     assert config.web3signer_url == 'http://web3signer:9000/'
     assert config.default_fee_recipient == '0x41bF25fC8C52d292bD66D3BCEcd8a919ecB9EF88'
@@ -59,6 +62,7 @@ def test_filled_config_overriden() -> None:
     environ = os.environ.copy()
 
     os.environ['eth_watcher_beacon_url'] = 'http://override-beacon/'
+    os.environ['eth_watcher_beacon_timeout_sec'] = '42'
     os.environ['eth_watcher_execution_url'] = 'http://override-exec/'
     os.environ['eth_watcher_web3signer_url'] = 'http://override-web3signer/'
     os.environ['eth_watcher_default_fee_recipient'] = '0x42'
@@ -72,6 +76,7 @@ def test_filled_config_overriden() -> None:
     config = load_config(path)
 
     assert config.beacon_url == 'http://override-beacon/'
+    assert config.beacon_timeout_sec == 42
     assert config.execution_url == 'http://override-exec/'
     assert config.web3signer_url == 'http://override-web3signer/'
     assert config.default_fee_recipient == '0x42'

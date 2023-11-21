@@ -26,6 +26,6 @@ def test_get_genesis():
             f"{beacon_url}/eth/v1/beacon/genesis",
             json=genesis,
         )
-        beacon = Beacon(beacon_url)
+        beacon = Beacon(beacon_url, 90)
 
         assert beacon.get_genesis() == expected
