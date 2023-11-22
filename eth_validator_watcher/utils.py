@@ -17,6 +17,8 @@ SLOT_FOR_MISSED_ATTESTATIONS_PROCESS = 16
 SLOT_FOR_REWARDS_PROCESS = 17
 ETH1_ADDRESS_LEN = 40
 ETH2_ADDRESS_LEN = 96
+LABEL_SCOPE_NETWORK="network"
+LABEL_SCOPE_WATCHED="watched"
 
 CHUCK_NORRIS = [
     "Chuck Norris doesn't stake Ethers; he stares at the blockchain, and it instantly "
