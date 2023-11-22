@@ -36,6 +36,8 @@ from .utils import (
     NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
+    LABEL_SCOPE_NETWORK,
+    LABEL_SCOPE_WATCHED,
     LimitedDict,
     Slack,
     convert_seconds_to_dhms,
@@ -55,24 +57,16 @@ app = typer.Typer(add_completion=False)
 metric_slot_gauge = Gauge("slot", "Slot")
 metric_epoch_gauge = Gauge("epoch", "Epoch")
 
-metric_our_queued_vals_gauge = Gauge(
-    "our_pending_queued_validators_count",
-    "Our pending queued validators count",
+metric_pending_q_vals_gauge = Gauge(
+    "pending_queued_validators_count",
+    "Pending queued validators count",
+    ["scope"],
 )
 
-metric_net_pending_q_vals_gauge = Gauge(
-    "total_pending_queued_validators_count",
-    "Total pending queued validators count",
-)
-
-metric_our_active_validators_gauge = Gauge(
-    "our_active_validators_count",
-    "Our active validators count",
-)
-
-metric_net_active_validators_gauge = Gauge(
-    "total_active_validators_count",
-    "Total active validators count",
+metric_active_validators_gauge = Gauge(
+    "active_validators_count",
+    "Active validators count",
+    ["scope"],
 )
 
 
@@ -259,7 +253,7 @@ def _handler(
 
             net_pending_q_idx2val = net_status2idx2val.get(Status.pendingQueued, {})
             nb_total_pending_q_vals = len(net_pending_q_idx2val)
-            metric_net_pending_q_vals_gauge.set(nb_total_pending_q_vals)
+            metric_pending_q_vals_gauge.labels(scope=LABEL_SCOPE_NETWORK).set(nb_total_pending_q_vals)
 
             active_ongoing = net_status2idx2val.get(Status.activeOngoing, {})
             active_exiting = net_status2idx2val.get(Status.activeExiting, {})
@@ -268,7 +262,7 @@ def _handler(
             net_epoch2active_idx2val[epoch] = net_active_idx2val
 
             net_active_vals_count = len(net_active_idx2val)
-            metric_net_active_validators_gauge.set(net_active_vals_count)
+            metric_active_validators_gauge.labels(scope=LABEL_SCOPE_NETWORK).set(net_active_vals_count)
 
             net_exited_s_idx2val = net_status2idx2val.get(Status.exitedSlashed, {})
 
@@ -288,7 +282,7 @@ def _handler(
             }
 
             our_queued_idx2val = our_status2idx2val.get(Status.pendingQueued, {})
-            metric_our_queued_vals_gauge.set(len(our_queued_idx2val))
+            metric_pending_q_vals_gauge.labels(scope=LABEL_SCOPE_WATCHED).set(len(our_queued_idx2val))
 
             ongoing = our_status2idx2val.get(Status.activeOngoing, {})
             active_exiting = our_status2idx2val.get(Status.activeExiting, {})
@@ -296,7 +290,7 @@ def _handler(
             our_active_idx2val = ongoing | active_exiting | active_slashed
             our_epoch2active_idx2val[epoch] = our_active_idx2val
 
-            metric_our_active_validators_gauge.set(len(our_active_idx2val))
+            metric_active_validators_gauge.labels(scope=LABEL_SCOPE_WATCHED).set(len(our_active_idx2val))
             our_exited_u_idx2val = our_status2idx2val.get(Status.exitedUnslashed, {})
             our_exited_s_idx2val = our_status2idx2val.get(Status.exitedSlashed, {})
 
