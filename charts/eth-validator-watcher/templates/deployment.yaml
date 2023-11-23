@@ -63,7 +63,7 @@ spec:
         livenessProbe:
           exec:
             command:
-            - /usr/bin/python3.9
+            - /usr/bin/python3.11
             - /usr/local/bin/liveness_check.py
             - /tmp/liveness
           initialDelaySeconds: {{ .initialDelaySeconds }}
@@ -76,7 +76,7 @@ spec:
         readinessProbe:
           exec:
             command:
-            - /usr/bin/python3.9
+            - /usr/bin/python3.11
             - /usr/local/bin/liveness_check.py
             - /tmp/liveness
           initialDelaySeconds: {{ .initialDelaySeconds }}
