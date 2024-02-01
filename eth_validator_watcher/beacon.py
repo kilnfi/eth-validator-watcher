@@ -17,6 +17,7 @@ from .models import (
     BlockIdentierType,
     Committees,
     Genesis,
+    Spec,
     Header,
     ProposerDuties,
     Rewards,
@@ -120,6 +121,15 @@ class Beacon:
         genesis_dict = response.json()
         return Genesis(**genesis_dict)
 
+    def get_spec(self) -> Spec:
+        """Get network specification."""
+        response = self.__get_retry_not_found(
+            f"{self.__url}/eth/v1/config/spec", timeout=TIMEOUT_BEACON_SEC
+        )
+        response.raise_for_status()
+        spec_dict = response.json()
+        return Spec(**spec_dict)
+
     def get_header(self, block_identifier: Union[BlockIdentierType, int]) -> Header:
         """Get a header.
 
@@ -129,7 +139,8 @@ class Beacon:
         """
         try:
             response = self.__get(
-                f"{self.__url}/eth/v1/beacon/headers/{block_identifier}", timeout=TIMEOUT_BEACON_SEC
+                f"{self.__url}/eth/v1/beacon/headers/{block_identifier}",
+                timeout=TIMEOUT_BEACON_SEC,
             )
 
             response.raise_for_status()
@@ -176,7 +187,8 @@ class Beacon:
         epoch: Epoch corresponding to the proposer duties to retrieve
         """
         response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}", timeout=TIMEOUT_BEACON_SEC
+            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}",
+            timeout=TIMEOUT_BEACON_SEC,
         )
 
         response.raise_for_status()
@@ -193,7 +205,8 @@ class Beacon:
         inner value             : Validator
         """
         response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/beacon/states/head/validators", timeout=TIMEOUT_BEACON_SEC
+            f"{self.__url}/eth/v1/beacon/states/head/validators",
+            timeout=TIMEOUT_BEACON_SEC,
         )
 
         response.raise_for_status()

@@ -30,8 +30,6 @@ from .suboptimal_attestations import process_suboptimal_attestations
 from .utils import (
     CHUCK_NORRIS,
     MISSED_BLOCK_TIMEOUT_SEC,
-    NB_SECOND_PER_SLOT,
-    NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
     LimitedDict,
@@ -246,9 +244,18 @@ def _handler(
 
     genesis = beacon.get_genesis()
 
-    for idx, (slot, slot_start_time_sec) in enumerate(slots(genesis.data.genesis_time)):
+    spec = beacon.get_spec()
+    seconds_per_slot = spec.data.SECONDS_PER_SLOT
+    slots_per_epoch = spec.data.SLOTS_PER_EPOCH
+
+    for idx, (slot, slot_start_time_sec) in enumerate(
+        slots(
+            genesis.data.genesis_time,
+            seconds_per_slot=seconds_per_slot,
+        )
+    ):
         if slot < 0:
-            chain_start_in_sec = -slot * NB_SECOND_PER_SLOT
+            chain_start_in_sec = -slot * seconds_per_slot
             days, hours, minutes, seconds = convert_seconds_to_dhms(chain_start_in_sec)
 
             print(
@@ -256,7 +263,7 @@ def _handler(
                 f"{minutes:2} minutes and {seconds:2} seconds."
             )
 
-            if slot % NB_SLOT_PER_EPOCH == 0:
+            if slot % slots_per_epoch == 0:
                 print(f"💪     {CHUCK_NORRIS[slot%len(CHUCK_NORRIS)]}")
 
             if liveness_file is not None:
@@ -264,8 +271,8 @@ def _handler(
 
             continue
 
-        epoch = slot // NB_SLOT_PER_EPOCH
-        slot_in_epoch = slot % NB_SLOT_PER_EPOCH
+        epoch = slot // slots_per_epoch
+        slot_in_epoch = slot % slots_per_epoch
 
         metric_slot_gauge.set(slot)
         metric_epoch_gauge.set(epoch)
@@ -411,7 +418,12 @@ def _handler(
             )
 
             process_fee_recipient(
-                block, our_active_idx2val, execution, fee_recipient, slack
+                block,
+                our_active_idx2val,
+                execution,
+                fee_recipient,
+                slack,
+                slots_per_epoch=slots_per_epoch,
             )
 
         is_our_validator = process_missed_blocks_head(
@@ -420,6 +432,7 @@ def _handler(
             slot,
             our_pubkeys,
             slack,
+            slots_per_epoch=slots_per_epoch,
         )
 
         if is_our_validator and potential_block is not None:

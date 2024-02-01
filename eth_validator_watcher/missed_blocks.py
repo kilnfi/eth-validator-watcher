@@ -27,6 +27,7 @@ def process_missed_blocks_head(
     slot: int,
     our_pubkeys: set[str],
     slack: Slack | None,
+    slots_per_epoch: int = NB_SLOT_PER_EPOCH,
 ) -> bool:
     """Process missed block proposals detection at head
 
@@ -40,7 +41,7 @@ def process_missed_blocks_head(
     Returns `True` if we had to propose the block, `False` otherwise
     """
     missed = potential_block is None
-    epoch = slot // NB_SLOT_PER_EPOCH
+    epoch = slot // slots_per_epoch
     proposer_duties = beacon.get_proposer_duties(epoch)
 
     # Get proposer public key for this slot
@@ -98,6 +99,7 @@ def process_missed_blocks_finalized(
     slot: int,
     our_pubkeys: set[str],
     slack: Slack | None,
+    slots_per_epoch: int = NB_SLOT_PER_EPOCH,
 ) -> int:
     """Process missed block proposals detection at finalized
 
@@ -114,14 +116,14 @@ def process_missed_blocks_finalized(
 
     last_finalized_header = beacon.get_header(BlockIdentierType.FINALIZED)
     last_finalized_slot = last_finalized_header.data.header.message.slot
-    epoch_of_last_finalized_slot = last_finalized_slot // NB_SLOT_PER_EPOCH
+    epoch_of_last_finalized_slot = last_finalized_slot // slots_per_epoch
 
     # Only to memoize it, in case of the BN does not serve this request for too old
     # epochs
     beacon.get_proposer_duties(epoch_of_last_finalized_slot)
 
     for slot_ in range(last_processed_finalized_slot + 1, last_finalized_slot + 1):
-        epoch = slot_ // NB_SLOT_PER_EPOCH
+        epoch = slot_ // slots_per_epoch
         proposer_duties = beacon.get_proposer_duties(epoch)
 
         # Get proposer public key for this slot

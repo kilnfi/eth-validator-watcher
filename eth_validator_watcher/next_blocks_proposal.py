@@ -20,6 +20,7 @@ def process_future_blocks_proposal(
     our_pubkeys: set[str],
     slot: int,
     is_new_epoch: bool,
+    slots_per_epoch: int = NB_SLOT_PER_EPOCH,
 ) -> int:
     """Handle next blocks proposal
 
@@ -29,7 +30,7 @@ def process_future_blocks_proposal(
     slot        : Slot
     is_new_epoch: Is new epoch
     """
-    epoch = slot // NB_SLOT_PER_EPOCH
+    epoch = slot // slots_per_epoch
     proposers_duties_current_epoch = beacon.get_proposer_duties(epoch)
     proposers_duties_next_epoch = beacon.get_proposer_duties(epoch + 1)
 

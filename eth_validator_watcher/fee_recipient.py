@@ -19,6 +19,7 @@ def process_fee_recipient(
     execution: Execution | None,
     expected_fee_recipient: str | None,
     slack: Slack | None,
+    slots_per_epoch: int = NB_SLOT_PER_EPOCH,
 ) -> None:
     """Check if the fee recipient is the one expected.
 
@@ -44,7 +45,7 @@ def process_fee_recipient(
 
     short_proposer_pubkey = index_to_validator[proposer_index].pubkey[:10]
     slot = block.data.message.slot
-    epoch = slot // NB_SLOT_PER_EPOCH
+    epoch = slot // slots_per_epoch
 
     # First, we check if the beacon block fee recipient is the one expected
     # `.lower()` is here just in case the execution client returns a fee recipient in
