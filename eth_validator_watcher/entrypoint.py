@@ -396,10 +396,21 @@ def _handler(
 
             last_rewards_process_epoch = epoch
 
-        process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
+        process_future_blocks_proposal(
+            beacon,
+            our_pubkeys,
+            slot,
+            is_new_epoch,
+            slots_per_epoch=slots_per_epoch,
+        )
 
         last_processed_finalized_slot = process_missed_blocks_finalized(
-            beacon, last_processed_finalized_slot, slot, our_pubkeys, slack
+            beacon,
+            last_processed_finalized_slot,
+            slot,
+            our_pubkeys,
+            slack,
+            slots_per_epoch=slots_per_epoch,
         )
 
         delta_sec = MISSED_BLOCK_TIMEOUT_SEC - (time() - slot_start_time_sec)
@@ -415,6 +426,7 @@ def _handler(
                 block,
                 slot,
                 our_active_idx2val,
+                slots_per_epoch=slots_per_epoch,
             )
 
             process_fee_recipient(
