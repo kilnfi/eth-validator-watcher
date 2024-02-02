@@ -288,7 +288,11 @@ def test_nominal() -> None:
         return {4}
 
     def process_future_blocks_proposal(
-        beacon: Beacon, pubkeys: set[str], slot: int, is_new_epoch: bool
+        beacon: Beacon,
+        pubkeys: set[str],
+        slot: int,
+        is_new_epoch: bool,
+        slots_per_epoch: int = 32,
     ) -> int:
         assert isinstance(beacon, Beacon)
         assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
@@ -303,6 +307,7 @@ def test_nominal() -> None:
         slot: int,
         pubkeys: set[str],
         slack: Slack,
+        slots_per_epoch: int = 32,
     ) -> int:
         assert isinstance(beacon, Beacon)
         assert last_processed_finalized_slot == 63
@@ -317,6 +322,7 @@ def test_nominal() -> None:
         potential_block: str | None,
         slot: int,
         index_to_validator: dict[int, Validator],
+        slots_per_epoch: int = 32,
     ) -> set[int]:
         assert isinstance(beacon, Beacon)
         assert potential_block == "A BLOCK"
