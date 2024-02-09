@@ -3,6 +3,7 @@
 from prometheus_client import Gauge
 
 MIN_PER_EPOCH_CHURN_LIMIT = 4
+MAX_PER_EPOCH_CHURN_LIMIT = 8
 CHURN_LIMIT_QUOTIENT = 65536
 NB_SECONDS_PER_SLOT = 12
 NB_SLOT_PER_EPOCH = 32
@@ -61,7 +62,7 @@ def compute_validators_churn(nb_active_validators: int) -> int:
     Parameters:
     nb_active_validators: The number of currently active validators
     """
-    return max(MIN_PER_EPOCH_CHURN_LIMIT, nb_active_validators // CHURN_LIMIT_QUOTIENT)
+    return min(MAX_PER_EPOCH_CHURN_LIMIT, max(MIN_PER_EPOCH_CHURN_LIMIT, nb_active_validators // CHURN_LIMIT_QUOTIENT))
 
 
 def get_bucket_index(validator_index: int) -> int:
