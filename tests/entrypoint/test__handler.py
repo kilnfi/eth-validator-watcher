@@ -4,7 +4,7 @@ from typing import Iterator, Optional, Tuple
 
 from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
-from eth_validator_watcher.models import BeaconType, Genesis, Validators
+from eth_validator_watcher.models import BeaconType, Genesis, Validators, Spec
 from eth_validator_watcher.utils import LimitedDict, Slack
 from eth_validator_watcher.web3signer import Web3Signer
 from freezegun import freeze_time
@@ -72,11 +72,19 @@ def test_invalid_pubkeys() -> None:
                 )
             )
 
+        def get_spec(self) -> Spec:
+            return Spec(
+                data=Spec.Data(
+                    SECONDS_PER_SLOT=12,
+                    SLOTS_PER_EPOCH=32,
+                )
+            )
+
     def get_our_pubkeys(pubkeys_file_path: Path, web3signer: None) -> set[str]:
         assert pubkeys_file_path == Path("/path/to/pubkeys")
         raise ValueError("Invalid pubkeys")
 
-    def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
+    def slots(genesis_time: int, seconds_per_slot=12) -> Iterator[Tuple[(int, int)]]:
         assert genesis_time == 0
         yield 63, 1664
         yield 64, 1676
@@ -115,10 +123,18 @@ def test_chain_not_ready() -> None:
                 )
             )
 
+        def get_spec(self) -> Spec:
+            return Spec(
+                data=Spec.Data(
+                    SECONDS_PER_SLOT=12,
+                    SLOTS_PER_EPOCH=32,
+                )
+            )
+
     def get_our_pubkeys(pubkeys_file_path: Path, web3signer: None) -> set[str]:
         return {"0x12345", "0x67890"}
 
-    def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
+    def slots(genesis_time: int, seconds_per_slot=12) -> Iterator[Tuple[(int, int)]]:
         assert genesis_time == 0
         yield -32, 1664
 
@@ -162,6 +178,14 @@ def test_nominal() -> None:
             return Genesis(
                 data=Genesis.Data(
                     genesis_time=0,
+                )
+            )
+
+        def get_spec(self) -> Spec:
+            return Spec(
+                data=Spec.Data(
+                    SECONDS_PER_SLOT=12,
+                    SLOTS_PER_EPOCH=32,
                 )
             )
 
@@ -216,7 +240,7 @@ def test_nominal() -> None:
         def process(self, slot: int) -> None:
             assert slot in {63, 64}
 
-    def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
+    def slots(genesis_time: int, seconds_per_slot=12) -> Iterator[Tuple[(int, int)]]:
         assert genesis_time == 0
         yield 63, 1664
         yield 64, 1676
@@ -264,7 +288,11 @@ def test_nominal() -> None:
         return {4}
 
     def process_future_blocks_proposal(
-        beacon: Beacon, pubkeys: set[str], slot: int, is_new_epoch: bool
+        beacon: Beacon,
+        pubkeys: set[str],
+        slot: int,
+        is_new_epoch: bool,
+        slots_per_epoch: int = 32,
     ) -> int:
         assert isinstance(beacon, Beacon)
         assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
@@ -279,6 +307,7 @@ def test_nominal() -> None:
         slot: int,
         pubkeys: set[str],
         slack: Slack,
+        slots_per_epoch: int = 32,
     ) -> int:
         assert isinstance(beacon, Beacon)
         assert last_processed_finalized_slot == 63
@@ -293,6 +322,7 @@ def test_nominal() -> None:
         potential_block: str | None,
         slot: int,
         index_to_validator: dict[int, Validator],
+        slots_per_epoch: int = 32,
     ) -> set[int]:
         assert isinstance(beacon, Beacon)
         assert potential_block == "A BLOCK"
@@ -311,6 +341,7 @@ def test_nominal() -> None:
         slot: int,
         pubkeys: set[str],
         slack: Slack,
+        slots_per_epoch: int = 32,
     ) -> bool:
         assert isinstance(beacon, Beacon)
         assert potential_block == "A BLOCK"

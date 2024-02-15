@@ -231,12 +231,15 @@ class Slack:
         self.__client.chat_postMessage(channel=self.__channel, text=message)
 
 
-def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
-    next_slot = int((time() - genesis_time_sec) / NB_SECOND_PER_SLOT) + 1
+def slots(
+    genesis_time_sec: int,
+    seconds_per_slot: int = NB_SECOND_PER_SLOT,
+) -> Iterator[Tuple[int, int]]:
+    next_slot = int((time() - genesis_time_sec) / seconds_per_slot) + 1
 
     try:
         while True:
-            next_slot_time_sec = genesis_time_sec + next_slot * NB_SECOND_PER_SLOT
+            next_slot_time_sec = genesis_time_sec + next_slot * seconds_per_slot
             time_to_wait = next_slot_time_sec - time()
             sleep(max(0, time_to_wait))
 

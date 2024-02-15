@@ -29,6 +29,7 @@ def process_suboptimal_attestations(
     block: Block,
     slot: int,
     our_active_validators_index_to_validator: dict[int, Validators.DataItem.Validator],
+    slots_per_epoch: int = NB_SLOT_PER_EPOCH,
 ) -> set[int]:
     """Process sub-optimal attestations
 
@@ -48,7 +49,7 @@ def process_suboptimal_attestations(
 
     # Epoch of previous slot is NOT the previous epoch, but really the epoch
     # corresponding to the previous slot.
-    epoch_of_previous_slot = previous_slot // NB_SLOT_PER_EPOCH
+    epoch_of_previous_slot = previous_slot // slots_per_epoch
 
     # All our active validators index
     our_active_validators_index = set(our_active_validators_index_to_validator)
@@ -133,7 +134,9 @@ def process_suboptimal_attestations(
     )
 
     if suboptimal_attestations_rate is not None:
-        metric_suboptimal_attestations_rate_gauge.set(100 * suboptimal_attestations_rate)
+        metric_suboptimal_attestations_rate_gauge.set(
+            100 * suboptimal_attestations_rate
+        )
 
     if len(our_validators_index_that_did_not_attest_optimally_during_previous_slot) > 0:
         assert suboptimal_attestations_rate is not None
