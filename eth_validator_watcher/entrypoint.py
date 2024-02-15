@@ -9,8 +9,10 @@ from typing import List, Optional
 import typer
 from prometheus_client import Gauge, start_http_server
 from typer import Option
+from pydantic import ValidationError
 
 from .beacon import Beacon
+from .config import load_config, WatchedKeyConfig
 from .coinbase import Coinbase
 from .entry_queue import export_duration_sec as export_entry_queue_dur_sec
 from .execution import Execution
@@ -76,48 +78,13 @@ metric_net_active_validators_gauge = Gauge(
 
 @app.command()
 def handler(
-    beacon_url: str = Option(..., help="URL of beacon node", show_default=False),
-    execution_url: str = Option(None, help="URL of execution node", show_default=False),
-    pubkeys_file_path: Optional[Path] = Option(
-        None,
-        help="File containing the list of public keys to watch",
+    config: Optional[Path] = Option(
+        'etc/config.local.yaml',
+        help="File containing the Ethereum Validator Watcher configuration file.",
         exists=True,
         file_okay=True,
         dir_okay=False,
-        show_default=False,
-    ),
-    web3signer_url: Optional[str] = Option(
-        None, help="URL to web3signer managing keys to watch", show_default=False
-    ),
-    fee_recipient: Optional[str] = Option(
-        None,
-        help="Fee recipient address - --execution-url must be set",
-        show_default=False,
-    ),
-    slack_channel: Optional[str] = Option(
-        None,
-        help="Slack channel to send alerts - SLACK_TOKEN env var must be set",
-        show_default=False,
-    ),
-    beacon_type: BeaconType = Option(
-        BeaconType.OTHER,
-        case_sensitive=False,
-        help=(
-            "Use this option if connected to a Teku < 23.6.0, Prysm < 4.0.8, "
-            "Lighthouse or Nimbus beacon node. "
-            "See https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0, "
-            "https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm < 4.0.8, "
-            "https://github.com/sigp/lighthouse/issues/4243 for Lighthouse, "
-            "https://github.com/status-im/nimbus-eth2/issues/5019 and "
-            "https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus."
-        ),
         show_default=True,
-    ),
-    relay_url: List[str] = Option(
-        [], help="URL of allow listed relay", show_default=False
-    ),
-    liveness_file: Optional[Path] = Option(
-        None, help="Liveness file", show_default=False
     ),
 ) -> None:
     """
@@ -170,17 +137,24 @@ def handler(
 
     Prometheus server is automatically exposed on port 8000.
     """
+    try:
+        cfg = load_config(config)
+    except ValidationError as err:
+        raise typer.BadParameter(f'Invalid configuration file: {err}')
+    
     try:  # pragma: no cover
         _handler(
-            beacon_url,
-            execution_url,
-            pubkeys_file_path,
-            web3signer_url,
-            fee_recipient,
-            slack_channel,
-            beacon_type,
-            relay_url,
-            liveness_file,
+            cfg.beacon_url,
+            cfg.beacon_timeout_sec,
+            cfg.execution_url,
+            cfg.watched_keys,
+            cfg.web3signer_url,
+            cfg.default_fee_recipient,
+            cfg.slack_channel,
+            cfg.slack_token,
+            cfg.beacon_type,
+            cfg.relays,
+            cfg.liveness_file,
         )
     except KeyboardInterrupt:  # pragma: no cover
         print("👋     Bye!")
@@ -188,32 +162,33 @@ def handler(
 
 def _handler(
     beacon_url: str,
+    beacon_timeout_sec: int,
     execution_url: str | None,
-    pubkeys_file_path: Path | None,
+    watched_keys: List[WatchedKeyConfig] | None,
     web3signer_url: str | None,
-    fee_recipient: str | None,
+    default_fee_recipient: str | None,
     slack_channel: str | None,
-    beacon_type: BeaconType,
+    slack_token: str | None,
+    beacon_type: BeaconType | None,
     relays_url: List[str],
     liveness_file: Path | None,
 ) -> None:
     """Just a wrapper to be able to test the handler function"""
-    slack_token = environ.get("SLACK_TOKEN")
 
-    if fee_recipient is not None and execution_url is None:
+    if default_fee_recipient is not None and execution_url is None:
         raise typer.BadParameter(
-            "`execution-url` must be set if you want to use `fee-recipient`"
+            "`execution_url` must be set if you want to use `default_fee_recipient`"
         )
 
-    if fee_recipient is not None:
+    if default_fee_recipient is not None:
         try:
-            fee_recipient = eth1_address_lower_0x_prefixed(fee_recipient)
+            default_fee_recipient = eth1_address_lower_0x_prefixed(default_fee_recipient)
         except ValueError:
-            raise typer.BadParameter("`fee-recipient` should be a valid ETH1 address")
+            raise typer.BadParameter("`default_fee_recipient` should be a valid ETH1 address")
 
     if slack_channel is not None and slack_token is None:
         raise typer.BadParameter(
-            "SLACK_TOKEN env var must be set if you want to use `slack-channel`"
+            "slack_token var must be set if you want to use `slack_channel`"
         )
 
     slack = (
@@ -222,7 +197,7 @@ def _handler(
         else None
     )
 
-    beacon = Beacon(beacon_url)
+    beacon = Beacon(beacon_url, beacon_timeout_sec)
     execution = Execution(execution_url) if execution_url is not None else None
     coinbase = Coinbase()
     web3signer = Web3Signer(web3signer_url) if web3signer_url is not None else None
@@ -276,10 +251,7 @@ def _handler(
             last_processed_finalized_slot = slot
 
         if is_new_epoch:
-            try:
-                our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
-            except ValueError:
-                raise typer.BadParameter("Some pubkeys are invalid")
+            our_pubkeys = get_our_pubkeys(watched_keys, web3signer)
 
             # Network validators
             # ------------------
@@ -411,7 +383,7 @@ def _handler(
             )
 
             process_fee_recipient(
-                block, our_active_idx2val, execution, fee_recipient, slack
+                block, our_active_idx2val, execution, default_fee_recipient, slack
             )
 
         is_our_validator = process_missed_blocks_head(

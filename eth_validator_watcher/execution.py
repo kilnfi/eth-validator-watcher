@@ -8,7 +8,7 @@ from eth_validator_watcher.models import EthGetBlockByHashRequest, ExecutionBloc
 
 
 class Execution:
-    """Beacon node abstraction."""
+    """Execution node abstraction."""
 
     def __init__(self, url: str) -> None:
         """Execution node

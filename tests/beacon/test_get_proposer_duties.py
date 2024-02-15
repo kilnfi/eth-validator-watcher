@@ -42,6 +42,6 @@ def test_():
             f"{beacon_url}/eth/v1/validator/duties/proposer/6542", json=proposer_duties
         )
 
-        beacon = Beacon(beacon_url)
+        beacon = Beacon(beacon_url, 90)
 
         assert beacon.get_proposer_duties(6542) == expected

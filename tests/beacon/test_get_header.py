@@ -16,7 +16,7 @@ def test_get_header_exists() -> None:
     with block_path.open() as file_descriptor:
         header_dict = json.load(file_descriptor)
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
 
     for identifier, value in {
         "head": BlockIdentierType.HEAD,
@@ -42,7 +42,7 @@ def test_get_header_does_not_exist() -> None:
 
         raise HTTPError(response=response)
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
     beacon._Beacon__http.get = get  # type: ignore
 
     with raises(NoBlockError):
@@ -57,7 +57,7 @@ def test_get_header_invalid_query() -> None:
 
         raise HTTPError(response=response)
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
     beacon._Beacon__http.get = get  # type: ignore
 
     with raises(exceptions.RequestException):

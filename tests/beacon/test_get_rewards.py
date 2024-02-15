@@ -9,7 +9,7 @@ from tests.beacon import assets
 
 
 def test_get_rewards_not_supported() -> None:
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
 
     expected = Rewards(data=Rewards.Data(ideal_rewards=[], total_rewards=[]))
 
@@ -26,7 +26,7 @@ def test_get_rewards() -> None:
     with rewards_path.open() as file_descriptor:
         rewards_dict = json.load(file_descriptor)
 
-    beacon = Beacon("http://beacon-node:5052")
+    beacon = Beacon("http://beacon-node:5052", 90)
 
     def match_request(request) -> bool:
         return request.json() == ["8499", "8500"]
