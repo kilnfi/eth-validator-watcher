@@ -2,15 +2,14 @@ from os import environ
 from pathlib import Path
 from typing import Iterator, Optional, Tuple
 
-from freezegun import freeze_time
-from pytest import raises
-from typer import BadParameter
-
 from eth_validator_watcher import entrypoint
 from eth_validator_watcher.entrypoint import _handler
 from eth_validator_watcher.models import BeaconType, Genesis, Validators
 from eth_validator_watcher.utils import LimitedDict, Slack
 from eth_validator_watcher.web3signer import Web3Signer
+from freezegun import freeze_time
+from pytest import raises
+from typer import BadParameter
 
 StatusEnum = Validators.DataItem.StatusEnum
 Validator = Validators.DataItem.Validator
@@ -104,6 +103,55 @@ def test_invalid_pubkeys() -> None:
         )
 
 
+def test_chain_not_ready() -> None:
+    class Beacon:
+        def __init__(self, url: str) -> None:
+            assert url == "http://localhost:5052"
+
+        def get_genesis(self) -> Genesis:
+            return Genesis(
+                data=Genesis.Data(
+                    genesis_time=0,
+                )
+            )
+
+    def get_our_pubkeys(pubkeys_file_path: Path, web3signer: None) -> set[str]:
+        return {"0x12345", "0x67890"}
+
+    def slots(genesis_time: int) -> Iterator[Tuple[(int, int)]]:
+        assert genesis_time == 0
+        yield -32, 1664
+
+    def convert_seconds_to_dhms(seconds: int) -> Tuple[int, int, int, int]:
+        assert seconds == 384
+        return 42, 42, 42, 42
+
+    def write_liveness_file(liveness_file: Path) -> None:
+        assert liveness_file == Path("/path/to/liveness")
+
+    def start_http_server(_: int) -> None:
+        pass
+
+    entrypoint.get_our_pubkeys = get_our_pubkeys
+    entrypoint.Beacon = Beacon
+    entrypoint.slots = slots
+    entrypoint.convert_seconds_to_dhms = convert_seconds_to_dhms
+    entrypoint.write_liveness_file = write_liveness_file
+    entrypoint.start_http_server = start_http_server
+
+    _handler(
+        beacon_url="http://localhost:5052",
+        execution_url=None,
+        pubkeys_file_path=Path("/path/to/pubkeys"),
+        web3signer_url=None,
+        fee_recipient=None,
+        slack_channel=None,
+        beacon_type=BeaconType.OLD_TEKU,
+        relays_url=[],
+        liveness_file=Path("/path/to/liveness"),
+    )
+
+
 @freeze_time("2023-01-01 00:00:00", auto_tick_seconds=15)
 def test_nominal() -> None:
     class Beacon:
@@ -150,7 +198,7 @@ def test_nominal() -> None:
                 },
             }
 
-        def get_potential_block(self, slot: int) -> Optional[str]:
+        def get_potential_block(self, slot: int) -> str | None:
             assert slot in {63, 64}
             return "A BLOCK"
 
@@ -225,9 +273,24 @@ def test_nominal() -> None:
 
         return 1
 
+    def process_missed_blocks_finalized(
+        beacon: Beacon,
+        last_processed_finalized_slot: int,
+        slot: int,
+        pubkeys: set[str],
+        slack: Slack,
+    ) -> int:
+        assert isinstance(beacon, Beacon)
+        assert last_processed_finalized_slot == 63
+        assert slot in {63, 64}
+        assert pubkeys == {"0xaaa", "0xbbb", "0xccc", "0xddd", "0xeee", "0xfff"}
+        assert isinstance(slack, Slack)
+
+        return 63
+
     def process_suboptimal_attestations(
         beacon: Beacon,
-        potential_block: Optional[str],
+        potential_block: str | None,
         slot: int,
         index_to_validator: dict[int, Validator],
     ) -> set[int]:
@@ -244,7 +307,7 @@ def test_nominal() -> None:
 
     def process_missed_blocks(
         beacon: Beacon,
-        potential_block: Optional[str],
+        potential_block: str | None,
         slot: int,
         pubkeys: set[str],
         slack: Slack,
@@ -263,7 +326,7 @@ def test_nominal() -> None:
         epoch: int,
         net_epoch2active_idx2val: dict[int, Validator],
         our_epoch2active_idx2val: dict[int, Validator],
-    ):
+    ) -> None:
         assert isinstance(beacon, Beacon)
         assert isinstance(beacon_type, BeaconType)
         assert epoch == 1
@@ -289,8 +352,9 @@ def test_nominal() -> None:
 
     entrypoint.slots = slots  # type: ignore
     entrypoint.process_future_blocks_proposal = process_future_blocks_proposal  # type: ignore
+    entrypoint.process_missed_blocks_finalized = process_missed_blocks_finalized  # type: ignore
     entrypoint.process_suboptimal_attestations = process_suboptimal_attestations  # type: ignore
-    entrypoint.process_missed_blocks = process_missed_blocks  # type: ignore
+    entrypoint.process_missed_blocks_head = process_missed_blocks  # type: ignore
     entrypoint.process_rewards = process_rewards  # type: ignore
     entrypoint.write_liveness_file = write_liveness_file  # type: ignore
 

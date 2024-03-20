@@ -1,7 +1,6 @@
 """Contains the logic to check if the validators missed attestations."""
 
 import functools
-from typing import Optional, Set
 
 from prometheus_client import Gauge
 
@@ -13,12 +12,12 @@ from .utils import LimitedDict, Slack
 
 print = functools.partial(print, flush=True)
 
-missed_attestations_count = Gauge(
+metric_missed_attestations_count = Gauge(
     "missed_attestations_count",
     "Missed attestations count",
 )
 
-double_missed_attestations_count = Gauge(
+metric_double_missed_attestations_count = Gauge(
     "double_missed_attestations_count",
     "Double missed attestations count",
 )
@@ -56,6 +55,8 @@ def process_missed_attestations(
         inner value           : validators
     epoch                        : Epoch where the missed attestations are checked
     """
+    if epoch < 1:
+        return set()
 
     for _key in _initialized_keys:
         if _key not in initialized_keys:
@@ -83,7 +84,7 @@ def process_missed_attestations(
         index for index, liveness in validators_liveness.items() if not liveness
     }
 
-    missed_attestations_count.set(len(dead_indexes))
+    metric_missed_attestations_count.set(len(dead_indexes))
 
     if len(dead_indexes) == 0:
         return set()
@@ -98,7 +99,7 @@ def process_missed_attestations(
     short_first_pubkeys_str = ", ".join(short_first_pubkeys)
 
     print(
-        f"☹️ Our validator {short_first_pubkeys_str} and "
+        f"🙁 Our validator {short_first_pubkeys_str} and "
         f"{len(dead_indexes) - len(short_first_pubkeys)} more "
         f"missed attestation at epoch {epoch - 1}"
     )
@@ -122,8 +123,8 @@ def process_double_missed_attestations(
     previous_dead_indexes: set[int],
     epoch_to_index_to_validator_index: LimitedDict,
     epoch: int,
-    slack: Optional[Slack],
-) -> Set[int]:
+    slack: Slack | None,
+) -> set[int]:
     """Process double missed attestations.
 
     Parameters:
@@ -140,8 +141,11 @@ def process_double_missed_attestations(
     epoch                        : Epoch where the missed attestations are checked
     slack                        : Slack instance
     """
+    if epoch < 2:
+        return set()
+
     double_dead_indexes = dead_indexes & previous_dead_indexes
-    double_missed_attestations_count.set(len(double_dead_indexes))
+    metric_double_missed_attestations_count.set(len(double_dead_indexes))
 
     if len(double_dead_indexes) == 0:
         return set()
@@ -172,7 +176,7 @@ def process_double_missed_attestations(
         )
 
         slack.send_message(message_slack)
-    
+
     for index in double_dead_indexes:
         key_double_missed_attestations_count.labels(pubkey=index_to_validator[index].pubkey).set(1)
     for pubkey in initialized_keys:

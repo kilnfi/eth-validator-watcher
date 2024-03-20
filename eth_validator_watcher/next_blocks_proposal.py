@@ -9,7 +9,7 @@ from .utils import NB_SLOT_PER_EPOCH
 
 print = functools.partial(print, flush=True)
 
-future_block_proposals_count = Gauge(
+metric_future_block_proposals_count = Gauge(
     "future_block_proposals_count",
     "Future block proposals count",
 )
@@ -61,7 +61,7 @@ def process_future_blocks_proposal(
         if item.pubkey in our_pubkeys and item.slot >= slot
     ]
 
-    future_block_proposals_count.set(len(filtered))
+    metric_future_block_proposals_count.set(len(filtered))
     print(filtered)
     for _key in our_pubkeys:
         key_future_block_proposals_count.labels(pubkey=_key).inc(

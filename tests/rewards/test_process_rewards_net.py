@@ -1,24 +1,36 @@
 from math import isclose
-from typing import Optional
 
 from eth_validator_watcher.models import BeaconType, Rewards, Validators
 from eth_validator_watcher.rewards import (
-    net_ideal_sources_count,
-    net_ideal_targets_count,
-    net_ideal_heads_count,
-    net_actual_neg_sources_count,
-    net_actual_pos_sources_count,
-    net_actual_neg_targets_count,
-    net_actual_pos_targets_count,
-    net_actual_heads_count,
-    net_suboptimal_sources_rate_gauge,
-    net_suboptimal_targets_rate_gauge,
-    net_suboptimal_heads_rate_gauge,
+    metric_net_actual_heads_count,
+    metric_net_actual_neg_sources_count,
+    metric_net_actual_neg_targets_count,
+    metric_net_actual_pos_sources_count,
+    metric_net_actual_pos_targets_count,
+    metric_net_ideal_heads_count,
+    metric_net_ideal_sources_count,
+    metric_net_ideal_targets_count,
+    metric_net_suboptimal_heads_rate_gauge,
+    metric_net_suboptimal_sources_rate_gauge,
+    metric_net_suboptimal_targets_rate_gauge,
     process_rewards,
 )
 from eth_validator_watcher.utils import LimitedDict
 
 Validator = Validators.DataItem.Validator
+
+
+def test_process_rewards_low_epoch() -> None:
+    for epoch in 0, 1:
+        # We just want to be sure it doesn't raise an exception.
+
+        process_rewards(
+            BeaconType.LIGHTHOUSE,  # type: ignore
+            "a beacon",  # type: ignore
+            epoch,
+            LimitedDict(2),
+            LimitedDict(2),
+        )
 
 
 def test_process_rewards_no_network_validator() -> None:
@@ -40,7 +52,7 @@ def test_process_rewards_all_net_validators_are_ideal() -> None:
             self,
             beacon_type: BeaconType,
             epoch: int,
-            validators_index: Optional[set[int]] = None,
+            validators_index: set[int] | None = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
@@ -78,15 +90,15 @@ def test_process_rewards_all_net_validators_are_ideal() -> None:
 
     beacon = Beacon()
 
-    ideal_sources_count_before = net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_before = net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_before = net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_before = metric_net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_before = metric_net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_before = metric_net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_before = net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_before = net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_before = net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_before = net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_heads_count_before = net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_before = metric_net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_before = metric_net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_before = metric_net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_before = metric_net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_before = metric_net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     net_epoch_to_index_to_validator = LimitedDict(2)
     net_epoch_to_index_to_validator[42] = {
@@ -118,16 +130,16 @@ def test_process_rewards_all_net_validators_are_ideal() -> None:
         our_epoch_to_index_to_validator,
     )
 
-    ideal_sources_count_after = net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_after = net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_after = net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_after = metric_net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_after = metric_net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_after = metric_net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_after = net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_after = net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_after = net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_after = net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_after = metric_net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_after = metric_net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_after = metric_net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_after = metric_net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_heads_count_after = net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_after = metric_net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     assert ideal_sources_count_after - ideal_sources_count_before == 9_090
     assert ideal_targets_count_after - ideal_targets_count_before == 16_889
@@ -153,9 +165,9 @@ def test_process_rewards_all_net_validators_are_ideal() -> None:
 
     assert actual_heads_count_after - actual_heads_count_before == 8_752
 
-    assert isclose(net_suboptimal_sources_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
-    assert isclose(net_suboptimal_targets_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
-    assert isclose(net_suboptimal_heads_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
+    assert isclose(metric_net_suboptimal_sources_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
+    assert isclose(metric_net_suboptimal_targets_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
+    assert isclose(metric_net_suboptimal_heads_rate_gauge.collect()[0].samples[0].value, 0.0)  # type: ignore
 
 
 def test_process_rewards_some_net_validators_are_ideal() -> None:
@@ -171,7 +183,7 @@ def test_process_rewards_some_net_validators_are_ideal() -> None:
             self,
             beacon_type: BeaconType,
             epoch: int,
-            validators_index: Optional[set[int]] = None,
+            validators_index: set[int] | None = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
@@ -230,15 +242,15 @@ def test_process_rewards_some_net_validators_are_ideal() -> None:
 
     beacon = Beacon()
 
-    ideal_sources_count_before = net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_before = net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_before = net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_before = metric_net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_before = metric_net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_before = metric_net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_before = net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_before = net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_before = net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_before = net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_heads_count_before = net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_before = metric_net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_before = metric_net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_before = metric_net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_before = metric_net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_before = metric_net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     net_epoch_to_index_to_validator = LimitedDict(2)
     net_epoch_to_index_to_validator[42] = {
@@ -305,16 +317,16 @@ def test_process_rewards_some_net_validators_are_ideal() -> None:
         our_epoch_to_index_to_validator,
     )
 
-    ideal_sources_count_after = net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_after = net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_after = net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_after = metric_net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_after = metric_net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_after = metric_net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_after = net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_after = net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_after = net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_after = net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_after = metric_net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_after = metric_net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_after = metric_net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_after = metric_net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_heads_count_after = net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_after = metric_net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     assert ideal_sources_count_after - ideal_sources_count_before == 30_524
     assert ideal_targets_count_after - ideal_targets_count_before == 56_712
@@ -341,17 +353,17 @@ def test_process_rewards_some_net_validators_are_ideal() -> None:
     assert actual_heads_count_after - actual_heads_count_before == 14_740
 
     assert isclose(
-        net_suboptimal_sources_rate_gauge.collect()[0].samples[0].value,  # type: ignore
+        metric_net_suboptimal_sources_rate_gauge.collect()[0].samples[0].value,  # type: ignore
         0.1,
     )
 
     assert isclose(
-        net_suboptimal_targets_rate_gauge.collect()[0].samples[0].value,  # type: ignore
+        metric_net_suboptimal_targets_rate_gauge.collect()[0].samples[0].value,  # type: ignore
         0.3,
     )
 
     assert isclose(
-        net_suboptimal_heads_rate_gauge.collect()[0].samples[0].value,  # type: ignore
+        metric_net_suboptimal_heads_rate_gauge.collect()[0].samples[0].value,  # type: ignore
         0.5,
     )
 
@@ -362,7 +374,7 @@ def test_process_rewards_no_net_validator_is_ideal() -> None:
             self,
             beacon_type: BeaconType,
             epoch: int,
-            validators_index: Optional[set[int]] = None,
+            validators_index: set[int] | None = None,
         ) -> Rewards:
             assert isinstance(beacon_type, BeaconType)
             assert epoch == 40
@@ -400,15 +412,15 @@ def test_process_rewards_no_net_validator_is_ideal() -> None:
 
     beacon = Beacon()
 
-    ideal_sources_count_before = net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_before = net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_before = net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_before = metric_net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_before = metric_net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_before = metric_net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_before = net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_before = net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_before = net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_before = net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_heads_count_before = net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_before = metric_net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_before = metric_net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_before = metric_net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_before = metric_net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_before = metric_net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     net_epoch_to_index_to_validator = LimitedDict(2)
     net_epoch_to_index_to_validator[42] = {
@@ -440,16 +452,16 @@ def test_process_rewards_no_net_validator_is_ideal() -> None:
         our_epoch_to_index_to_validator,
     )
 
-    ideal_sources_count_after = net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
-    ideal_targets_count_after = net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
-    ideal_heads_count_after = net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
+    ideal_sources_count_after = metric_net_ideal_sources_count.collect()[0].samples[0].value  # type: ignore
+    ideal_targets_count_after = metric_net_ideal_targets_count.collect()[0].samples[0].value  # type: ignore
+    ideal_heads_count_after = metric_net_ideal_heads_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_positive_sources_count_after = net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_sources_count_after = net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
-    actual_positive_targets_count_after = net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
-    actual_negative_targets_count_after = net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_sources_count_after = metric_net_actual_pos_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_sources_count_after = metric_net_actual_neg_sources_count.collect()[0].samples[0].value  # type: ignore
+    actual_positive_targets_count_after = metric_net_actual_pos_targets_count.collect()[0].samples[0].value  # type: ignore
+    actual_negative_targets_count_after = metric_net_actual_neg_targets_count.collect()[0].samples[0].value  # type: ignore
 
-    actual_heads_count_after = net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
+    actual_heads_count_after = metric_net_actual_heads_count.collect()[0].samples[0].value  # type: ignore
 
     assert ideal_sources_count_after - ideal_sources_count_before == 9_090
     assert ideal_targets_count_after - ideal_targets_count_before == 16_889
@@ -475,6 +487,6 @@ def test_process_rewards_no_net_validator_is_ideal() -> None:
 
     assert actual_heads_count_after - actual_heads_count_before == 0
 
-    assert isclose(net_suboptimal_sources_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
-    assert isclose(net_suboptimal_targets_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
-    assert isclose(net_suboptimal_heads_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
+    assert isclose(metric_net_suboptimal_sources_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
+    assert isclose(metric_net_suboptimal_targets_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore
+    assert isclose(metric_net_suboptimal_heads_rate_gauge.collect()[0].samples[0].value, 1.0)  # type: ignore

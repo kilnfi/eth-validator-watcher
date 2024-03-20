@@ -1,14 +1,13 @@
 """Contains the models for the validator watcher."""
 
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 from pydantic import BaseModel
 
 
 class Validators(BaseModel):
     class DataItem(BaseModel):
-        class StatusEnum(str, Enum):
+        class StatusEnum(StrEnum):
             pendingInitialized = "pending_initialized"
             pendingQueued = "pending_queued"
             activeOngoing = "active_ongoing"
@@ -35,6 +34,19 @@ class Validators(BaseModel):
 class Genesis(BaseModel):
     class Data(BaseModel):
         genesis_time: int
+
+    data: Data
+
+
+class Header(BaseModel):
+    class Data(BaseModel):
+        class Header(BaseModel):
+            class Message(BaseModel):
+                slot: int
+
+            message: Message
+
+        header: Header
 
     data: Data
 
@@ -116,12 +128,18 @@ class CoinbaseTrade(BaseModel):
     side: str
 
 
-class BeaconType(str, Enum):
+class BeaconType(StrEnum):
     LIGHTHOUSE = "lighthouse"
     NIMBUS = "nimbus"
-    PRYSM = "prysm"
+    OLD_PRYSM = "old-prysm"
     OLD_TEKU = "old-teku"
     OTHER = "other"
+
+
+class BlockIdentierType(StrEnum):
+    HEAD = "head"
+    GENESIS = "genesis"
+    FINALIZED = "finalized"
 
 
 class EthGetBlockByHashRequest(BaseModel):
@@ -134,7 +152,7 @@ class EthGetBlockByHashRequest(BaseModel):
 class ExecutionBlock(BaseModel):
     class Result(BaseModel):
         class Transaction(BaseModel):
-            to: Optional[str]
+            to: str | None
 
         transactions: list[Transaction]
 

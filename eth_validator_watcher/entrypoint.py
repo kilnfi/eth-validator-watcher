@@ -1,5 +1,6 @@
 """Entrypoint for the eth-validator-watcher CLI."""
 
+import functools
 from os import environ
 
 # Disable created series to avoid memory leak
@@ -24,53 +25,55 @@ from .missed_attestations import (
     process_double_missed_attestations,
     process_missed_attestations,
 )
-from .missed_blocks import process_missed_blocks
+from .missed_blocks import process_missed_blocks_finalized, process_missed_blocks_head
 from .models import BeaconType, Validators
 from .next_blocks_proposal import process_future_blocks_proposal
+from .relays import Relays
+from .rewards import process_rewards
 from .slashed_validators import SlashedValidators
 from .suboptimal_attestations import process_suboptimal_attestations
 from .utils import (
-    BLOCK_NOT_ORPHANED_TIME_SEC,
+    CHUCK_NORRIS,
+    MISSED_BLOCK_TIMEOUT_SEC,
+    NB_SECOND_PER_SLOT,
     NB_SLOT_PER_EPOCH,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
     LimitedDict,
     Slack,
+    convert_seconds_to_dhms,
+    eth1_address_lower_0x_prefixed,
     get_our_pubkeys,
     slots,
     write_liveness_file,
-    eth1_address_0x_prefixed,
 )
-
-from .rewards import process_rewards
 from .web3signer import Web3Signer
 
-from .relays import Relays
+print = functools.partial(print, flush=True)
 
 Status = Validators.DataItem.StatusEnum
 
-
 app = typer.Typer(add_completion=False)
 
-slot_gauge = Gauge("slot", "Slot")
-epoch_gauge = Gauge("epoch", "Epoch")
+metric_slot_gauge = Gauge("slot", "Slot")
+metric_epoch_gauge = Gauge("epoch", "Epoch")
 
-our_queued_vals_gauge = Gauge(
+metric_our_queued_vals_gauge = Gauge(
     "our_pending_queued_validators_count",
     "Our pending queued validators count",
 )
 
-net_pending_q_vals_gauge = Gauge(
+metric_net_pending_q_vals_gauge = Gauge(
     "total_pending_queued_validators_count",
     "Total pending queued validators count",
 )
 
-our_active_validators_gauge = Gauge(
+metric_our_active_validators_gauge = Gauge(
     "our_active_validators_count",
     "Our active validators count",
 )
 
-net_active_validators_gauge = Gauge(
+metric_net_active_validators_gauge = Gauge(
     "total_active_validators_count",
     "Total active validators count",
 )
@@ -110,15 +113,15 @@ def handler(
         BeaconType.OTHER,
         case_sensitive=False,
         help=(
-            "Use this option if connected to a Teku < 23.6.0, Prysm, Lighthouse or "
-            "Nimbus beacon node. "
+            "Use this option if connected to a Teku < 23.6.0, Prysm < 4.0.8, "
+            "Lighthouse or Nimbus beacon node. "
             "See https://github.com/ConsenSys/teku/issues/7204 for Teku < 23.6.0, "
-            "https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm, "
+            "https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm < 4.0.8, "
             "https://github.com/sigp/lighthouse/issues/4243 for Lighthouse, "
             "https://github.com/status-im/nimbus-eth2/issues/5019 and "
             "https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus."
         ),
-        show_default=False,
+        show_default=True,
     ),
     relay_url: List[str] = Option(
         [], help="URL of allow listed relay", show_default=False
@@ -136,7 +139,8 @@ def handler(
     \b
     Ethereum Validator Watcher monitors the Ethereum beacon chain in real-time and notifies you when any of your validators:
     - are going to propose a block in the next two epochs
-    - missed a block proposal
+    - missed a block proposal at head
+    - missed a block proposal at finalized
     - did not optimally attest
     - missed an attestation
     - missed two attestations in a row
@@ -179,33 +183,33 @@ def handler(
 
     Prometheus server is automatically exposed on port 8000.
     """
-    
-
-
-    _handler(  # pragma: no cover
-        beacon_url,
-        execution_url,
-        pubkeys_file_path,
-        web3signer_url,
-        fee_recipient,
-        slack_channel,
-        beacon_type,
-        relay_url,
-        liveness_file,
-        export_key_specific_values,
-    )
+    try:  # pragma: no cover
+        _handler(
+            beacon_url,
+            execution_url,
+            pubkeys_file_path,
+            web3signer_url,
+            fee_recipient,
+            slack_channel,
+            beacon_type,
+            relay_url,
+            liveness_file,
+            export_key_specific_values,
+        )
+    except KeyboardInterrupt:  # pragma: no cover
+        print("👋     Bye!")
 
 
 def _handler(
     beacon_url: str,
-    execution_url: Optional[str],
-    pubkeys_file_path: Optional[Path],
-    web3signer_url: Optional[str],
-    fee_recipient: Optional[str],
-    slack_channel: Optional[str],
+    execution_url: str | None,
+    pubkeys_file_path: Path | None,
+    web3signer_url: str | None,
+    fee_recipient: str | None,
+    slack_channel: str | None,
     beacon_type: BeaconType,
     relays_url: List[str],
-    liveness_file: Optional[Path],
+    liveness_file: Path | None,
     export_key_specific_values: bool,
 ) -> None:
     """Just a wrapper to be able to test the handler function"""
@@ -218,7 +222,7 @@ def _handler(
 
     if fee_recipient is not None:
         try:
-            fee_recipient = eth1_address_0x_prefixed(fee_recipient)
+            fee_recipient = eth1_address_lower_0x_prefixed(fee_recipient)
         except ValueError:
             raise typer.BadParameter("`fee-recipient` should be a valid ETH1 address")
 
@@ -232,8 +236,6 @@ def _handler(
         if slack_channel is not None and slack_token is not None
         else None
     )
-
-    start_http_server(8000)
 
     beacon = Beacon(beacon_url)
     execution = Execution(execution_url) if execution_url is not None else None
@@ -251,27 +253,49 @@ def _handler(
     exited_validators = ExitedValidators(slack)
     slashed_validators = SlashedValidators(slack)
 
-    last_missed_attestations_process_epoch: Optional[int] = None
-    last_rewards_process_epoch: Optional[int] = None
+    last_missed_attestations_process_epoch: int | None = None
+    last_rewards_process_epoch: int | None = None
 
-    previous_epoch: Optional[int] = None
+    previous_epoch: int | None = None
+    last_processed_finalized_slot: int | None = None
+
     genesis = beacon.get_genesis()
 
-    for slot, slot_start_time_sec in slots(genesis.data.genesis_time):
+    for idx, (slot, slot_start_time_sec) in enumerate(slots(genesis.data.genesis_time)):
+        if slot < 0:
+            chain_start_in_sec = -slot * NB_SECOND_PER_SLOT
+            days, hours, minutes, seconds = convert_seconds_to_dhms(chain_start_in_sec)
+
+            print(
+                f"⏱️     The chain will start in {days:2} days, {hours:2} hours, "
+                f"{minutes:2} minutes and {seconds:2} seconds."
+            )
+
+            if slot % NB_SLOT_PER_EPOCH == 0:
+                print(f"💪     {CHUCK_NORRIS[slot%len(CHUCK_NORRIS)]}")
+
+            if liveness_file is not None:
+                write_liveness_file(liveness_file)
+
+            continue
+
         epoch = slot // NB_SLOT_PER_EPOCH
         slot_in_epoch = slot % NB_SLOT_PER_EPOCH
 
-        slot_gauge.set(slot)
-        epoch_gauge.set(epoch)
+        metric_slot_gauge.set(slot)
+        metric_epoch_gauge.set(epoch)
 
         is_new_epoch = previous_epoch is None or previous_epoch != epoch
+
+        if last_processed_finalized_slot is None:
+            last_processed_finalized_slot = slot
 
         if is_new_epoch:
             try:
                 our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
             except ValueError:
                 raise typer.BadParameter("Some pubkeys are invalid")
-            
+
             if export_key_specific_values:
                 for pubkey in our_pubkeys:
                     if pubkey not in initialized_keys:
@@ -288,7 +312,7 @@ def _handler(
 
             net_pending_q_idx2val = net_status2idx2val.get(Status.pendingQueued, {})
             nb_total_pending_q_vals = len(net_pending_q_idx2val)
-            net_pending_q_vals_gauge.set(nb_total_pending_q_vals)
+            metric_net_pending_q_vals_gauge.set(nb_total_pending_q_vals)
 
             active_ongoing = net_status2idx2val.get(Status.activeOngoing, {})
             active_exiting = net_status2idx2val.get(Status.activeExiting, {})
@@ -297,7 +321,7 @@ def _handler(
             net_epoch2active_idx2val[epoch] = net_active_idx2val
 
             net_active_vals_count = len(net_active_idx2val)
-            net_active_validators_gauge.set(net_active_vals_count)
+            metric_net_active_validators_gauge.set(net_active_vals_count)
 
             net_exited_s_idx2val = net_status2idx2val.get(Status.exitedSlashed, {})
 
@@ -317,8 +341,7 @@ def _handler(
             }
 
             our_queued_idx2val = our_status2idx2val.get(Status.pendingQueued, {})
-
-            our_queued_vals_gauge.set(len(our_queued_idx2val))
+            metric_our_queued_vals_gauge.set(len(our_queued_idx2val))
 
             if export_key_specific_values:
                 for pubkey in our_pubkeys:
@@ -332,14 +355,14 @@ def _handler(
                                 ]
                             )
                         )
-            
+
             ongoing = our_status2idx2val.get(Status.activeOngoing, {})
             active_exiting = our_status2idx2val.get(Status.activeExiting, {})
             active_slashed = our_status2idx2val.get(Status.activeSlashed, {})
             our_active_idx2val = ongoing | active_exiting | active_slashed
             our_epoch2active_idx2val[epoch] = our_active_idx2val
 
-            our_active_validators_gauge.set(len(our_active_idx2val))
+            metric_our_active_validators_gauge.set(len(our_active_idx2val))
 
             if export_key_specific_values:
                 for pubkey in our_pubkeys:
@@ -423,7 +446,11 @@ def _handler(
 
         process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
 
-        delta_sec = BLOCK_NOT_ORPHANED_TIME_SEC - (time() - slot_start_time_sec)
+        last_processed_finalized_slot = process_missed_blocks_finalized(
+            beacon, last_processed_finalized_slot, slot, our_pubkeys, slack
+        )
+
+        delta_sec = MISSED_BLOCK_TIMEOUT_SEC - (time() - slot_start_time_sec)
         sleep(max(0, delta_sec))
 
         potential_block = beacon.get_potential_block(slot)
@@ -442,7 +469,7 @@ def _handler(
                 block, our_active_idx2val, execution, fee_recipient, slack
             )
 
-        is_our_validator = process_missed_blocks(
+        is_our_validator = process_missed_blocks_head(
             beacon,
             potential_block,
             slot,
@@ -464,3 +491,6 @@ def _handler(
 
         if liveness_file is not None:
             write_liveness_file(liveness_file)
+
+        if idx == 0:
+            start_http_server(8000)

@@ -1,19 +1,16 @@
 """Contains the SlashedValidators class, which is responsible for managing the slashed
 validators."""
-
-from typing import Optional
-
 from prometheus_client import Gauge
 
 from .models import Validators
 from .utils import Slack
 
-our_slashed_validators_count = Gauge(
+metric_our_slashed_validators_count = Gauge(
     "our_slashed_validators_count",
     "Our slashed validators count",
 )
 
-total_slashed_validators_count = Gauge(
+metric_total_slashed_validators_count = Gauge(
     "total_slashed_validators_count",
     "Total slashed validators count",
 )
@@ -30,14 +27,14 @@ initialized_keys: set[str] = set()
 class SlashedValidators:
     """Slashed validators abstraction."""
 
-    def __init__(self, slack: Optional[Slack]) -> None:
+    def __init__(self, slack: Slack | None) -> None:
         """Slashed validators
 
         Parameters:
         slack: Optional slack client
         """
-        self.__total_exited_slashed_indexes: Optional[set[int]] = None
-        self.__our_exited_slashed_indexes: Optional[set[int]] = None
+        self.__total_exited_slashed_indexes: set[int] | None = None
+        self.__our_exited_slashed_indexes: set[int] | None = None
         self.__slack = slack
 
     def process(
@@ -95,8 +92,8 @@ class SlashedValidators:
             our_slashed_withdrawal_index_to_validator
         )
 
-        total_slashed_validators_count.set(len(total_slashed_indexes))
-        our_slashed_validators_count.set(len(our_slashed_indexes))
+        metric_total_slashed_validators_count.set(len(total_slashed_indexes))
+        metric_our_slashed_validators_count.set(len(our_slashed_indexes))
 
         total_exited_slashed_indexes = set(total_exited_slashed_index_to_validator)
         our_exited_slashed_indexes = set(our_exited_slashed_index_to_validator)
@@ -123,7 +120,7 @@ class SlashedValidators:
 
         for index in not_our_new_exited_slashed_indexes:
             print(
-                f"✂️     validator {total_exited_slashed_index_to_validator[index].pubkey[:10]} is slashed"
+                f"🔪     validator {total_exited_slashed_index_to_validator[index].pubkey[:10]} is slashed"
             )
 
         for index in our_new_exited_slashed_indexes:

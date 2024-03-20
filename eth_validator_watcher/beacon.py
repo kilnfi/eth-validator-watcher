@@ -1,11 +1,12 @@
 """Contains the Beacon class which is used to interact with the consensus layer node."""
 
 
+import functools
 from collections import defaultdict
 from functools import lru_cache
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
-from requests import Response, Session, codes
+from requests import HTTPError, Response, Session, codes
 from requests.adapters import HTTPAdapter, Retry
 from requests.exceptions import ChunkedEncodingError, RetryError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
@@ -13,8 +14,10 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fi
 from .models import (
     BeaconType,
     Block,
+    BlockIdentierType,
     Committees,
     Genesis,
+    Header,
     ProposerDuties,
     Rewards,
     Validators,
@@ -24,6 +27,13 @@ from .models import (
 )
 
 StatusEnum = Validators.DataItem.StatusEnum
+
+
+# Hard-coded for now, will need to move this to a config.
+TIMEOUT_BEACON_SEC = 90
+
+
+print = functools.partial(print, flush=True)
 
 
 class NoBlockError(Exception):
@@ -40,11 +50,12 @@ class Beacon:
         url: URL where the beacon can be reached
         """
         self.__url = url
+        self.__http_retry_not_found = Session()
         self.__http = Session()
         self.__first_liveness_call = True
         self.__first_rewards_call = True
 
-        adapter = HTTPAdapter(
+        adapter_retry_not_found = HTTPAdapter(
             max_retries=Retry(
                 backoff_factor=0.5,
                 total=3,
@@ -56,8 +67,31 @@ class Beacon:
             )
         )
 
+        adapter = HTTPAdapter(
+            max_retries=Retry(
+                backoff_factor=0.5,
+                total=3,
+                status_forcelist=[
+                    codes.bad_gateway,
+                    codes.service_unavailable,
+                ],
+            )
+        )
+
+        self.__http_retry_not_found.mount("http://", adapter_retry_not_found)
+        self.__http_retry_not_found.mount("https://", adapter_retry_not_found)
+
         self.__http.mount("http://", adapter)
         self.__http.mount("https://", adapter)
+
+    @retry(
+        stop=stop_after_attempt(5),
+        wait=wait_fixed(3),
+        retry=retry_if_exception_type(ChunkedEncodingError),
+    )
+    def __get_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
+        """Wrapper around requests.get() with retry on 404"""
+        return self.__http_retry_not_found.get(*args, **kwargs)
 
     @retry(
         stop=stop_after_attempt(5),
@@ -73,16 +107,43 @@ class Beacon:
         wait=wait_fixed(3),
         retry=retry_if_exception_type(ChunkedEncodingError),
     )
-    def __post(self, *args: Any, **kwargs: Any) -> Response:
-        """Wrapper around requests.get()"""
-        return self.__http.post(*args, **kwargs)
+    def __post_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
+        """Wrapper around requests.get() with retry on 404"""
+        return self.__http_retry_not_found.post(*args, **kwargs)
 
     def get_genesis(self) -> Genesis:
         """Get genesis data."""
-        response = self.__get(f"{self.__url}/eth/v1/beacon/genesis", timeout=5)
+        response = self.__get_retry_not_found(
+            f"{self.__url}/eth/v1/beacon/genesis", timeout=TIMEOUT_BEACON_SEC
+        )
         response.raise_for_status()
         genesis_dict = response.json()
         return Genesis(**genesis_dict)
+
+    def get_header(self, block_identifier: Union[BlockIdentierType, int]) -> Header:
+        """Get a header.
+
+        Parameters
+        block_identifier: Block identifier or slot corresponding to the block to
+                          retrieve
+        """
+        try:
+            response = self.__get(
+                f"{self.__url}/eth/v1/beacon/headers/{block_identifier}", timeout=TIMEOUT_BEACON_SEC
+            )
+
+            response.raise_for_status()
+
+        except HTTPError as e:
+            if e.response.status_code == codes.not_found:
+                # If we are here, it means the block does not exist
+                raise NoBlockError from e
+
+            # If we are here, it's an other error
+            raise
+
+        header_dict = response.json()
+        return Header(**header_dict)
 
     def get_block(self, slot: int) -> Block:
         """Get a block.
@@ -92,26 +153,30 @@ class Beacon:
         """
         try:
             response = self.__get(
-                f"{self.__url}/eth/v2/beacon/blocks/{slot}", timeout=5
+                f"{self.__url}/eth/v2/beacon/blocks/{slot}", timeout=TIMEOUT_BEACON_SEC
             )
 
-        except RetryError as e:
-            # If we are here, it means the block does not exist
-            raise NoBlockError from e
+            response.raise_for_status()
 
-        response.raise_for_status()
+        except HTTPError as e:
+            if e.response.status_code == codes.not_found:
+                # If we are here, it means the block does not exist
+                raise NoBlockError from e
+
+            # If we are here, it's an other error
+            raise
 
         block_dict = response.json()
         return Block(**block_dict)
 
-    @lru_cache(maxsize=2)
+    @lru_cache()
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
         """Get proposer duties
 
         epoch: Epoch corresponding to the proposer duties to retrieve
         """
-        response = self.__get(
-            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}", timeout=10
+        response = self.__get_retry_not_found(
+            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}", timeout=TIMEOUT_BEACON_SEC
         )
 
         response.raise_for_status()
@@ -127,8 +192,8 @@ class Beacon:
         outer value (=inner key): Index of validator
         inner value             : Validator
         """
-        response = self.__get(
-            f"{self.__url}/eth/v1/beacon/states/head/validators", timeout=25
+        response = self.__get_retry_not_found(
+            f"{self.__url}/eth/v1/beacon/states/head/validators", timeout=TIMEOUT_BEACON_SEC
         )
 
         response.raise_for_status()
@@ -158,10 +223,10 @@ class Beacon:
         Parameters:
         epoch: Epoch
         """
-        response = self.__get(
+        response = self.__get_retry_not_found(
             f"{self.__url}/eth/v1/beacon/states/head/committees",
             params=dict(epoch=epoch),
-            timeout=10,
+            timeout=TIMEOUT_BEACON_SEC,
         )
 
         response.raise_for_status()
@@ -182,7 +247,7 @@ class Beacon:
         self,
         beacon_type: BeaconType,
         epoch: int,
-        validators_index: Optional[set[int]] = None,
+        validators_index: set[int] | None = None,
     ) -> Rewards:
         """Get rewards.
 
@@ -202,13 +267,14 @@ class Beacon:
         # https://github.com/status-im/nimbus-eth2/issues/5138,
         # we just assume there is no rewards at all
 
-        if beacon_type in {BeaconType.NIMBUS, BeaconType.PRYSM}:
+        if beacon_type in {BeaconType.NIMBUS, BeaconType.OLD_PRYSM}:
             if self.__first_rewards_call:
                 self.__first_rewards_call = False
                 print(
                     (
-                        "⚠️ You are using Prysm or Nimbus. Rewards will be ignored. "
-                        "See https://github.com/prysmaticlabs/prysm/issues/11581 "
+                        "⚠️ You are using Prysm < 4.0.8 or Nimbus. Rewards will be "
+                        "ignored. See "
+                        "https://github.com/prysmaticlabs/prysm/issues/11581 "
                         "(Prysm) & https://github.com/status-im/nimbus-eth2/issues/5138 "
                         "(Nimbus) for more information."
                     )
@@ -216,14 +282,14 @@ class Beacon:
 
             return Rewards(data=Rewards.Data(ideal_rewards=[], total_rewards=[]))
 
-        response = self.__post(
+        response = self.__post_retry_not_found(
             f"{self.__url}/eth/v1/beacon/rewards/attestations/{epoch}",
             json=(
                 [str(index) for index in sorted(validators_index)]
                 if validators_index is not None
                 else []
             ),
-            timeout=10,
+            timeout=TIMEOUT_BEACON_SEC,
         )
 
         response.raise_for_status()
@@ -261,20 +327,41 @@ class Beacon:
 
         beacon_type_to_function = {
             BeaconType.LIGHTHOUSE: self.__get_validators_liveness_lighthouse,
-            BeaconType.PRYSM: self.__get_validators_liveness_beacon_api,
+            BeaconType.OLD_PRYSM: self.__get_validators_liveness_beacon_api,
             BeaconType.OLD_TEKU: self.__get_validators_liveness_old_teku,
             BeaconType.OTHER: self.__get_validators_liveness_beacon_api,
         }
 
         response = beacon_type_to_function[beacon_type](epoch, validators_index)
 
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            if e.response.status_code != codes.bad_request:
+                raise
+
+            # If we are here, it means the requested epoch is too old, which
+            # could be normal if the watcher just started
+            print(
+                f"❓     Missed attestations detection is disabled for epoch {epoch}. "
+            )
+
+            print(
+                "❓     You can ignore this message if the watcher just started less "
+                "than one epoch ago. Otherwise, please check that you used the correct "
+                f"`--beacon-type` option (currently set to `{beacon_type}`). "
+            )
+
+            print("❓     Use `--help` for more details.")
+
+            return {index: True for index in validators_index}
+
         validators_liveness_dict = response.json()
         validators_liveness = ValidatorsLivenessResponse(**validators_liveness_dict)
 
         return {item.index: item.is_live for item in validators_liveness.data}
 
-    def get_potential_block(self, slot) -> Optional[Block]:
+    def get_potential_block(self, slot) -> Block | None:
         """Get a block if it exists, otherwise return None.
 
         Parameters:
@@ -300,12 +387,12 @@ class Beacon:
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
         """
-        return self.__post(
+        return self.__post_retry_not_found(
             f"{self.__url}/lighthouse/liveness",
             json=ValidatorsLivenessRequestLighthouse(
                 epoch=epoch, indices=sorted(list(validators_index))
             ).model_dump(),
-            timeout=10,
+            timeout=TIMEOUT_BEACON_SEC,
         )
 
     def __get_validators_liveness_old_teku(
@@ -320,12 +407,12 @@ class Beacon:
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
         """
-        return self.__post(
+        return self.__post_retry_not_found(
             f"{self.__url}/eth/v1/validator/liveness/{epoch}",
             json=ValidatorsLivenessRequestTeku(
                 indices=sorted(list(validators_index))
             ).model_dump(),
-            timeout=10,
+            timeout=TIMEOUT_BEACON_SEC,
         )
 
     def __get_validators_liveness_beacon_api(
@@ -340,11 +427,11 @@ class Beacon:
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
         """
-        return self.__post(
+        return self.__post_retry_not_found(
             f"{self.__url}/eth/v1/validator/liveness/{epoch}",
             json=[
                 str(validator_index)
                 for validator_index in sorted(list(validators_index))
             ],
-            timeout=10,
+            timeout=TIMEOUT_BEACON_SEC,
         )

@@ -3,13 +3,14 @@
 from prometheus_client import Gauge
 
 MIN_PER_EPOCH_CHURN_LIMIT = 4
+MAX_PER_EPOCH_CHURN_LIMIT = 8
 CHURN_LIMIT_QUOTIENT = 65536
 NB_SECONDS_PER_SLOT = 12
 NB_SLOT_PER_EPOCH = 32
 NB_SECONDS_PER_EPOCH = NB_SECONDS_PER_SLOT * NB_SLOT_PER_EPOCH
 
 # TODO: Compute this dynamically
-BUCKETS = [
+BUCKETS: list[tuple[int, int]] = [
     (0, 4),
     (327_680, 5),
     (393_216, 6),
@@ -27,9 +28,29 @@ BUCKETS = [
     (1_179_648, 18),
     (1_245_184, 19),
     (1_310_720, 20),
+    (1_376_256, 21),
+    (1_441_792, 22),
+    (1_507_328, 23),
+    (1_572_864, 24),
+    (1_638_400, 25),
+    (1_703_936, 26),
+    (1_769_472, 27),
+    (1_835_008, 28),
+    (1_900_544, 29),
+    (1_966_080, 30),
+    (2_031_616, 31),
+    (2_097_152, 32),
+    (2_162_688, 33),
+    (2_228_224, 34),
+    (2_293_760, 35),
+    (2_359_296, 36),
+    (2_424_832, 37),
+    (2_490_368, 38),
+    (2_555_904, 39),
+    (2_621_440, 40),
 ]
 
-entry_queue_duration_sec = Gauge(
+metric_entry_queue_duration_sec = Gauge(
     "entry_queue_duration_sec",
     "Entry queue duration in seconds",
 )
@@ -41,21 +62,7 @@ def compute_validators_churn(nb_active_validators: int) -> int:
     Parameters:
     nb_active_validators: The number of currently active validators
     """
-    return max(MIN_PER_EPOCH_CHURN_LIMIT, nb_active_validators // CHURN_LIMIT_QUOTIENT)
-
-
-def compute_pessimistic_duration_sec(
-    nb_active_validators: int, position_in_entry_queue: int
-) -> int:
-    """Compute a pessimistic estimation of when a validator will exit the entry queue.
-
-    Parameters:
-    nb_active_validators: The number of currently active validators
-    position_in_entry_queue: The position of the validator in the entry queue
-    """
-    return (
-        position_in_entry_queue // compute_validators_churn(nb_active_validators)
-    ) * NB_SECONDS_PER_EPOCH
+    return min(MAX_PER_EPOCH_CHURN_LIMIT, max(MIN_PER_EPOCH_CHURN_LIMIT, nb_active_validators // CHURN_LIMIT_QUOTIENT))
 
 
 def get_bucket_index(validator_index: int) -> int:
@@ -71,10 +78,11 @@ def get_bucket_index(validator_index: int) -> int:
     raise RuntimeError("Validator index is too high")
 
 
-def compute_optimistic_duration_sec(
+def compute_duration_sec(
     nb_active_validators: int, position_in_entry_queue: int
 ) -> int:
-    """Compute an optimistic estimation of when a validator will exit the entry queue.
+    """Compute the remaining time before a validator is active if no validator wants to
+    exit.
 
     Parameters:
     nb_active_validators   : The number of currently active validators
@@ -84,10 +92,9 @@ def compute_optimistic_duration_sec(
     stop_bucket_index = get_bucket_index(nb_active_validators + position_in_entry_queue)
 
     if start_bucket_index == stop_bucket_index:
-        return compute_pessimistic_duration_sec(
-            nb_active_validators, position_in_entry_queue
-        )
-
+        return (
+            position_in_entry_queue // compute_validators_churn(nb_active_validators)
+        ) * NB_SECONDS_PER_EPOCH
     # Compute the number of validators in the first bucket
     start_limit, _ = BUCKETS[start_bucket_index + 1]
     number_validators_in_start_bucket = start_limit - nb_active_validators
@@ -96,7 +103,7 @@ def compute_optimistic_duration_sec(
     stop_limit, _ = BUCKETS[stop_bucket_index]
 
     number_validators_in_stop_bucket = (
-        nb_active_validators + position_in_entry_queue - stop_limit + 1
+        nb_active_validators + position_in_entry_queue + 1 - stop_limit
     )
 
     def fill_bucket(index: int) -> int:
@@ -133,11 +140,6 @@ def export_duration_sec(
     nb_active_validators   : The number of currently active validators
     position_in_entry_queue: The position of the validator in the entry queue
     """
-    result = (
-        compute_optimistic_duration_sec(nb_active_validators, position_in_entry_queue)
-        + compute_pessimistic_duration_sec(
-            nb_active_validators, position_in_entry_queue
-        )
-    ) // 2
 
-    entry_queue_duration_sec.set(result)
+    duration_sec = compute_duration_sec(nb_active_validators, position_in_entry_queue)
+    metric_entry_queue_duration_sec.set(duration_sec)

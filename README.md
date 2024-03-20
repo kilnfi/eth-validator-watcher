@@ -7,14 +7,20 @@ Ethereum Validator Watcher
 
 The code is provided as-is with no warranties.
 
-![grafana-dashboard](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/f1e5db59-8c3a-47a8-850f-6b8083f03501)
+Youtube video of [Ethereum Validator Watcher talk during EthCC[6]](https://www.youtube.com/watch?v=SkyncLrME1g&t=12s&ab_channel=%5BEthCC%5DLivestream2).
 
+Grafana dashboard [configuration file](./grafana_dashboard.json).
+
+![dashboard](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/c5ea8135-9b5e-4935-b8ca-56a02a9ba447)
+![logs](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/12bddcbe-e019-40af-be64-c1edcecc0561)
+![metrics](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/60b8fb12-5ad0-4908-8a35-639f1553a249)
 
 Description
 -----------
 **Ethereum Validator Watcher** monitors the Ethereum beacon chain in real-time and notifies you when any of your validators:
 - are going to propose a block in the next two epochs
-- missed a block proposal
+- missed a block proposal at head
+- missed a block proposal at finalized
 - did not optimally attest
 - missed an attestation
 - missed two attestations in a row
@@ -49,43 +55,48 @@ Finally, this program exports the following sets of data from:
 - Prometheus (you can use this Grafana dashboard to monitor your validators)
 - Slack
 - logs
-  
+
 Prometheus server is automatically exposed on port 8000.
 
 Command line options
 --------------------
- 
+
 ```
-╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --beacon-url               TEXT                                      URL of beacon node [required]                                                    │
-│    --execution-url            TEXT                                      URL of execution node                                                            │
-│    --pubkeys-file-path        FILE                                      File containing the list of public keys to watch                                 │
-│    --web3signer-url           TEXT                                      URL to web3signer managing keys to watch                                         │
-│    --fee-recipient            TEXT                                      Fee recipient address - --execution-url must be set                              │
-│    --slack-channel            TEXT                                      Slack channel to send alerts - SLACK_TOKEN env var must be set                   │
-│    --beacon-type              [lighthouse|nimbus|prysm|old-teku|other]  Use this option if connected to a Teku < 23.6.0, Prysm, Lighthouse or Nimbus     │
-│                                                                         beacon node. See https://github.com/ConsenSys/teku/issues/7204 for Teku <        │
-│                                                                         23.6.0, https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm,           │
-│                                                                         https://github.com/sigp/lighthouse/issues/4243 for Lighthouse,                   │
-│                                                                         https://github.com/status-im/nimbus-eth2/issues/5019 and                         │
-│                                                                         https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus.                 │
-│    --relay-url                TEXT                                      URL of allow listed relay                                                        │
-│    --liveness-file            PATH                                      Liveness file                                                                    │
-|    --export-key-specific-values                                         Enable export of key specific values in the metric exporter                      |
-│    --help                                                               Show this message and exit.                                                      │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --beacon-url               TEXT                                          URL of beacon node [required]                                                    │
+│    --execution-url            TEXT                                          URL of execution node                                                            │
+│    --pubkeys-file-path        FILE                                          File containing the list of public keys to watch                                 │
+│    --web3signer-url           TEXT                                          URL to web3signer managing keys to watch                                         │
+│    --fee-recipient            TEXT                                          Fee recipient address - --execution-url must be set                              │
+│    --slack-channel            TEXT                                          Slack channel to send alerts - SLACK_TOKEN env var must be set                   │
+│    --beacon-type              [lighthouse|nimbus|old-prysm|old-teku|other]  Use this option if connected to a Teku < 23.6.0, Prysm < 4.0.8, Lighthouse or    │
+│                                                                             Nimbus beacon node. See https://github.com/ConsenSys/teku/issues/7204 for Teku < │
+│                                                                             23.6.0, https://github.com/prysmaticlabs/prysm/issues/11581 for Prysm < 4.0.8,   │
+│                                                                             https://github.com/sigp/lighthouse/issues/4243 for Lighthouse,                   │
+│                                                                             https://github.com/status-im/nimbus-eth2/issues/5019 and                         │
+│                                                                             https://github.com/status-im/nimbus-eth2/issues/5138 for Nimbus.                 │
+│                                                                             [default: BeaconType.OTHER]                                                      │
+│    --relay-url                TEXT                                          URL of allow listed relay                                                        │
+│    --liveness-file            PATH                                          Liveness file                                                                    │
+│    --export-key-specific-values                                             Enable export of key specific values in the metric exporter                      │
+│    --help                                                                   Show this message and exit.                                                      │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 Beacon nodes compatibility
 --------------------------
 Beacon type      | Compatibility
 -----------------|----------------------------------------------------------------------------------------------------------
-Prysm            | Partial with `--beacon-type=prysm` - Rewards computation disabled. See https://github.com/prysmaticlabs/prysm/issues/11581 for more details.
+Lighthouse       | Full with `--beacon-type=lighthouse`. See https://github.com/sigp/lighthouse/issues/4243 for more details.
+Prysm `>= 4.0.8` | Full.
+Prysm `< 4.0.8 ` | Partial with `--beacon-type=old-prysm` - Rewards computation disabled. See https://github.com/prysmaticlabs/prysm/issues/11581 for more details.
 Teku `>= 23.6.0` | Full. You need to activate the [beacon-liveness-tracking-enabled](https://docs.teku.consensys.net/reference/cli#options) flag on your beacon node.
 Teku `< 23.6.0 ` | Full with `--beacon-type=old-teku`. See https://github.com/ConsenSys/teku/pull/7212 for more details. You need to activate the [beacon-liveness-tracking-enabled](https://docs.teku.consensys.net/reference/cli#options) flag on your beacon node.
-Lighthouse       | Full with `--beacon-type=lighthouse`. See https://github.com/sigp/lighthouse/issues/4243 for more details.
 Nimbus           | Partial with `--beacon-type=nimbus` - Missed attestations detection and rewards computation disabled. See https://github.com/status-im/nimbus-eth2/issues/5019 and https://github.com/status-im/nimbus-eth2/issues/5138 for more details.
 Lodestar         | Not (yet) tested.
+
+The beacon type is relative to the beacon node connected to the watcher, **not to the beacon node connected to the validator client containing a validator key you want to watch**.
+(The watcher is agnostic of the infrastructure mananing validators keys you want to watch.)
 
 Command lines examples
 ----------------------
@@ -127,50 +138,48 @@ eth-validator-watcher --beacon-url http://localhost:3500 --web3signer-url http:/
 Exported Prometheus metrics
 ---------------------------
 
-name                                                   | description
--------------------------------------------------------|------------
-`eth_usd`                                              | ETH/USD conversion rate
-`entry_queue_duration_sec`                             | Entry queue duration in seconds
-`our_pending_queued_validators_count`                  | Our pending queued validators count
-`total_pending_queued_validators_count`                | Total pending queued validators count
-`our_active_validators_count`                          | Our active validators count
-`total_active_validators_count`                        | Total active validators count
-`our_exited_validators_count`                          | Our exited validators count
-`wrong_fee_recipient_proposed_block_count`             | Wrong fee recipient proposed block count
-`missed_attestations_count`                            | Missed attestations count
-`double_missed_attestations_count`                     | Double missed attestations count
-`missed_block_proposals_count`                         | Missed block proposals count
-`missed_block_proposals_count_details`                 | Missed block proposals count with slot and epoch labels
-`proposed_block_proposals_count`                       | Proposed block proposals count
-`proposed_block_proposals_count_details`               | Proposed block proposals count with slot and epoch details
-`future_block_proposals_count`                         | Future block proposals count
-`our_slashed_validators_count`                         | Our slashed validators count
-`total_slashed_validators_count`                       | Total slashed validators count
-`suboptimal_attestations_rate`                         | Suboptimal attestations rate
-`keys_count`                                           | Keys count
-`bad_relay_count`                                      | Bad relay count
-`net_suboptimal_sources_rate`                          | Network suboptimal sources rate
-`net_suboptimal_targets_rate`                          | Network suboptimal targets rate
-`net_suboptimal_heads_rate`                            | Network suboptimal heads rate
-`net_ideal_sources_count`                              | Network ideal sources count
-`net_ideal_targets_count`                              | Network ideal targets count
-`net_ideal_heads_count`                                | Network ideal heads count
-`net_actual_pos_sources_count`                         | Network actual positive sources count
-`net_actual_neg_sources_count`                         | Network actual negative sources count
-`net_actual_pos_targets_count`                         | Network actual positive targets count
-`net_actual_neg_targets_count`                         | Network actual negative targets count
-`net_actual_heads_count`                               | Network actual heads count
-`our_suboptimal_sources_rate`                          | Our suboptimal sources rate
-`our_suboptimal_targets_rate`                          | Our suboptimal targets rate
-`our_suboptimal_heads_rate`                            | Our suboptimal heads rate
-`our_ideal_sources_count`                              | Our ideal sources count
-`our_ideal_targets_count`                              | Our ideal targets count
-`our_ideal_heads_count`                                | Our ideal heads count
-`our_actual_pos_sources_count`                         | Our actual positive sources count
-`our_actual_neg_sources_count`                         | Our actual negative sources count
-`our_actual_pos_targets_count`                         | Our actual positive targets count
-`our_actual_neg_targets_count`                         | Our actual negative targets count
-`our_actual_heads_count`                               | Our actual heads count
+name                                             | description
+-------------------------------------------------|------------
+`eth_usd`                                        | ETH/USD conversion rate
+`entry_queue_duration_sec`                       | Entry queue duration in seconds
+`our_pending_queued_validators_count`            | Our pending queued validators count
+`total_pending_queued_validators_count`          | Total pending queued validators count
+`our_active_validators_count`                    | Our active validators count
+`total_active_validators_count`                  | Total active validators count
+`our_exited_validators_count`                    | Our exited validators count
+`wrong_fee_recipient_proposed_block_count`       | Wrong fee recipient proposed block count
+`missed_attestations_count`                      | Missed attestations count
+`double_missed_attestations_count`               | Double missed attestations count
+`missed_block_proposals_head_count`              | Missed block proposals on head count
+`missed_block_proposals_finalized_count`         | Missed block proposals on finalized count
+`future_block_proposals_count`                   | Future block proposals count
+`our_slashed_validators_count`                   | Our slashed validators count
+`total_slashed_validators_count`                 | Total slashed validators count
+`suboptimal_attestations_rate`                   | Suboptimal attestations rate
+`keys_count`                                     | Keys count
+`bad_relay_count`                                | Bad relay count
+`net_suboptimal_sources_rate`                    | Network suboptimal sources rate
+`net_suboptimal_targets_rate`                    | Network suboptimal targets rate
+`net_suboptimal_heads_rate`                      | Network suboptimal heads rate
+`net_ideal_sources_count`                        | Network ideal sources count
+`net_ideal_targets_count`                        | Network ideal targets count
+`net_ideal_heads_count`                          | Network ideal heads count
+`net_actual_pos_sources_count`                   | Network actual positive sources count
+`net_actual_neg_sources_count`                   | Network actual negative sources count
+`net_actual_pos_targets_count`                   | Network actual positive targets count
+`net_actual_neg_targets_count`                   | Network actual negative targets count
+`net_actual_heads_count`                         | Network actual heads count
+`our_suboptimal_sources_rate`                    | Our suboptimal sources rate
+`our_suboptimal_targets_rate`                    | Our suboptimal targets rate
+`our_suboptimal_heads_rate`                      | Our suboptimal heads rate
+`our_ideal_sources_count`                        | Our ideal sources count
+`our_ideal_targets_count`                        | Our ideal targets count
+`our_ideal_heads_count`                          | Our ideal heads count
+`our_actual_pos_sources_count`                   | Our actual positive sources count
+`our_actual_neg_sources_count`                   | Our actual negative sources count
+`our_actual_pos_targets_count`                   | Our actual positive targets count
+`our_actual_neg_targets_count`                   | Our actual negative targets count
+`our_actual_heads_count`                         | Our actual heads count
 `key_exited_validators`                                | Key exited validator
 `key_wrong_fee_recipient_proposed_block_count_total`   | Key wrong fee recipient proposed block count
 `key_missed_attestations_count`                        | Key missed attestations
@@ -220,18 +229,30 @@ You are going to propose a block in the next two epochs. | ```💍 Our validator
 Someone [proposed](https://beaconcha.in/slot/6716776) a block. | ```✅     validator 0xb9d2439f proposed block at epoch 209899 - slot 6716776 ✅```
 You [proposed](https://beaconcha.in/slot/6716781) a block. | ```✨ Our validator 0xa6cdd026 proposed block at epoch 209899 - slot 6716781 ✨```
 You proposed a block with the wrong fee recipient. | ```🚩 Our validator 0x00000000 proposed block at epoch 209952 - slot 6718495 with the wrong fee recipient```
-You [did not had](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/666dad82-2f67-432d-97eb-9f99ef6c106a) optimal attestation inclusion. | ```☣️ Our validator 0x98a5bad4, 0x8116a5f8, 0xa2fff7bd, 0x87cd0fd3, 0x978ebbdb and 1 more (1.2 %) had not optimal attestation inclusion at slot 6716778```
+You [did not had](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/666dad82-2f67-432d-97eb-9f99ef6c106a) optimal attestation inclusion. | ```❗ Our validator 0x98a5bad4, 0x8116a5f8, 0xa2fff7bd, 0x87cd0fd3, 0x978ebbdb and 1 more (1.2 %) had not optimal attestation inclusion at slot 6716778```
 Someone [missed](https://beaconcha.in/validator/399279#blocks) a block proposal.  | ```💩     validator 0xa3dbc635 missed   block at epoch 209894 - slot 6716637 💩```
-You [missed](https://beaconcha.in/validator/631094#blocks) a block proposal. | ```❌ Our validator 0xa66d5712 missed   block at epoch 209695 - slot 6710240 ❌```
-You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/9bed8b53-5c53-4cf0-818d-066434660004) an attestation. | ```☹️ Our validator 0xa672f362, 0xb5f46214, 0xac81b7f4 and 0 more missed attestation at epoch 209894```
-You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/74326f4f-d3f5-405d-87ce-9576f9ed79a0) 2 attestations in a row. | ```😱  Our validator 0x8c9bfca1, 0xa68f7c5d and 0 more missed 2 attestations in a row from epoch 209367```
+You [missed](https://sepolia.beaconcha.in/slot/3454352) a block proposal (head). | ```🔺 Our validator 0xb09d7c4e missed   block at head at epoch 107948 - slot 3454352 🔺```
+You [missed](https://sepolia.beaconcha.in/slot/3454352) a block proposal (finalized). | ```❌ Our validator 0xb09d7c4e missed block at finalized at epoch 107948 - slot 3454352 ❌```
+You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/9bed8b53-5c53-4cf0-818d-066434660004) an attestation. | ```🙁 Our validator 0xa672f362, 0xb5f46214, 0xac81b7f4 and 0 more missed attestation at epoch 209894```
+You [missed](https://github.com/kilnfi/eth-validator-watcher/assets/4943830/74326f4f-d3f5-405d-87ce-9576f9ed79a0) 2 attestations in a row. | ```😱 Our validator 0x8c9bfca1, 0xa68f7c5d and 0 more missed 2 attestations in a row from epoch 209367```
 You [exited](https://beaconcha.in/validator/491565). | ```🚶 Our validator 0xaeb82c90 is exited```
-Someone [got](https://beaconcha.in/validator/647102) slashed. | ```✂️     validator 0xb3a608a7 is slashed```
+Someone [got](https://beaconcha.in/validator/647102) slashed. | ```🔪     validator 0xb3a608a7 is slashed```
 You got slashed (you don't want to see this one). | ```🔕 Our validator 0x00000000 is slashed```
 You proposed a block with a non-allowed relay. | ```🟧 Block proposed with unknown builder (may be a locally built block)```
 You did not had ideal source rewards. | ```🚰 Our validator 0x8012aba2, 0x8012cdb1, 0x803f3b39, 0x8054cda1, 0x8055bb56 and 0 more had not ideal rewards on source at epoch 215201```
 You did not had ideal target rewards. | ```🎯 Our validator 0x8000118f, 0x80a238ea, 0x80e5809d, 0x80ec3c2d, 0x80f4487d and 0 more had not ideal rewards on target at epoch 215201```
 You did not had ideal head rewards. | ```🗣️ Our validator 0x8005f5e8, 0x801910e5, 0x80193dd5, 0x801a26e9, 0x80285258 and 0 more had not ideal rewards on head  at epoch 215200```
+The chain is not yet started.       | ```⏱️     The chain will start in  1 days,  1 hours,  3 minutes and 48 seconds.```
+
+If you see this kind of message:
+```
+❓     Missed attestations detection is disabled for epoch 238030.
+❓     You can ignore this message if the watcher just started less than one epoch ago. Otherwise, please check that you used the correct `--beacon-type`` option (currently set to `other`).
+❓     Use `--help` for more details.
+```
+
+If you just started the watcher less than one epoch ago (and especially, if you started the watcher during the few last slots of the epoch), then you can safely ignore this message.
+Otherwise, please check you uses the correct `--beacon-type` option.
 
 Slack messages
 --------------
@@ -274,7 +295,7 @@ livenessProbe:
   failureThreshold: 1
   exec:
     command:
-    - /usr/bin/python3.9
+    - /usr/bin/python3.11
     - /usr/local/bin/liveness_check.py
     - <path-to-a-file>
 ```

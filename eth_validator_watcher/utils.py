@@ -11,13 +11,36 @@ from .web3signer import Web3Signer
 
 NB_SLOT_PER_EPOCH = 32
 NB_SECOND_PER_SLOT = 12
-BLOCK_NOT_ORPHANED_TIME_SEC = 9
+MISSED_BLOCK_TIMEOUT_SEC = 10
 SLOT_FOR_MISSED_ATTESTATIONS_PROCESS = 16
 SLOT_FOR_REWARDS_PROCESS = 17
 ETH1_ADDRESS_LEN = 40
 ETH2_ADDRESS_LEN = 96
 
-keys_count = Gauge(
+CHUCK_NORRIS = [
+    "Chuck Norris doesn't stake Ethers; he stares at the blockchain, and it instantly "
+    "produces new coins.",
+    "When Chuck Norris sends Ethers, it doesn't need confirmations. The Ethereum "
+    "network just knows better than to mess with Chuck.",
+    "Chuck Norris once hacked into a smart contract without using a computer. He just "
+    "stared at the code, and it fixed itself.",
+    "Ethereum's gas fees are afraid of Chuck Norris. They lower themselves just to "
+    "avoid his wrath.",
+    "Chuck Norris doesn't need a private key to access his Ethereum wallet. He just "
+    "flexes his biceps, and it opens.",
+    "When Chuck Norris trades on a decentralized exchange, the price slippage goes in "
+    "his favor, no matter what.",
+    "Vitalik Buterin once challenged Chuck Norris to a coding contest. Chuck won by "
+    "writing Ethereum's whitepaper with his eyes closed.",
+    "Chuck Norris's Ethereum nodes are so fast that they can process transactions "
+    "before they even happen.",
+    'The Ethereum community calls Chuck Norris the "Smart Contract Whisperer" '
+    "because he can make any contract do his bidding.",
+    "When Chuck Norris checks his Ethereum balance, the wallet interface just says, "
+    '"Infinite."',
+]
+
+metric_keys_count = Gauge(
     "keys_count",
     "Keys count",
 )
@@ -155,12 +178,14 @@ def load_pubkeys_from_file(path: Path) -> set[str]:
         Returns the corresponding set of public keys.
     """
     with path.open() as file_descriptor:
-        return set((eth2_address_0x_prefixed(line.strip()) for line in file_descriptor))
+        return set(
+            (eth2_address_lower_0x_prefixed(line.strip()) for line in file_descriptor)
+        )
 
 
 def get_our_pubkeys(
-    pubkeys_file_path: Optional[Path],
-    web3signer: Optional[Web3Signer],
+    pubkeys_file_path: Path | None,
+    web3signer: Web3Signer | None,
 ) -> set[str]:
     """Get our pubkeys
 
@@ -185,7 +210,7 @@ def get_our_pubkeys(
     )
 
     our_pubkeys = pubkeys_from_file | pubkeys_from_web3signer
-    keys_count.set(len(our_pubkeys))
+    metric_keys_count.set(len(our_pubkeys))
     return our_pubkeys
 
 
@@ -222,24 +247,37 @@ def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
         pass  # pragma: no cover
 
 
-def eth1_address_0x_prefixed(address: str) -> str:
-    if not re.match(f"^(0x)?[0-9a-fA-F]{{{ETH1_ADDRESS_LEN}}}$", address):
-        raise ValueError(f"Invalid ETH1 address: {address}")
+def convert_seconds_to_dhms(seconds: int) -> tuple[int, int, int, int]:
+    # Calculate days, hours, minutes, and seconds
+    days, seconds = divmod(seconds, 86400)  # 1 day = 24 hours * 60 minutes * 60 seconds
+    hours, seconds = divmod(seconds, 3600)  # 1 hour = 60 minutes * 60 seconds
+    minutes, seconds = divmod(seconds, 60)  # 1 minute = 60 seconds
+
+    return days, hours, minutes, seconds
+
+
+def eth1_address_lower_0x_prefixed(address: str) -> str:
+    address_lower = address.lower()
+
+    if not re.match(f"^(0x)?[0-9a-f]{{{ETH1_ADDRESS_LEN}}}$", address_lower):
+        raise ValueError(f"Invalid ETH1 address: {address_lower}")
 
     if len(address) == ETH1_ADDRESS_LEN:
-        return f"0x{address}"
+        return f"0x{address_lower}"
 
-    return address
+    return address_lower
 
 
-def eth2_address_0x_prefixed(address: str) -> str:
-    if not re.match(f"^(0x)?[0-9a-fA-F]{{{ETH2_ADDRESS_LEN}}}$", address):
-        raise ValueError(f"Invalid ETH2 address: {address}")
+def eth2_address_lower_0x_prefixed(address: str) -> str:
+    address_lower = address.lower()
+
+    if not re.match(f"^(0x)?[0-9a-f]{{{ETH2_ADDRESS_LEN}}}$", address_lower):
+        raise ValueError(f"Invalid ETH2 address: {address_lower}")
 
     if len(address) == ETH2_ADDRESS_LEN:
-        return f"0x{address}"
+        return f"0x{address_lower}"
 
-    return address
+    return address_lower
 
 
 class LimitedDict:

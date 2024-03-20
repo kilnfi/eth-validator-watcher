@@ -1,14 +1,13 @@
 """Contains the ExitedValidators class, which is responsible for managing the exited
 validators."""
 
-from typing import Optional
 
 from prometheus_client import Gauge
 
 from .models import Validators
 from .utils import Slack
 
-our_exited_validators_count = Gauge(
+metric_our_exited_validators_count = Gauge(
     "our_exited_validators_count",
     "Our exited validators count",
 )
@@ -23,13 +22,13 @@ initialized_keys : set[str] = set()
 class ExitedValidators:
     """Exited validators abstraction."""
 
-    def __init__(self, slack: Optional[Slack]) -> None:
+    def __init__(self, slack: Slack | None) -> None:
         """Exited validators
 
         Parameters:
         slack: Optional slack client
         """
-        self.__our_exited_unslashed_indexes: Optional[set[int]] = None
+        self.__our_exited_unslashed_indexes: set[int] | None = None
         self.__slack = slack
 
     def process(
@@ -69,7 +68,7 @@ class ExitedValidators:
             our_unslashed_withdrawal_index_to_validator
         )
 
-        our_exited_validators_count.set(len(our_exited_indexes))
+        metric_our_exited_validators_count.set(len(our_exited_indexes))
 
         if self.__our_exited_unslashed_indexes is None:
             self.__our_exited_unslashed_indexes = our_exited_unslashed_indexes

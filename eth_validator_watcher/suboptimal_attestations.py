@@ -18,7 +18,7 @@ from .utils import (
 
 print = functools.partial(print, flush=True)
 
-suboptimal_attestations_rate_gauge = Gauge(
+metric_suboptimal_attestations_rate_gauge = Gauge(
     "suboptimal_attestations_rate",
     "Suboptimal attestations rate",
 )
@@ -48,6 +48,9 @@ def process_suboptimal_attestations(
       - key  : index of our active validator
       - value: public key of our active validator
     """
+    if slot < 1:
+        return set()
+
     for _idx in our_active_validators_index_to_validator:
         if our_active_validators_index_to_validator[_idx].pubkey not in initialized_keys:
             key_suboptimal_attestations_rate_gauge.labels(
@@ -153,7 +156,7 @@ def process_suboptimal_attestations(
     )
 
     if suboptimal_attestations_rate is not None:
-        suboptimal_attestations_rate_gauge.set(100 * suboptimal_attestations_rate)
+        metric_suboptimal_attestations_rate_gauge.set(100 * suboptimal_attestations_rate)
 
     if len(our_validators_index_that_did_not_attest_optimally_during_previous_slot) > 0:
         assert suboptimal_attestations_rate is not None
@@ -173,7 +176,7 @@ def process_suboptimal_attestations(
         short_first_pubkeys_str = ", ".join(short_first_pubkeys)
 
         print(
-            f"☣️ Our validator {short_first_pubkeys_str} and "
+            f"❗ Our validator {short_first_pubkeys_str} and "
             f"{len(our_validators_index_that_did_not_attest_optimally_during_previous_slot) - len(short_first_pubkeys)} more "
             f"({round(100 * suboptimal_attestations_rate, 1)} %) had not optimal attestation "
             f"inclusion at slot {previous_slot}"

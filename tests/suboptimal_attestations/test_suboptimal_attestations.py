@@ -1,7 +1,7 @@
 from eth_validator_watcher import models, suboptimal_attestations
 from eth_validator_watcher.suboptimal_attestations import (
     process_suboptimal_attestations,
-    suboptimal_attestations_rate_gauge,
+    metric_suboptimal_attestations_rate_gauge,
 )
 
 Validator = models.Validators.DataItem.Validator
@@ -58,7 +58,20 @@ def aggregate_attestations(
     }
 
 
-def test_our_pubkeys():
+def test_low_slot() -> None:
+    expected: set[int] = set()
+
+    actual = process_suboptimal_attestations(
+        beacon="A dummy beacon",  # type: ignore
+        block="A dummy block",  # type: ignore
+        slot=0,
+        our_active_validators_index_to_validator={},
+    )
+
+    assert expected == actual
+
+
+def test_our_pubkeys() -> None:
     """
     In this test case, our pubkeys are "0xaaa" ==> "0xggg".
     Only "0xaaa", "0xccc", "0xeee" & "0xggg" are active.
@@ -122,7 +135,8 @@ def test_our_pubkeys():
 
     suboptimal_attestations.aggregate_attestations = aggregate_attestations
 
-    assert process_suboptimal_attestations(
+    expected = {10, 70}
+    actual = process_suboptimal_attestations(
         beacon=Beacon(),  # type: ignore
         block="A dummy block",  # type: ignore
         slot=42,
@@ -132,6 +146,7 @@ def test_our_pubkeys():
             50: Validator(pubkey="0xeee", effective_balance=32000000000, slashed=False),
             70: Validator(pubkey="0xggg", effective_balance=32000000000, slashed=False),
         },
-    ) == {10, 70}
+    )
 
-    assert suboptimal_attestations_rate_gauge.collect()[0].samples[0].value == 50.0  # type: ignore
+    assert expected == actual
+    assert metric_suboptimal_attestations_rate_gauge.collect()[0].samples[0].value == 50.0  # type: ignore
