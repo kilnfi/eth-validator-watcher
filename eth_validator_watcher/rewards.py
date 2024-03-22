@@ -303,7 +303,6 @@ def process_rewards(
             ).inc(abs(_actual_targets))
             key_actual_heads_count.labels(pubkey=pubkey).inc(_actual_heads)
 
-
     suboptimal_sources_rate = 1 - sum(are_sources_ideal) / len(are_sources_ideal)
     suboptimal_targets_rate = 1 - sum(are_targets_ideal) / len(are_targets_ideal)
     suboptimal_heads_rate = 1 - sum(are_heads_ideal) / len(are_heads_ideal)

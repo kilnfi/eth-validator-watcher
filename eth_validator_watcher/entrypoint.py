@@ -342,7 +342,6 @@ def _handler(
 
             our_queued_idx2val = our_status2idx2val.get(Status.pendingQueued, {})
             metric_our_queued_vals_gauge.set(len(our_queued_idx2val))
-
             if export_key_specific_values:
                 for pubkey in our_pubkeys:
                     if pubkey in initialized_keys:
@@ -355,6 +354,7 @@ def _handler(
                                 ]
                             )
                         )
+
 
             ongoing = our_status2idx2val.get(Status.activeOngoing, {})
             active_exiting = our_status2idx2val.get(Status.activeExiting, {})
