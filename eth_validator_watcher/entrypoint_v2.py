@@ -197,7 +197,7 @@ class ValidatorWatcher:
 
             self._clock.maybe_wait_for_slot(slot + 1, time.time())
             slot += 1
-            epoch = slot % self._spec.data.SLOTS_PER_EPOCH
+            epoch = slot // self._spec.data.SLOTS_PER_EPOCH
 
 
 @app.command()
