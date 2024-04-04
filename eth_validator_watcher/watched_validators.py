@@ -23,6 +23,17 @@ from .config import Config, WatchedKeyConfig
 from .models import Validators
 
 
+def normalized_public_key(pubkey: str) -> str:
+    """Normalize a public key.
+
+    Parameters:
+        pubkey: Public key to normalize
+    """
+    if pubkey.startswith('0x'):
+        pubkey = pubkey[2:]
+    return pubkey.lower()
+
+
 class WatchedValidator:
     """Watched validator abstraction.
 
@@ -56,7 +67,7 @@ class WatchedValidator:
 
     @property
     def pubkey(self) -> str:
-        return self.beacon_validator.validator.pubkey
+        return normalized_public_key(self.beacon_validator.validator.pubkey)
 
     @property
     def status(self) -> Validators.DataItem.StatusEnum:
@@ -131,7 +142,7 @@ class WatchedValidators:
         unknown = 0
         for item in config.watched_keys:
             updated = False
-            index = self._pubkey_to_index.get(item.public_key, None)
+            index = self._pubkey_to_index.get(normalized_public_key(item.public_key), None)
             if index:
                 validator = self._validators.get(index)
                 if validator:
@@ -155,7 +166,7 @@ class WatchedValidators:
             if validator is None:
                 validator = WatchedValidator()
                 self._validators[item.index] = validator
-                self._pubkey_to_index[item.validator.pubkey] = item.index
+                self._pubkey_to_index[normalized_public_key(item.validator.pubkey)] = item.index
 
             validator.process_epoch(item)
 
