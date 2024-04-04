@@ -205,31 +205,24 @@ class ValidatorWatcher:
         """Run the Ethereum Validator Watcher.
         """
         watched_validators = WatchedValidators()
-
         epoch = self._clock.get_current_epoch(time.time())
-
-        # Before entering the processing loop, make sure we have a
-        # beacon state in the watched validators as this is what
-        # ensures we know about validators.
-        logging.info(f'Initializing watcher at epoch {epoch}')
-        beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
-        watched_validators.process_epoch(beacon_validators)
-        rewards = self._beacon.get_rewards(epoch - 2)
-        process_rewards(watched_validators, rewards)
-
         slot = self._clock.get_current_slot(time.time())
+
+        beacon_validators = None
+        rewards = None
+
         while True:
             logging.info(f'Processing slot {slot}')
-            
-            if slot % self._spec.data.SLOTS_PER_EPOCH == 0:
-                logging.info(f'Processing new epoch {epoch}')
+
+            if beacon_validators == None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
+                logging.info(f'Processing epoch {epoch}')
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
                 watched_validators.process_epoch(beacon_validators)
 
             if slot % SLOT_FOR_MISSED_ATTESTATIONS_PROCESS == 0:
                 logging.info('Processing missed attestations')
 
-            if slot % SLOT_FOR_REWARDS_PROCESS == 0:
+            if rewards == None or (slot % SLOT_FOR_REWARDS_PROCESS == 0):
                 logging.info('Processing rewards')
                 rewards = self._beacon.get_rewards(epoch - 2)
                 process_rewards(watched_validators, rewards)
@@ -238,6 +231,7 @@ class ValidatorWatcher:
             self._reload_config()
             watched_validators.process_config(self._cfg)
 
+            logging.info('Updating Prometheus metrics')
             self._update_metrics(watched_validators, epoch, slot)
 
             self._clock.maybe_wait_for_slot(slot + 1, time.time())
