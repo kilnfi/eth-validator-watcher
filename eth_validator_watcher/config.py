@@ -31,6 +31,7 @@ class Config(BaseSettings):
     relays: Optional[List[str]] = None
     liveness_file: Optional[str] = None
     watched_keys: Optional[List[WatchedKeyConfig]] = None
+    metrics_port: Optional[int] = 8000
 
 
 def load_config(config_file: str) -> Config:

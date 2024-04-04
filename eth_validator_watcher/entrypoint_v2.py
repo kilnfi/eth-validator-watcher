@@ -4,6 +4,7 @@
 from collections import defaultdict
 from functools import partial
 from pathlib import Path
+from prometheus_client import start_http_server
 from typing import Optional
 
 import logging
@@ -104,6 +105,7 @@ class ValidatorWatcher:
             Path to the configuration file.
         """
         self._metrics = get_prometheus_metrics()
+        self._metrics_started = False
         self._cfg_path = cfg_path
         self._cfg = None
         self._beacon = None
@@ -153,6 +155,10 @@ class ValidatorWatcher:
         for label, status_count in validator_status_count.items():
             for status, count in status_count.items():
                 self._metrics.eth_validator_status_count.labels(label, status.name).set(count)
+
+        if not self._metrics_started:
+            start_http_server(self._cfg.metrics_port)
+            self._metrics_started = True
 
     def run(self) -> None:
         """Run the Ethereum Validator Watcher.
