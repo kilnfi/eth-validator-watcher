@@ -26,10 +26,10 @@ from .watched_validators import WatchedValidators
 app = typer.Typer(add_completion=False)
 
 
-def pct(a: int, b: int) -> float:
+def pct(a: int, b: int, inclusive: bool=False) -> float:
     """Helper function to calculate the percentage of a over b.
     """
-    total = a + b
+    total = a + b if not inclusive else b
     if total == 0:
         return 0.0
     return float(a / total) * 100.0
@@ -162,12 +162,15 @@ class ValidatorWatcher:
         
         validator_status_count: dict[str, dict[StatusEnum, int]] = defaultdict(partial(defaultdict, int))
 
-        validator_suboptimal_source_count: dict[str, int] = defaultdict(int)
-        validator_suboptimal_target_count: dict[str, int] = defaultdict(int)
-        validator_suboptimal_head_count: dict[str, int] = defaultdict(int)
-        validator_optimal_source_count: dict[str, int] = defaultdict(int)
-        validator_optimal_target_count: dict[str, int] = defaultdict(int)
-        validator_optimal_head_count: dict[str, int] = defaultdict(int)
+        suboptimal_source_count: dict[str, int] = defaultdict(int)
+        suboptimal_target_count: dict[str, int] = defaultdict(int)
+        suboptimal_head_count: dict[str, int] = defaultdict(int)
+        optimal_source_count: dict[str, int] = defaultdict(int)
+        optimal_target_count: dict[str, int] = defaultdict(int)
+        optimal_head_count: dict[str, int] = defaultdict(int)
+
+        ideal_consensus_reward: dict[str, int] = defaultdict(int)
+        actual_consensus_reward: dict[str, int] = defaultdict(int)
 
         labels = set()
 
@@ -179,12 +182,15 @@ class ValidatorWatcher:
                 # Looks weird but we want to explicitly have labels set
                 # for each set of labels even if they aren't validating
                 # (in which case the validator attributes are None).
-                validator_suboptimal_source_count[label] += int(validator.suboptimal_source == True)
-                validator_suboptimal_target_count[label] += int(validator.suboptimal_target == True)
-                validator_suboptimal_head_count[label] += int(validator.suboptimal_head == True)
-                validator_optimal_source_count[label] += int(validator.suboptimal_source == False)
-                validator_optimal_target_count[label] += int(validator.suboptimal_target == False)
-                validator_optimal_head_count[label] += int(validator.suboptimal_head == False)
+                suboptimal_source_count[label] += int(validator.suboptimal_source == True)
+                suboptimal_target_count[label] += int(validator.suboptimal_target == True)
+                suboptimal_head_count[label] += int(validator.suboptimal_head == True)
+                optimal_source_count[label] += int(validator.suboptimal_source == False)
+                optimal_target_count[label] += int(validator.suboptimal_target == False)
+                optimal_head_count[label] += int(validator.suboptimal_head == False)
+
+                ideal_consensus_reward[label] += validator.ideal_consensus_reward or 0
+                actual_consensus_reward[label] += validator.actual_consensus_reward or 0
 
                 labels.add(label)
 
@@ -193,9 +199,13 @@ class ValidatorWatcher:
                 self._metrics.eth_validator_status_count.labels(label, status.name).set(count)
 
         for label in labels:
-            self._metrics.eth_suboptimal_sources_rate.labels(label).set(pct(validator_suboptimal_source_count[label], validator_optimal_source_count[label]))
-            self._metrics.eth_suboptimal_targets_rate.labels(label).set(pct(validator_suboptimal_target_count[label], validator_optimal_target_count[label]))
-            self._metrics.eth_suboptimal_heads_rate.labels(label).set(pct(validator_suboptimal_head_count[label], validator_optimal_head_count[label]))
+            self._metrics.eth_suboptimal_sources_rate.labels(label).set(pct(suboptimal_source_count[label], optimal_source_count[label]))
+            self._metrics.eth_suboptimal_targets_rate.labels(label).set(pct(suboptimal_target_count[label], optimal_target_count[label]))
+            self._metrics.eth_suboptimal_heads_rate.labels(label).set(pct(suboptimal_head_count[label], optimal_head_count[label]))
+
+            self._metrics.eth_ideal_consensus_rewards.labels(label).set(ideal_consensus_reward[label])
+            self._metrics.eth_actual_consensus_rewards.labels(label).set(actual_consensus_reward[label])
+            self._metrics.eth_consensus_rewards_rate.labels(label).set(pct(actual_consensus_reward[label], ideal_consensus_reward[label], True))
 
         if not self._metrics_started:
             start_http_server(self._cfg.metrics_port)
