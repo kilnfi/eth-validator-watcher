@@ -274,58 +274,24 @@ class Beacon:
 
         return result
 
-    def get_rewards(
-        self,
-        beacon_type: BeaconType,
-        epoch: int,
-        validators_index: set[int] | None = None,
-    ) -> Rewards:
+    def get_rewards(self, epoch: int) -> Rewards:
         """Get rewards.
 
         Parameters:
-        beacon_type     : Type of beacon node
-        epoch           : Epoch corresponding to the rewards to retrieve
-        validators_index: Set of validator indexes corresponding to the rewards to
-                          retrieve. If None, rewards for all validators will be
-                          retrieved.
+        epoch: Epoch corresponding to the rewards to retrieve.
         """
-
-        # On Prysm, because of
-        # https://github.com/prysmaticlabs/prysm/issues/11581,
-        # we just assume there is no rewards at all
-
-        # On Nimbus, because of
-        # https://github.com/status-im/nimbus-eth2/issues/5138,
-        # we just assume there is no rewards at all
-
-        if beacon_type in {BeaconType.NIMBUS, BeaconType.OLD_PRYSM}:
-            if self.__first_rewards_call:
-                self.__first_rewards_call = False
-                print(
-                    (
-                        "⚠️ You are using Prysm < 4.0.8 or Nimbus. Rewards will be "
-                        "ignored. See "
-                        "https://github.com/prysmaticlabs/prysm/issues/11581 "
-                        "(Prysm) & https://github.com/status-im/nimbus-eth2/issues/5138 "
-                        "(Nimbus) for more information."
-                    )
-                )
-
-            return Rewards(data=Rewards.Data(ideal_rewards=[], total_rewards=[]))
-
         response = self.__post_retry_not_found(
             f"{self.__url}/eth/v1/beacon/rewards/attestations/{epoch}",
-            json=(
-                [str(index) for index in sorted(validators_index)]
-                if validators_index is not None
-                else []
-            ),
+            json=([]),
             timeout=self.__timeout_sec,
         )
 
         response.raise_for_status()
         rewards_dict = response.json()
-        return Rewards(**rewards_dict)
+        del response
+        rewards = Rewards(**rewards_dict)
+        del rewards_dict
+        return rewards
 
     def get_validators_liveness(
         self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
