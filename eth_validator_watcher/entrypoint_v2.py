@@ -72,55 +72,20 @@ class BeaconClock:
         """
         return int((now - self._genesis) // self._slot_duration)
 
-    def maybe_wait_for_epoch(self, epoch: int, now: float) -> None:
-        """Wait for the next epoch.
+    def maybe_wait_for_slot(self, slot: int, now: float) -> None:
+        """Wait until the given slot is reached.
 
         Args:
         -----
-        epoch: int
-            Current epoch.
+        slot: int
+            Slot to wait for.
         now: float
             Current time in seconds since the epoch.
         """
-        epoch_start = self.epoch_to_slot(epoch) * self._slot_duration + self._genesis
-        time_to_wait = epoch_start - now
-        if time_to_wait > 0:
-            logging.info(f'Waiting {time_to_wait:.2f} seconds for the next epoch {epoch}')
-            time.sleep(time_to_wait)
-
-    def maybe_wait_for_missed_attestations_slot(self, epoch: int, now: float) -> None:
-        """Wait for the missed attestations slot.
-
-        Args:
-        -----
-        epoch: int
-            Current epoch.
-        now: float
-            Current time in seconds since the epoch.
-        """
-        slot = self.epoch_to_slot(epoch) + SLOT_FOR_MISSED_ATTESTATIONS_PROCESS
-        slot_time = slot * self._slot_duration + self._genesis
-        time_to_wait = slot_time - now
-        if time_to_wait > 0:
-            logging.info(f'Waiting {time_to_wait:.2f} seconds for the missed attestations slot {slot}')
-            time.sleep(time_to_wait)
-
-    def maybe_wait_for_rewards_slot(self, epoch: int, now: float) -> None:
-        """Wait for the rewards slot.
-
-        Args:
-        -----
-        epoch: int
-            Current epoch.
-        now: float
-            Current time in seconds since the epoch.
-        """
-        slot = self.epoch_to_slot(epoch) + SLOT_FOR_REWARDS_PROCESS
-        slot_time = slot * self._slot_duration + self._genesis
-        time_to_wait = slot_time - now
-        if time_to_wait > 0:
-            logging.info(f'Waiting {time_to_wait:.2f} seconds for the rewards slot {slot}')
-            time.sleep(time_to_wait)
+        target = self._genesis + slot * self._slot_duration
+        if now < target:
+            logging.info(f'Waiting {target - now:.2f} seconds for slot {slot}')
+            time.sleep(target - now)
 
 
 class ValidatorWatcher:
@@ -143,13 +108,13 @@ class ValidatorWatcher:
 
         self._reload_config()
 
-        spec = self._beacon.get_spec()        
+        self._spec = self._beacon.get_spec()        
         genesis = self._beacon.get_genesis().data.genesis_time
 
         self._clock = BeaconClock(
             genesis,
-            spec.data.SECONDS_PER_SLOT,
-            spec.data.SLOTS_PER_EPOCH,
+            self._spec.data.SECONDS_PER_SLOT,
+            self._spec.data.SLOTS_PER_EPOCH,
         )
 
     def _reload_config(self) -> None:
@@ -170,24 +135,33 @@ class ValidatorWatcher:
 
         epoch = self._clock.get_current_epoch(time.time())
 
+        # Before entering the processing loop, make sure we have a
+        # beacon state in the watched validators as this is what
+        # ensures we know about validators.
+        logging.info(f'Initializing watcher at epoch {epoch}')
+        beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
+        watched_validators.process_epoch(beacon_validators)
+
+        slot = self._clock.get_current_slot(time.time())
         while True:
-            logging.info(f'Processing epoch {epoch}')
-            self._clock.maybe_wait_for_epoch(epoch, time.time())
-            beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
-            watched_validators.process_epoch(beacon_validators)
+            if slot % self._spec.data.SLOTS_PER_EPOCH == 0:
+                logging.info(f'Processing new epoch {epoch}')
+                beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
+                watched_validators.process_epoch(beacon_validators)
+
+            if slot % SLOT_FOR_MISSED_ATTESTATIONS_PROCESS == 0:
+                logging.info('Processing missed attestations')
+
+            if slot % SLOT_FOR_REWARDS_PROCESS == 0:
+                logging.info('Processing rewards')
 
             logging.info('Processing configuration update')
             self._reload_config()
             watched_validators.process_config(self._cfg)
 
-            logging.info('Processing missed attestations')
-            self._clock.maybe_wait_for_missed_attestations_slot(epoch, time.time())
-
-            logging.info('Processing rewards')
-            self._clock.maybe_wait_for_rewards_slot(epoch, time.time())
-
-            epoch += 1
-
+            self._clock.maybe_wait_for_slot(slot + 1, time.time())
+            slot += 1
+            epoch = slot % self._spec.data.SLOTS_PER_EPOCH
 
 
 @app.command()
