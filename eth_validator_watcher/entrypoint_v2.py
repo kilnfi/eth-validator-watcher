@@ -15,6 +15,7 @@ from .beacon import Beacon
 from .config import load_config, WatchedKeyConfig
 from .metrics import get_prometheus_metrics
 from .models import Validators
+from .rewards import process_rewards
 from .utils import (
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
@@ -23,6 +24,15 @@ from .watched_validators import WatchedValidators
 
 
 app = typer.Typer(add_completion=False)
+
+
+def pct(a: int, b: int) -> float:
+    """Helper function to calculate the percentage of a over b.
+    """
+    total = a + b
+    if total == 0:
+        return 0.0
+    return float(a / total) * 100.0
 
 
 class BeaconClock:
@@ -143,18 +153,49 @@ class ValidatorWatcher:
         epoch: Current epoch.
         slot: Current slot.
         """
-        # Update network metrics
         self._metrics.eth_epoch.set(epoch)
         self._metrics.eth_slot.set(slot)
 
-        # Update metric for validator status.
+        # We iterate once on the validator set to optimize CPU as
+        # there is a log of entries here, this makes code here a bit
+        # more complex and entangled.
+        
         validator_status_count: dict[str, dict[StatusEnum, int]] = defaultdict(partial(defaultdict, int))
+
+        validator_suboptimal_source_count: dict[str, int] = defaultdict(int)
+        validator_suboptimal_target_count: dict[str, int] = defaultdict(int)
+        validator_suboptimal_head_count: dict[str, int] = defaultdict(int)
+        validator_optimal_source_count: dict[str, int] = defaultdict(int)
+        validator_optimal_target_count: dict[str, int] = defaultdict(int)
+        validator_optimal_head_count: dict[str, int] = defaultdict(int)
+
+        labels = set()
+
         for validator in watched_validators.get_validators().values():
             for label in validator.labels:
+
                 validator_status_count[label][validator.status] += 1
+
+                # Looks weird but we want to explicitly have labels set
+                # for each set of labels even if they aren't validating
+                # (in which case the validator attributes are None).
+                validator_suboptimal_source_count[label] += int(validator.suboptimal_source == True)
+                validator_suboptimal_target_count[label] += int(validator.suboptimal_target == True)
+                validator_suboptimal_head_count[label] += int(validator.suboptimal_head == True)
+                validator_optimal_source_count[label] += int(validator.suboptimal_source == False)
+                validator_optimal_target_count[label] += int(validator.suboptimal_target == False)
+                validator_optimal_head_count[label] += int(validator.suboptimal_head == False)
+
+                labels.add(label)
+
         for label, status_count in validator_status_count.items():
             for status, count in status_count.items():
                 self._metrics.eth_validator_status_count.labels(label, status.name).set(count)
+
+        for label in labels:
+            self._metrics.eth_suboptimal_sources_rate.labels(label).set(pct(validator_suboptimal_source_count[label], validator_optimal_source_count[label]))
+            self._metrics.eth_suboptimal_targets_rate.labels(label).set(pct(validator_suboptimal_target_count[label], validator_optimal_target_count[label]))
+            self._metrics.eth_suboptimal_heads_rate.labels(label).set(pct(validator_suboptimal_head_count[label], validator_optimal_head_count[label]))
 
         if not self._metrics_started:
             start_http_server(self._cfg.metrics_port)
@@ -173,6 +214,8 @@ class ValidatorWatcher:
         logging.info(f'Initializing watcher at epoch {epoch}')
         beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
         watched_validators.process_epoch(beacon_validators)
+        rewards = self._beacon.get_rewards(epoch - 2)
+        process_rewards(watched_validators, rewards)
 
         slot = self._clock.get_current_slot(time.time())
         while True:
@@ -188,6 +231,8 @@ class ValidatorWatcher:
 
             if slot % SLOT_FOR_REWARDS_PROCESS == 0:
                 logging.info('Processing rewards')
+                rewards = self._beacon.get_rewards(epoch - 2)
+                process_rewards(watched_validators, rewards)
 
             logging.info('Processing configuration update')
             self._reload_config()

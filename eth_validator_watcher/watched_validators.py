@@ -64,6 +64,8 @@ class WatchedValidator:
         self.suboptimal_source : bool | None = None
         self.suboptimal_target : bool | None = None
         self.suboptimal_head : bool | None = None
+        self.ideal_consensus_reward : int | None = None
+        self.actual_consensus_reward : int | None = None
         self.beacon_validator : Validators.DataItem | None = None
 
     @property
@@ -109,6 +111,8 @@ class WatchedValidator:
         self.suboptimal_source = None
         self.suboptimal_target = None
         self.suboptimal_head = None
+        self.ideal_consensus_reward = None
+        self.actual_consensus_reward = None
 
         self.beacon_validator = validator
 
