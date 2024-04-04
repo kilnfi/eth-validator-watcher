@@ -19,6 +19,7 @@ from .models import (
     Header,
     ProposerDuties,
     Rewards,
+    Spec,
     Validators,
     ValidatorsLivenessRequestLighthouse,
     ValidatorsLivenessRequestTeku,
@@ -126,6 +127,15 @@ class Beacon:
         genesis_dict = response.json()
         return Genesis(**genesis_dict)
 
+    def get_spec(self) -> Spec:
+        """Get spec data."""
+        response = self.__get_retry_not_found(
+            f"{self.__url}/eth/v1/config/spec", timeout=self.__timeout_sec
+        )
+        response.raise_for_status()
+        spec_dict = response.json()
+        return Spec(**spec_dict)
+
     def get_header(self, block_identifier: Union[BlockIdentierType, int]) -> Header:
         """Get a header.
 
@@ -216,9 +226,9 @@ class Beacon:
 
         return result
 
-    def get_validators(self) -> Validators:
+    def get_validators(self, slot: int) -> Validators:
         response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/beacon/states/head/validators", timeout=self.__timeout_sec
+            f"{self.__url}/eth/v1/beacon/states/{slot}/validators", timeout=self.__timeout_sec
         )
 
         # Unsure if explicit del help with memory here, let's keep it

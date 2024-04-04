@@ -38,6 +38,14 @@ class Genesis(BaseModel):
     data: Data
 
 
+class Spec(BaseModel):
+    class Data(BaseModel):
+        SECONDS_PER_SLOT: int
+        SLOTS_PER_EPOCH: int
+
+    data: Data
+    
+
 class Header(BaseModel):
     class Data(BaseModel):
         class Header(BaseModel):
