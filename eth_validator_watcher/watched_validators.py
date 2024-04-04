@@ -21,6 +21,7 @@ from typing import Optional
 
 from .config import Config, WatchedKeyConfig
 from .models import Validators
+from .utils import LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED
 
 
 def normalized_public_key(pubkey: str) -> str:
@@ -57,7 +58,7 @@ class WatchedValidator:
     def __init__(self):
         self.index : int = 0
         self.previous_status : Validators.DataItem.StatusEnum | None = None
-        self.labels : Optional[list[str]] = None
+        self._labels : Optional[list[str]] = None
         self.missed_attestation : bool | None = None
         self.previous_missed_attestation : bool | None = None
         self.suboptimal_source : bool | None = None
@@ -67,11 +68,22 @@ class WatchedValidator:
 
     @property
     def pubkey(self) -> str:
+        """Get the public key of the validator.
+        """
         return normalized_public_key(self.beacon_validator.validator.pubkey)
 
     @property
     def status(self) -> Validators.DataItem.StatusEnum:
+        """Get the status of the validator.
+        """
         return self.beacon_validator.status
+
+    @property
+    def labels(self) -> list[str]:
+        """Get the labels for the validator.
+        """
+        configured = self._labels or []
+        return configured + [LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED]
 
     def process_config(self, config: WatchedKeyConfig):
         """Processes a new configuration.
@@ -79,7 +91,7 @@ class WatchedValidator:
         Parameters:
             config: New configuration
         """
-        self.labels = config.labels
+        self._labels = config.labels
 
     def process_epoch(self, validator: Validators.DataItem):
         """Processes a new epoch.
@@ -130,6 +142,10 @@ class WatchedValidators:
         if index is None:
             return None
         return self._validators.get(index)
+
+    def get_validators(self) -> dict[int, WatchedValidator]:
+        """Get all validators."""
+        return self._validators
 
     def process_config(self, config: Config):
         """Process a config update

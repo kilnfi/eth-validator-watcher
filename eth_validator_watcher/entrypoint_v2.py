@@ -1,6 +1,7 @@
 """Draft entrypoint for the eth-validator-watcher v1.0.0.
 """
 
+from collections import defaultdict
 from functools import partial
 from pathlib import Path
 from typing import Optional
@@ -11,6 +12,8 @@ import time
 
 from .beacon import Beacon
 from .config import load_config, WatchedKeyConfig
+from .metrics import get_prometheus_metrics
+from .models import Validators
 from .utils import (
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
@@ -100,6 +103,7 @@ class ValidatorWatcher:
         cfg_path: Path
             Path to the configuration file.
         """
+        self._metrics = get_prometheus_metrics()
         self._cfg_path = cfg_path
         self._cfg = None
         self._beacon = None
@@ -128,6 +132,28 @@ class ValidatorWatcher:
         if self._beacon is None or self._beacon.get_url() != self._cfg.beacon_url or self._beacon.get_timeout_sec() != self._cfg.beacon_timeout_sec:
             self._beacon = Beacon(self._cfg.beacon_url, self._cfg.beacon_timeout_sec)
 
+    def _update_metrics(self, watched_validators: WatchedValidators, epoch: int, slot: int) -> None:
+        """Update the Prometheus metrics with the watched validators.
+
+        Args:
+        -----
+        watched_validators: Watched validators.
+        epoch: Current epoch.
+        slot: Current slot.
+        """
+        # Update network metrics
+        self._metrics.eth_epoch.set(epoch)
+        self._metrics.eth_slot.set(slot)
+
+        # Update metric for validator status.
+        validator_status_count: dict[str, dict[StatusEnum, int]] = defaultdict(partial(defaultdict, int))
+        for validator in watched_validators.get_validators().values():
+            for label in validator.labels:
+                validator_status_count[label][validator.status] += 1
+        for label, status_count in validator_status_count.items():
+            for status, count in status_count.items():
+                self._metrics.eth_validator_status_count.labels(label, status.name).set(count)
+
     def run(self) -> None:
         """Run the Ethereum Validator Watcher.
         """
@@ -144,6 +170,8 @@ class ValidatorWatcher:
 
         slot = self._clock.get_current_slot(time.time())
         while True:
+            logging.info(f'Processing slot {slot}')
+            
             if slot % self._spec.data.SLOTS_PER_EPOCH == 0:
                 logging.info(f'Processing new epoch {epoch}')
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
@@ -158,6 +186,8 @@ class ValidatorWatcher:
             logging.info('Processing configuration update')
             self._reload_config()
             watched_validators.process_config(self._cfg)
+
+            self._update_metrics(watched_validators, epoch, slot)
 
             self._clock.maybe_wait_for_slot(slot + 1, time.time())
             slot += 1
