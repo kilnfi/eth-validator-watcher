@@ -83,7 +83,7 @@ class WatchedValidator:
         """Get the labels for the validator.
         """
         configured = self._labels or []
-        return configured + [LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED]
+        return configured + [LABEL_SCOPE_NETWORK]
 
     def process_config(self, config: WatchedKeyConfig):
         """Processes a new configuration.
@@ -91,7 +91,8 @@ class WatchedValidator:
         Parameters:
             config: New configuration
         """
-        self._labels = config.labels
+        labels = config.labels or []
+        self._labels = labels + [LABEL_SCOPE_WATCHED]
 
     def process_epoch(self, validator: Validators.DataItem):
         """Processes a new epoch.
