@@ -82,6 +82,14 @@ class Beacon:
         self.__http.mount("http://", adapter)
         self.__http.mount("https://", adapter)
 
+    def get_url(self) -> str:
+        """Return the URL of the beacon."""
+        return self.__url
+
+    def get_timeout_sec(self) -> int:
+        """Return the timeout in seconds used to query the beacon."""
+        return self.__timeout_sec
+
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_fixed(3),
@@ -207,6 +215,21 @@ class Beacon:
             result[item.status][item.index] = item.validator
 
         return result
+
+    def get_validators(self) -> Validators:
+        response = self.__get_retry_not_found(
+            f"{self.__url}/eth/v1/beacon/states/head/validators", timeout=self.__timeout_sec
+        )
+
+        # Unsure if explicit del help with memory here, let's keep it
+        # for now and benchmark this in real conditions.
+        response.raise_for_status()
+        validators_dict = response.json()
+        del response
+        validators = Validators(**validators_dict)
+        del validators_dict
+
+        return validators
 
     @lru_cache(maxsize=1)
     def get_duty_slot_to_committee_index_to_validators_index(
