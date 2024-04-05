@@ -106,15 +106,6 @@ class ProposerDuties(BaseModel):
     data: list[Data]
 
 
-class ValidatorsLivenessRequestLighthouse(BaseModel):
-    indices: list[int]
-    epoch: int
-
-
-class ValidatorsLivenessRequestTeku(BaseModel):
-    indices: list[int]
-
-
 class ValidatorsLivenessResponse(BaseModel):
     class Data(BaseModel):
         index: int

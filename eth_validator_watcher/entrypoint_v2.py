@@ -5,6 +5,7 @@ from collections import defaultdict
 from functools import partial
 from pathlib import Path
 from prometheus_client import start_http_server
+from pydantic import ValidationError
 from typing import Optional
 
 import logging
@@ -159,7 +160,7 @@ class ValidatorWatcher:
         # We iterate once on the validator set to optimize CPU as
         # there is a log of entries here, this makes code here a bit
         # more complex and entangled.
-        
+       
         validator_status_count: dict[str, dict[StatusEnum, int]] = defaultdict(partial(defaultdict, int))
 
         suboptimal_source_count: dict[str, int] = defaultdict(int)
@@ -182,6 +183,7 @@ class ValidatorWatcher:
                 # Looks weird but we want to explicitly have labels set
                 # for each set of labels even if they aren't validating
                 # (in which case the validator attributes are None).
+
                 suboptimal_source_count[label] += int(validator.suboptimal_source == True)
                 suboptimal_target_count[label] += int(validator.suboptimal_target == True)
                 suboptimal_head_count[label] += int(validator.suboptimal_head == True)
@@ -228,6 +230,7 @@ class ValidatorWatcher:
                 logging.info(f'Processing epoch {epoch}')
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
                 watched_validators.process_epoch(beacon_validators)
+                validators_liveness = self._beacon.get_validators_liveness(epoch - 1, watched_validators.get_indexes())
 
             if slot % SLOT_FOR_MISSED_ATTESTATIONS_PROCESS == 0:
                 logging.info('Processing missed attestations')
