@@ -172,6 +172,8 @@ class ValidatorWatcher:
 
         ideal_consensus_reward: dict[str, int] = defaultdict(int)
         actual_consensus_reward: dict[str, int] = defaultdict(int)
+        missed_attestations: dict[str, int] = defaultdict(int)
+        missed_consecutive_attestations: dict[str, int] = defaultdict(int)
 
         labels = set()
 
@@ -194,6 +196,9 @@ class ValidatorWatcher:
                 ideal_consensus_reward[label] += validator.ideal_consensus_reward or 0
                 actual_consensus_reward[label] += validator.actual_consensus_reward or 0
 
+                missed_attestations[label] += int(validator.missed_attestation == True)
+                missed_consecutive_attestations[label] += int(validator.previous_missed_attestation == True and validator.missed_attestation == True)
+
                 labels.add(label)
 
         for label, status_count in validator_status_count.items():
@@ -208,6 +213,9 @@ class ValidatorWatcher:
             self._metrics.eth_ideal_consensus_rewards.labels(label).set(ideal_consensus_reward[label])
             self._metrics.eth_actual_consensus_rewards.labels(label).set(actual_consensus_reward[label])
             self._metrics.eth_consensus_rewards_rate.labels(label).set(pct(actual_consensus_reward[label], ideal_consensus_reward[label], True))
+
+            self._metrics.eth_missed_attestations.labels(label).set(missed_attestations[label])
+            self._metrics.eth_missed_consecutive_attestations.labels(label).set(missed_consecutive_attestations[label])
 
         if not self._metrics_started:
             start_http_server(self._cfg.metrics_port)

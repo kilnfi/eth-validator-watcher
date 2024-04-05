@@ -22,6 +22,8 @@ class PrometheusMetrics:
     eth_ideal_consensus_rewards: Gauge
     eth_actual_consensus_rewards: Gauge
     eth_consensus_rewards_rate: Gauge
+    eth_missed_attestations: Gauge
+    eth_missed_consecutive_attestations: Gauge
 
 
 def get_prometheus_metrics() -> PrometheusMetrics:
@@ -44,6 +46,8 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_ideal_consensus_rewards=Gauge("eth_ideal_consensus_rewards", "Ideal consensus rewards", ['scope']),
             eth_actual_consensus_rewards=Gauge("eth_actual_consensus_rewards", "Actual consensus rewards", ['scope']),
             eth_consensus_rewards_rate=Gauge("eth_consensus_rewards_rate", "Consensus rewards rate", ['scope']),
+            eth_missed_attestations=Gauge("eth_missed_attestations", "Missed attestations in the last epoch", ['scope']),
+            eth_missed_consecutive_attestations=Gauge("eth_missed_consecutive_attestations", "Missed consecutive attestations", ['scope']),
         )
 
     return _metrics
