@@ -20,7 +20,7 @@ import logging
 from typing import Optional
 
 from .config import Config, WatchedKeyConfig
-from .models import Validators
+from .models import Validators, ValidatorsLivenessResponse
 from .utils import LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED
 
 
@@ -148,6 +148,10 @@ class WatchedValidators:
             return None
         return self._validators.get(index)
 
+    def get_indexes(self) -> list[int]:
+        """Get all validator indexes."""
+        return list(self._validators.keys())
+
     def get_validators(self) -> dict[int, WatchedValidator]:
         """Get all validators."""
         return self._validators
@@ -172,13 +176,14 @@ class WatchedValidators:
             if not updated:
                 unknown += 1
 
-        logging.info(f'Config processed ({unknown} unknown validators were skipped)')
+        logging.info(f'Config reloaded')
 
     def process_epoch(self, validators: Validators):
         """Process a new epoch
 
         Parameters:
             validators: New validator state for the epoch from the beaconchain.
+            liveness: Whether or not the validator attested in the previous epoch.
         """
         logging.info('Processing new epoch')
 
@@ -192,3 +197,18 @@ class WatchedValidators:
             validator.process_epoch(item)
 
         logging.info(f'New epoch processed ({len(validators.data)} validators)')
+
+    def process_liveness(self, liveness: ValidatorsLivenessResponse):
+        """Process liveness data
+
+        Parameters:
+            liveness: Liveness data from the beacon chain
+        """
+        logging.info('Processing liveness data')
+
+        for item in liveness.data:
+            validator = self._validators.get(item.index)
+            if validator:
+                validator.missed_attestation = not item.is_live
+
+        logging.info(f'Liveness data processed ({len(liveness.data)} validators)')

@@ -21,8 +21,6 @@ from .models import (
     Rewards,
     Spec,
     Validators,
-    ValidatorsLivenessRequestLighthouse,
-    ValidatorsLivenessRequestTeku,
     ValidatorsLivenessResponse,
 )
 
@@ -293,68 +291,24 @@ class Beacon:
         del rewards_dict
         return rewards
 
-    def get_validators_liveness(
-        self, beacon_type: BeaconType, epoch: int, validators_index: set[int]
-    ) -> dict[int, bool]:
+    def get_validators_liveness(self, epoch: int, indexes: list[int]) -> ValidatorsLivenessResponse:
         """Get validators liveness.
 
-        Parameters      :
-        beacon_type     : Type of beacon node
-        epoch           : Epoch corresponding to the validators liveness to retrieve
-        validators_index: Set of validator indexs corresponding to the liveness to
-                          retrieve
+        Parameters:
+        epoch: Epoch corresponding to the validators liveness to retrieve
         """
+        response = self.__post_retry_not_found(
+            f"{self.__url}/eth/v1/validator/liveness/{epoch}",
+            json=[f"{i}" for i in indexes],
+            timeout=self.__timeout_sec,
+        )
 
-        # On Nimbus, because of
-        # https://github.com/status-im/nimbus-eth2/issues/5019,
-        # we just assume that all validators are live
-
-        if beacon_type == BeaconType.NIMBUS:
-            if self.__first_liveness_call:
-                self.__first_liveness_call = False
-                print(
-                    (
-                        "⚠️ You are using Nimbus. Missed attestations will be ignored. "
-                        "See https://github.com/status-im/nimbus-eth2/issues/5019 for "
-                        "more information."
-                    )
-                )
-
-            return {index: True for index in validators_index}
-
-        beacon_type_to_function = {
-            BeaconType.LIGHTHOUSE: self.__get_validators_liveness_lighthouse,
-            BeaconType.OLD_PRYSM: self.__get_validators_liveness_beacon_api,
-            BeaconType.OLD_TEKU: self.__get_validators_liveness_old_teku,
-            BeaconType.OTHER: self.__get_validators_liveness_beacon_api,
-        }
-
-        response = beacon_type_to_function[beacon_type](epoch, validators_index)
-
-        try:
-            response.raise_for_status()
-        except HTTPError as e:
-            if e.response.status_code != codes.bad_request:
-                raise
-
-            # If we are here, it means the requested epoch is too old, which
-            # could be normal if the watcher just started
-            print(
-                f"❓     Missed attestations detection is disabled for epoch {epoch}. "
-            )
-
-            print(
-                "❓     You can ignore this message if the watcher just started less "
-                "than one epoch ago. Otherwise, please check that you used the correct "
-                f"`beacon_type` option (currently set to `{beacon_type}`). "
-            )
-
-            return {index: True for index in validators_index}
-
+        response.raise_for_status()
         validators_liveness_dict = response.json()
+        del response
         validators_liveness = ValidatorsLivenessResponse(**validators_liveness_dict)
-
-        return {item.index: item.is_live for item in validators_liveness.data}
+        del validators_liveness_dict
+        return validators_liveness
 
     def get_potential_block(self, slot) -> Block | None:
         """Get a block if it exists, otherwise return None.
@@ -370,46 +324,6 @@ class Beacon:
             # orphaned before we could fetch it.
             return None
 
-    def __get_validators_liveness_lighthouse(
-        self, epoch: int, validators_index: set[int]
-    ) -> Response:
-        """Get validators liveness from Lighthouse.
-
-        https://github.com/sigp/lighthouse/issues/4243
-
-        Parameters:
-        epoch           : Epoch corresponding to the validators liveness to retrieve
-        validators_index: Set of validator indexs corresponding to the liveness to
-                          retrieve
-        """
-        return self.__post_retry_not_found(
-            f"{self.__url}/lighthouse/liveness",
-            json=ValidatorsLivenessRequestLighthouse(
-                epoch=epoch, indices=sorted(list(validators_index))
-            ).model_dump(),
-            timeout=self.__timeout_sec,
-        )
-
-    def __get_validators_liveness_old_teku(
-        self, epoch: int, validators_index: set[int]
-    ) -> Response:
-        """Get validators liveness from Teku.
-
-        https://github.com/ConsenSys/teku/issues/7204
-
-        Parameters:
-        epoch           : Epoch corresponding to the validators liveness to retrieve
-        validators_index: Set of validator indexs corresponding to the liveness to
-                          retrieve
-        """
-        return self.__post_retry_not_found(
-            f"{self.__url}/eth/v1/validator/liveness/{epoch}",
-            json=ValidatorsLivenessRequestTeku(
-                indices=sorted(list(validators_index))
-            ).model_dump(),
-            timeout=self.__timeout_sec,
-        )
-
     def __get_validators_liveness_beacon_api(
         self, epoch: int, validators_index: set[int]
     ) -> Response:
@@ -422,11 +336,4 @@ class Beacon:
         validators_index: Set of validator indexs corresponding to the liveness to
                           retrieve
         """
-        return self.__post_retry_not_found(
-            f"{self.__url}/eth/v1/validator/liveness/{epoch}",
-            json=[
-                str(validator_index)
-                for validator_index in sorted(list(validators_index))
-            ],
-            timeout=self.__timeout_sec,
-        )
+        return 
