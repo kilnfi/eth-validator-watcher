@@ -178,7 +178,7 @@ class ValidatorWatcher:
         for validator in watched_validators.get_validators().values():
             for label in validator.labels:
 
-                validator_status_count[label][validator.status] += 1
+                validator_status_count[label][str(validator.status)] += 1
 
                 # Looks weird but we want to explicitly have labels set
                 # for each set of labels even if they aren't validating
@@ -198,7 +198,7 @@ class ValidatorWatcher:
 
         for label, status_count in validator_status_count.items():
             for status, count in status_count.items():
-                self._metrics.eth_validator_status_count.labels(label, status.name).set(count)
+                self._metrics.eth_validator_status_count.labels(label, status).set(count)
 
         for label in labels:
             self._metrics.eth_suboptimal_sources_rate.labels(label).set(pct(suboptimal_source_count[label], optimal_source_count[label]))

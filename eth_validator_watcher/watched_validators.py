@@ -1,12 +1,12 @@
 """Watched validators.
 
 This module provides a wrapper around per-validator computations
-before exposing them later to prometheus. There are 4 types of
+before exposing them later to prometheus. There are different types of
 processing performed:
 
 - process_config: configuration update (per-key labels)
 - process_epoch: new epoch processing (beacon chain status update)
-- process_missed_attestations: missed attestation processing (slot 16)
+- process_liveness: missed attestation processing (slot 16)
 - process_rewards: rewards processing (slot 17)
 
 WatchedValidator which holds the state of a validator while
@@ -105,16 +105,16 @@ class WatchedValidator:
         if self.beacon_validator is not None:
             self.previous_status = self.status
 
-        self.previous_missed_attestation = self.missed_attestation
-        self.missed_attestation = None
-
-        self.suboptimal_source = None
-        self.suboptimal_target = None
-        self.suboptimal_head = None
-        self.ideal_consensus_reward = None
-        self.actual_consensus_reward = None
-
         self.beacon_validator = validator
+
+    def process_liveness(self, liveness: ValidatorsLivenessResponse.Data):
+        """Processes liveness data.
+
+        Parameters:
+        liveness: Validator liveness data
+        """
+        self.previous_missed_attestation = self.missed_attestation
+        self.missed_attestation = not liveness.is_live
 
 
 class WatchedValidators:
@@ -209,6 +209,6 @@ class WatchedValidators:
         for item in liveness.data:
             validator = self._validators.get(item.index)
             if validator:
-                validator.missed_attestation = not item.is_live
+                validator.process_liveness()
 
         logging.info(f'Liveness data processed ({len(liveness.data)} validators)')
