@@ -209,6 +209,6 @@ class WatchedValidators:
         for item in liveness.data:
             validator = self._validators.get(item.index)
             if validator:
-                validator.process_liveness()
+                validator.process_liveness(item)
 
         logging.info(f'Liveness data processed ({len(liveness.data)} validators)')

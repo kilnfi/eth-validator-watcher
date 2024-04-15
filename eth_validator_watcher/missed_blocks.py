@@ -126,7 +126,6 @@ def process_missed_blocks_finalized(
 
         # Get proposer public key for this slot
         proposer_duties_data = proposer_duties.data
-
         # In `data` list, items seem to be ordered by slot.
         # However, there is no specification for that, so it is wiser to
         # iterate on the list
