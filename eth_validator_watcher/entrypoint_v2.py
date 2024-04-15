@@ -162,7 +162,7 @@ class ValidatorWatcher:
         # We iterate once on the validator set to optimize CPU as
         # there is a log of entries here, this makes code here a bit
         # more complex and entangled.
-       
+
         validator_status_count: dict[str, dict[StatusEnum, int]] = defaultdict(partial(defaultdict, int))
 
         suboptimal_source_count: dict[str, int] = defaultdict(int)
@@ -241,6 +241,7 @@ class ValidatorWatcher:
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
                 watched_validators.process_epoch(beacon_validators)
                 validators_liveness = self._beacon.get_validators_liveness(epoch - 1, watched_validators.get_indexes())
+                watched_validators.process_liveness(validators_liveness)
 
             if slot % SLOT_FOR_MISSED_ATTESTATIONS_PROCESS == 0:
                 logging.info('Processing missed attestations')

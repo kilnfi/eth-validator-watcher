@@ -20,7 +20,7 @@ def get_current_eth_price() -> float:
     """
     try:
         response = Session().get(URL, params=dict(limit=1))
-        trades_dict = response.json()
+        trades_dict = response.json() 
         trades = parse_obj_as(list[CoinbaseTrade], trades_dict)
         trade, *_ = trades
     except:
