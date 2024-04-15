@@ -12,6 +12,7 @@ import logging
 import typer
 import time
 
+from .coinbase import  get_current_eth_price
 from .beacon import Beacon
 from .config import load_config, WatchedKeyConfig
 from .metrics import get_prometheus_metrics
@@ -156,6 +157,7 @@ class ValidatorWatcher:
         """
         self._metrics.eth_epoch.set(epoch)
         self._metrics.eth_slot.set(slot)
+        self._metrics.eth_current_price.set(get_current_eth_price())
 
         # We iterate once on the validator set to optimize CPU as
         # there is a log of entries here, this makes code here a bit
