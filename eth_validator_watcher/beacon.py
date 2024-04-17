@@ -144,14 +144,11 @@ class Beacon:
             response = self.__get(
                 f"{self.__url}/eth/v1/beacon/headers/{block_identifier}", timeout=self.__timeout_sec
             )
-
             response.raise_for_status()
-
         except HTTPError as e:
             if e.response.status_code == codes.not_found:
                 # If we are here, it means the block does not exist
                 raise NoBlockError from e
-
             # If we are here, it's an other error
             raise
 
