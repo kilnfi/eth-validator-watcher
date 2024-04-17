@@ -26,6 +26,9 @@ class ProposerSchedule:
     def get_finalized_proposer(self, slot: int) -> int:
         return self._finalized_schedule.get(slot, None)
 
+    def get_future_proposals(self, slot: int) -> dict[int, int]:
+        return {k: v for k, v in self._head_schedule.items() if k > slot}
+
     def epoch(self, slot: int) -> int:
         return slot // self._spec.data.SLOTS_PER_EPOCH
 

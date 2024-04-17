@@ -16,7 +16,7 @@ from .coinbase import  get_current_eth_price
 from .beacon import Beacon, NoBlockError
 from .config import load_config, WatchedKeyConfig
 from .metrics import get_prometheus_metrics
-from .blocks import process_block, process_finalized_block
+from .blocks import process_block, process_finalized_block, process_future_blocks
 from .models import BlockIdentierType, Validators
 from .rewards import process_rewards
 from .utils import (
@@ -201,6 +201,7 @@ class ValidatorWatcher:
         missed_blocks: dict[str, int] = defaultdict(int)
         proposed_finalized_blocks: dict[str, int] = defaultdict(int)
         missed_finalized_blocks: dict[str, int] = defaultdict(int)
+        future_blocks: dict[str, int] = defaultdict(int)
 
         labels = set()
 
@@ -230,8 +231,19 @@ class ValidatorWatcher:
                 missed_blocks[label] += validator.missed_blocks_total
                 proposed_finalized_blocks[label] += validator.proposed_blocks_finalized_total
                 missed_finalized_blocks[label] += validator.missed_blocks_finalized_total
+                future_blocks[label] += validator.future_blocks_proposal
 
                 labels.add(label)
+
+            # Here we reset the counters for the next run, we do not
+            # touch gauges though.  This ensures we handle properly
+            # changes of the labelling in real-time.
+
+            validator.proposed_blocks_total = 0
+            validator.missed_blocks_total = 0
+            validator.proposed_blocks_finalized_total = 0
+            validator.missed_blocks_finalized_total = 0
+            validator.future_blocks_proposal = 0
 
         for label, status_count in validator_status_count.items():
             for status, count in status_count.items():
@@ -249,10 +261,14 @@ class ValidatorWatcher:
             self._metrics.eth_missed_attestations_count.labels(label).set(missed_attestations[label])
             self._metrics.eth_missed_consecutive_attestations_count.labels(label).set(missed_consecutive_attestations[label])
 
-            self._metrics.eth_block_proposals_head_total.labels(label).set(proposed_blocks[label])
-            self._metrics.eth_missed_block_proposals_head_total.labels(label).set(missed_blocks[label])
-            self._metrics.eth_block_proposals_finalized_total.labels(label).set(proposed_finalized_blocks[label])
-            self._metrics.eth_missed_block_proposals_finalized_total.labels(label).set(missed_finalized_blocks[label])
+            # Here we inc, it's fine since we previously reset the
+            # counters on each run.
+
+            self._metrics.eth_block_proposals_head_total.labels(label).inc(proposed_blocks[label])
+            self._metrics.eth_missed_block_proposals_head_total.labels(label).inc(missed_blocks[label])
+            self._metrics.eth_block_proposals_finalized_total.labels(label).inc(proposed_finalized_blocks[label])
+            self._metrics.eth_missed_block_proposals_finalized_total.labels(label).inc(missed_finalized_blocks[label])
+            self._metrics.eth_future_block_proposals.labels(label).set(future_blocks[label])
 
         if not self._metrics_started:
             start_http_server(self._cfg.metrics_port)
@@ -294,6 +310,7 @@ class ValidatorWatcher:
             has_block = has_block_at_slot(self._beacon, slot)
 
             process_block(watched_validators, self._schedule, slot, has_block)
+            process_future_blocks(watched_validators, self._schedule, slot)
 
             last_finalized_slot = self._beacon.get_header(BlockIdentierType.FINALIZED).data.header.message.slot
             while last_processed_finalized_slot and last_processed_finalized_slot < last_finalized_slot:

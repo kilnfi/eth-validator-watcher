@@ -65,6 +65,7 @@ class WatchedValidator:
         self.missed_blocks_finalized_total : int = 0
         self.proposed_blocks_total : int = 0
         self.proposed_blocks_finalized_total : int = 0
+        self.future_blocks_proposal : int = 0
 
     @property
     def pubkey(self) -> str:

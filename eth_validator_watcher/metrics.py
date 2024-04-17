@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from prometheus_client import Gauge
+from prometheus_client import Counter, Gauge
 
 
 # This is global because Prometheus metrics don't support registration
@@ -25,16 +25,12 @@ class PrometheusMetrics:
     eth_actual_consensus_rewards_gwei: Gauge
     eth_missed_attestations_count: Gauge
     eth_missed_consecutive_attestations_count: Gauge
-
-    # We use Gauge here while we should use a counter semantically,
-    # but it is not possible to explictly set a counter value in
-    # Prometheus' API (to prevent decreasing it). We use the _total
-    # terminology to make it clear that it is a counter.
     
-    eth_block_proposals_head_total: Gauge
-    eth_missed_block_proposals_head_total: Gauge
-    eth_block_proposals_finalized_total: Gauge
-    eth_missed_block_proposals_finalized_total: Gauge
+    eth_block_proposals_head_total: Counter
+    eth_missed_block_proposals_head_total: Counter
+    eth_block_proposals_finalized_total: Counter
+    eth_missed_block_proposals_finalized_total: Counter
+    eth_future_block_proposals: Gauge
 
 
 def get_prometheus_metrics() -> PrometheusMetrics:
@@ -62,10 +58,11 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_missed_attestations_count=Gauge("eth_missed_attestations", "Missed attestations in the last epoch", ['scope']),
             eth_missed_consecutive_attestations_count=Gauge("eth_missed_consecutive_attestations", "Missed consecutive attestations in the last two epochs", ['scope']),
 
-            eth_block_proposals_head_total=Gauge("eth_block_proposals_head_total", "Total block proposals at head", ['scope']),
-            eth_missed_block_proposals_head_total=Gauge("eth_missed_block_proposals_head_total", "Total missed block proposals at head", ['scope']),
-            eth_block_proposals_finalized_total=Gauge("eth_block_proposals_finalized_total", "Total finalized block proposals", ['scope']),
-            eth_missed_block_proposals_finalized_total=Gauge("eth_missed_block_proposals_finalized_total", "Total missed finalized block proposals", ['scope']),
+            eth_block_proposals_head_total=Counter("eth_block_proposals_head_total", "Total block proposals at head", ['scope']),
+            eth_missed_block_proposals_head_total=Counter("eth_missed_block_proposals_head_total", "Total missed block proposals at head", ['scope']),
+            eth_block_proposals_finalized_total=Counter("eth_block_proposals_finalized_total", "Total finalized block proposals", ['scope']),
+            eth_missed_block_proposals_finalized_total=Counter("eth_missed_block_proposals_finalized_total", "Total missed finalized block proposals", ['scope']),
+            eth_future_block_proposals=Gauge("eth_future_block_proposals", "Future block proposals", ['scope'])
         )
 
     return _metrics
