@@ -19,9 +19,9 @@ def process_block(validators: WatchedValidators, schedule: ProposerSchedule, slo
         return
 
     if has_block:
-        validator.proposed_blocks_count += 1
+        validator.proposed_blocks_total += 1
     else:
-        validator.missed_blocks_count += 1
+        validator.missed_blocks_total += 1
 
 
 def process_finalized_block(validators: WatchedValidators, schedule: ProposerSchedule, slot_id: int, has_block: bool):
@@ -34,6 +34,6 @@ def process_finalized_block(validators: WatchedValidators, schedule: ProposerSch
         return
 
     if has_block:
-        validator.proposed_blocks_finalized_count += 1
+        validator.proposed_blocks_finalized_total += 1
     else:
-        validator.missed_blocks_finalized_count += 1
+        validator.missed_blocks_finalized_total += 1
