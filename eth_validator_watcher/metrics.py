@@ -16,6 +16,7 @@ class PrometheusMetrics:
     eth_epoch: Gauge
     eth_current_price: Gauge
 
+    # Reset on each epoch.
     eth_validator_status_count: Gauge
     eth_suboptimal_sources_rate: Gauge
     eth_suboptimal_targets_rate: Gauge
@@ -23,8 +24,12 @@ class PrometheusMetrics:
     eth_ideal_consensus_rewards: Gauge
     eth_actual_consensus_rewards: Gauge
     eth_consensus_rewards_rate: Gauge
-    eth_missed_attestations: Gauge
-    eth_missed_consecutive_attestations: Gauge
+
+    # Incremented on each slot.
+    eth_missed_attestations: Counter
+    eth_missed_consecutive_attestations: Counter
+    eth_missed_block_proposals_head: Counter
+    eth_missed_block_proposals_finalized: Counter
 
 
 def get_prometheus_metrics() -> PrometheusMetrics:
@@ -50,6 +55,8 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_consensus_rewards_rate=Gauge("eth_consensus_rewards_rate", "Consensus rewards rate", ['scope']),
             eth_missed_attestations=Gauge("eth_missed_attestations", "Missed attestations in the last epoch", ['scope']),
             eth_missed_consecutive_attestations=Gauge("eth_missed_consecutive_attestations", "Missed consecutive attestations", ['scope']),
+            eth_missed_block_proposals_head=Gauge("eth_missed_block_proposals_head", "Missed block proposals at head", ['scope']),
+            eth_missed_block_proposals_finalized=Gauge("eth_missed_block_proposals_finalized", "Missed finalized block proposals", ['scope']),
         )
 
     return _metrics
