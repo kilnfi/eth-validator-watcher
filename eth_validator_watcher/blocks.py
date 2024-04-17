@@ -37,3 +37,14 @@ def process_finalized_block(validators: WatchedValidators, schedule: ProposerSch
         validator.proposed_blocks_finalized_total += 1
     else:
         validator.missed_blocks_finalized_total += 1
+
+
+def process_future_blocks(validators: WatchedValidators, schedule: ProposerSchedule, slot_id: int):
+    future_proposals = schedule.get_future_proposals(slot_id)
+
+    for slot_id, validator_index in future_proposals.items():
+        validator = validators.get_validator_by_index(validator_index)
+        if validator is None:
+            continue
+
+        validator.future_blocks_proposal += 1
