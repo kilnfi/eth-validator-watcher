@@ -61,10 +61,10 @@ class WatchedValidator:
 
         # Counters (incremented continuously) ; implies to use rates()
         # on the Prometheus side to have meaningful graphs.
-        self.missed_blocks_count : int = 0
-        self.missed_blocks_finalized_count : int = 0
-        self.proposed_blocks_count : int = 0
-        self.proposed_blocks_finalized_count : int = 0
+        self.missed_blocks_total : int = 0
+        self.missed_blocks_finalized_total : int = 0
+        self.proposed_blocks_total : int = 0
+        self.proposed_blocks_finalized_total : int = 0
 
     @property
     def pubkey(self) -> str:

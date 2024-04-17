@@ -181,7 +181,7 @@ class ValidatorWatcher:
         """
         self._metrics.eth_epoch.set(epoch)
         self._metrics.eth_slot.set(slot)
-        self._metrics.eth_current_price.set(get_current_eth_price())
+        self._metrics.eth_current_price_dollars.set(get_current_eth_price())
 
         # We iterate once on the validator set to optimize CPU as
         # there is a log of entries here, this makes code here a bit
@@ -200,6 +200,11 @@ class ValidatorWatcher:
         actual_consensus_reward: dict[str, int] = defaultdict(int)
         missed_attestations: dict[str, int] = defaultdict(int)
         missed_consecutive_attestations: dict[str, int] = defaultdict(int)
+
+        proposed_blocks: dict[str, int] = defaultdict(int)
+        missed_blocks: dict[str, int] = defaultdict(int)
+        proposed_finalized_blocks: dict[str, int] = defaultdict(int)
+        missed_finalized_blocks: dict[str, int] = defaultdict(int)
 
         labels = set()
 
@@ -225,6 +230,11 @@ class ValidatorWatcher:
                 missed_attestations[label] += int(validator.missed_attestation == True)
                 missed_consecutive_attestations[label] += int(validator.previous_missed_attestation == True and validator.missed_attestation == True)
 
+                proposed_blocks[label] += validator.proposed_blocks_total
+                missed_blocks[label] += validator.missed_blocks_total
+                proposed_finalized_blocks[label] += validator.proposed_blocks_finalized_total
+                missed_finalized_blocks[label] += validator.missed_blocks_finalized_total
+
                 labels.add(label)
 
         for label, status_count in validator_status_count.items():
@@ -236,12 +246,17 @@ class ValidatorWatcher:
             self._metrics.eth_suboptimal_targets_rate.labels(label).set(pct(suboptimal_target_count[label], optimal_target_count[label]))
             self._metrics.eth_suboptimal_heads_rate.labels(label).set(pct(suboptimal_head_count[label], optimal_head_count[label]))
 
-            self._metrics.eth_ideal_consensus_rewards.labels(label).set(ideal_consensus_reward[label])
-            self._metrics.eth_actual_consensus_rewards.labels(label).set(actual_consensus_reward[label])
+            self._metrics.eth_ideal_consensus_rewards_gwei.labels(label).set(ideal_consensus_reward[label])
+            self._metrics.eth_actual_consensus_rewards_gwei.labels(label).set(actual_consensus_reward[label])
             self._metrics.eth_consensus_rewards_rate.labels(label).set(pct(actual_consensus_reward[label], ideal_consensus_reward[label], True))
 
-            self._metrics.eth_missed_attestations.labels(label).set(missed_attestations[label])
-            self._metrics.eth_missed_consecutive_attestations.labels(label).set(missed_consecutive_attestations[label])
+            self._metrics.eth_missed_attestations_count.labels(label).set(missed_attestations[label])
+            self._metrics.eth_missed_consecutive_attestations_count.labels(label).set(missed_consecutive_attestations[label])
+
+            self._metrics.eth_block_proposals_head_total.labels(label).set(proposed_blocks[label])
+            self._metrics.eth_missed_block_proposals_head_total.labels(label).set(missed_blocks[label])
+            self._metrics.eth_block_proposals_finalized_total.labels(label).set(proposed_finalized_blocks[label])
+            self._metrics.eth_missed_block_proposals_finalized_total.labels(label).set(missed_finalized_blocks[label])
 
         if not self._metrics_started:
             start_http_server(self._cfg.metrics_port)
