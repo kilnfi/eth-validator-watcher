@@ -40,33 +40,31 @@ class WatchedValidator:
 
     This needs to be optimized for both CPU and memory usage as it
     will be instantiated for every validator of the network.
-
-    Attributes:
-        index: Validator index
-        pubkey: Validator public key
-        status: Validator status for the current epoch
-        previous_status: Validator previous status for the previous epoch
-        labels: Validator labels
-        missed_attestation: Validator missed attestation for the current epoch
-        previous_missed_attestation: Validator missed previous attestation for the previous epoch
-        suboptimal_source: Validator suboptimal source for the current epoch
-        suboptimal_target: Validator suboptimal target for the current epoch
-        suboptimal_head: Validator suboptimal head for the current epoch
-        beacon_validator: Latest state of the validator from the beacon chain
     """
 
     def __init__(self):
         self.index : int = 0
         self.previous_status : Validators.DataItem.StatusEnum | None = None
         self._labels : Optional[list[str]] = None
+
+        # Gauges (updated each epoch) ; implies to use direct values
+        # on the Prometheus side (no rate calculation).
         self.missed_attestation : bool | None = None
         self.previous_missed_attestation : bool | None = None
+        self.future_proposals : int | None = None
         self.suboptimal_source : bool | None = None
         self.suboptimal_target : bool | None = None
         self.suboptimal_head : bool | None = None
         self.ideal_consensus_reward : int | None = None
         self.actual_consensus_reward : int | None = None
         self.beacon_validator : Validators.DataItem | None = None
+
+        # Counters (incremented continuously) ; implies to use rates()
+        # on the Prometheus side to have meaningful graphs.
+        self.missed_blocks_count : int = 0
+        self.missed_blocks_finalized_count : int = 0
+        self.proposed_blocks_count : int = 0
+        self.proposed_blocks_finalized_count : int = 0
 
     @property
     def pubkey(self) -> str:

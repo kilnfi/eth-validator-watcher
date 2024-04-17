@@ -2,7 +2,6 @@
 
 import functools
 from collections import defaultdict
-from functools import lru_cache
 from typing import Any, Optional, Union
 
 from requests import HTTPError, Response, Session, codes
@@ -183,7 +182,6 @@ class Beacon:
         block_dict = response.json()
         return Block(**block_dict)
 
-    @lru_cache()
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
         """Get proposer duties
 
@@ -239,7 +237,6 @@ class Beacon:
 
         return validators
 
-    @lru_cache(maxsize=1)
     def get_duty_slot_to_committee_index_to_validators_index(
         self, epoch: int
     ) -> dict[int, dict[int, list[int]]]:

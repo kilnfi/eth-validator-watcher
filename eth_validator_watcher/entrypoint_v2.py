@@ -13,15 +13,17 @@ import typer
 import time
 
 from .coinbase import  get_current_eth_price
-from .beacon import Beacon
+from .beacon import Beacon, NoBlockError
 from .config import load_config, WatchedKeyConfig
 from .metrics import get_prometheus_metrics
-from .models import Validators
+from .blocks import process_block, process_finalized_block
+from .models import BlockIdentierType, Validators
 from .rewards import process_rewards
 from .utils import (
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
 )
+from .proposer_schedule import ProposerSchedule
 from .watched_validators import WatchedValidators
 
 
@@ -104,6 +106,26 @@ class BeaconClock:
             time.sleep(target - now)
 
 
+def has_block_at_slot(beacon: Beacon, block_identifier: BlockIdentierType | int) -> bool:
+    """Returns the slot of a block identifier if it exists.
+
+    Args:
+    -----
+    beacon: Beacon
+        Beacon instance.
+    block_identifier: BlockIdentierType | int
+        Block identifier (i.e: head, finalized, 42, etc).
+
+    Returns:
+    --------
+    bool: True if the block exists, False otherwise.
+    """
+    try:
+        return beacon.get_header(block_identifier).data.header.message.slot > 0
+    except NoBlockError:
+        return False
+
+            
 class ValidatorWatcher:
     """Ethereum Validator Watcher.
     """
@@ -134,6 +156,8 @@ class ValidatorWatcher:
             self._spec.data.SECONDS_PER_SLOT,
             self._spec.data.SLOTS_PER_EPOCH,
         )
+
+        self._schedule = ProposerSchedule(self._spec)
 
     def _reload_config(self) -> None:
         """Reload the configuration file.
@@ -231,25 +255,42 @@ class ValidatorWatcher:
         slot = self._clock.get_current_slot(time.time())
 
         beacon_validators = None
+        validators_liveness = None
         rewards = None
+        last_processed_finalized_slot = None
 
         while True:
             logging.info(f'Processing slot {slot}')
+
+            last_finalized_slot = self._beacon.get_header(BlockIdentierType.FINALIZED).data.header.message.slot
+            self._schedule.update(self._beacon, slot, last_processed_finalized_slot, last_finalized_slot)
 
             if beacon_validators == None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
                 logging.info(f'Processing epoch {epoch}')
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
                 watched_validators.process_epoch(beacon_validators)
+
+            if validators_liveness == None or (slot % SLOT_FOR_MISSED_ATTESTATIONS_PROCESS == 0):
+                logging.info('Processing validator liveness')
                 validators_liveness = self._beacon.get_validators_liveness(epoch - 1, watched_validators.get_indexes())
                 watched_validators.process_liveness(validators_liveness)
-
-            if slot % SLOT_FOR_MISSED_ATTESTATIONS_PROCESS == 0:
-                logging.info('Processing missed attestations')
 
             if rewards == None or (slot % SLOT_FOR_REWARDS_PROCESS == 0):
                 logging.info('Processing rewards')
                 rewards = self._beacon.get_rewards(epoch - 2)
                 process_rewards(watched_validators, rewards)
+
+            has_block = has_block_at_slot(self._beacon, slot)
+
+            process_block(watched_validators, self._schedule, slot, has_block)
+
+            last_finalized_slot = self._beacon.get_header(BlockIdentierType.FINALIZED).data.header.message.slot
+            while last_processed_finalized_slot and last_processed_finalized_slot < last_finalized_slot:
+                logging.info(f'Processing finalized slot from {last_processed_finalized_slot or last_finalized_slot} to {last_finalized_slot}')
+                has_block = has_block_at_slot(self._beacon, last_processed_finalized_slot)
+                process_finalized_block(watched_validators, self._schedule, last_processed_finalized_slot, has_block)
+                last_processed_finalized_slot += 1
+            last_processed_finalized_slot = last_finalized_slot
 
             logging.info('Processing configuration update')
             self._reload_config()
@@ -258,7 +299,9 @@ class ValidatorWatcher:
             logging.info('Updating Prometheus metrics')
             self._update_metrics(watched_validators, epoch, slot)
 
+            self._schedule.clear(slot, last_processed_finalized_slot)
             self._clock.maybe_wait_for_slot(slot + 1, time.time())
+
             slot += 1
             epoch = slot // self._spec.data.SLOTS_PER_EPOCH
 
