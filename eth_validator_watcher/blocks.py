@@ -1,8 +1,5 @@
 import functools
 
-from prometheus_client import Counter
-
-from .models import Block, BlockIdentierType
 from .proposer_schedule import ProposerSchedule
 from .watched_validators import WatchedValidators
 

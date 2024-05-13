@@ -30,6 +30,7 @@ class PrometheusMetrics:
     eth_missed_block_proposals_head_total: Counter
     eth_block_proposals_finalized_total: Counter
     eth_missed_block_proposals_finalized_total: Counter
+
     eth_future_block_proposals: Gauge
 
 
