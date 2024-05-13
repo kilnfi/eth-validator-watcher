@@ -217,3 +217,20 @@ class Beacon:
         validators_liveness = ValidatorsLivenessResponse(**validators_liveness_dict)
         del validators_liveness_dict
         return validators_liveness
+
+    def has_block_at_slot(self, block_identifier: BlockIdentierType | int) -> bool:
+        """Returns the slot of a block identifier if it exists.
+
+        Args:
+        -----
+        block_identifier: BlockIdentierType | int
+            Block identifier (i.e: head, finalized, 42, etc).
+
+        Returns:
+        --------
+        bool: True if the block exists, False otherwise.
+        """
+        try:
+            return self.get_header(block_identifier).data.header.message.slot > 0
+        except NoBlockError:
+            return False

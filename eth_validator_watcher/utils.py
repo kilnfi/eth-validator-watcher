@@ -225,6 +225,15 @@ def eth1_address_lower_0x_prefixed(address: str) -> str:
     return address_lower
 
 
+def pct(a: int, b: int, inclusive: bool=False) -> float:
+    """Helper function to calculate the percentage of a over b.
+    """
+    total = a + b if not inclusive else b
+    if total == 0:
+        return 0.0
+    return float(a / total) * 100.0
+
+
 def eth2_address_lower_0x_prefixed(address: str) -> str:
     address_lower = address.lower()
 

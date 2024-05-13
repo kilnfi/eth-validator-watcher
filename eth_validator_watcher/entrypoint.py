@@ -13,6 +13,7 @@ import typer
 import time
 
 from .coinbase import  get_current_eth_price
+from .clock import BeaconClock
 from .beacon import Beacon, NoBlockError
 from .config import load_config, WatchedKeyConfig
 from .metrics import get_prometheus_metrics
@@ -22,6 +23,7 @@ from .rewards import process_rewards
 from .utils import (
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
+    pct,
 )
 from .proposer_schedule import ProposerSchedule
 from .watched_validators import WatchedValidators
@@ -29,97 +31,6 @@ from .watched_validators import WatchedValidators
 
 app = typer.Typer(add_completion=False)
 
-
-def pct(a: int, b: int, inclusive: bool=False) -> float:
-    """Helper function to calculate the percentage of a over b.
-    """
-    total = a + b if not inclusive else b
-    if total == 0:
-        return 0.0
-    return float(a / total) * 100.0
-
-
-class BeaconClock:
-    """Helper class to keep track of the beacon clock.
-
-    This clock is slightly skewed to ensure we have the data for the
-    slot we are processing: it is possible beacons do not have data
-    exactly on slot time, so we wait for ~4 seconds into the next
-    slot.
-    """
-
-    def __init__(self, genesis: int, slot_duration: int, slots_per_epoch: int) -> None:
-        self._genesis = genesis
-        self._slot_duration = slot_duration
-        self._slots_per_epoch = slots_per_epoch
-        self._lag_seconds = 4.0
-
-    def get_current_epoch(self) -> int:
-        """Get the current epoch.
-
-        Returns:
-        --------
-        int: Current epoch.
-        """
-        return self.get_current_slot() // self._slots_per_epoch
-
-    def epoch_to_slot(self, epoch: int) -> int:
-        """Convert an epoch to a slot.
-
-        Args:
-        -----
-        epoch: int
-            Epoch to convert.
-
-        Returns:
-        --------
-        int: Slot corresponding to the epoch.
-        """
-        return epoch * self._slots_per_epoch
-
-    def get_current_slot(self) -> int:
-        """Get the current slot.
-
-        Returns:
-        --------
-        int: Current slot.
-        """
-        return int((time.time() - self._lag_seconds - self._genesis) // self._slot_duration)
-
-    def maybe_wait_for_slot(self, slot: int, now: float) -> None:
-        """Wait until the given slot is reached.
-
-        Args:
-        -----
-        slot: int
-            Slot to wait for.
-        now: float
-            Current time in seconds since the epoch.
-        """
-        target = self._genesis + slot * self._slot_duration + self._lag_seconds
-        if now < target:
-            logging.info(f'Waiting {target - now:.2f} seconds for slot {slot}')
-            time.sleep(target - now)
-
-
-def has_block_at_slot(beacon: Beacon, block_identifier: BlockIdentierType | int) -> bool:
-    """Returns the slot of a block identifier if it exists.
-
-    Args:
-    -----
-    beacon: Beacon
-        Beacon instance.
-    block_identifier: BlockIdentierType | int
-        Block identifier (i.e: head, finalized, 42, etc).
-
-    Returns:
-    --------
-    bool: True if the block exists, False otherwise.
-    """
-    try:
-        return beacon.get_header(block_identifier).data.header.message.slot > 0
-    except NoBlockError:
-        return False
 
 
 class ValidatorWatcher:
@@ -183,8 +94,10 @@ class ValidatorWatcher:
         # there is a log of entries here, this makes code here a bit
         # more complex and entangled.
 
+        # Count of validators by status
         validator_status_count: dict[str, dict[StatusEnum, int]] = defaultdict(partial(defaultdict, int))
 
+        # Gauges
         suboptimal_source_count: dict[str, int] = defaultdict(int)
         suboptimal_target_count: dict[str, int] = defaultdict(int)
         suboptimal_head_count: dict[str, int] = defaultdict(int)
@@ -192,20 +105,25 @@ class ValidatorWatcher:
         optimal_target_count: dict[str, int] = defaultdict(int)
         optimal_head_count: dict[str, int] = defaultdict(int)
 
+        # Gauges
         ideal_consensus_reward: dict[str, int] = defaultdict(int)
         actual_consensus_reward: dict[str, int] = defaultdict(int)
         missed_attestations: dict[str, int] = defaultdict(int)
         missed_consecutive_attestations: dict[str, int] = defaultdict(int)
 
+        # Counters
         proposed_blocks: dict[str, int] = defaultdict(int)
         missed_blocks: dict[str, int] = defaultdict(int)
         proposed_finalized_blocks: dict[str, int] = defaultdict(int)
         missed_finalized_blocks: dict[str, int] = defaultdict(int)
+
+        # Gauge
         future_blocks: dict[str, int] = defaultdict(int)
 
         labels = set()
 
         for validator in watched_validators.get_validators().values():
+
             # Everything here implies to have a validator that is
             # active on the beacon chain, this prevents miscounting
             # missed attestation for instance.
@@ -240,6 +158,7 @@ class ValidatorWatcher:
                 missed_blocks[label] += validator.missed_blocks_total
                 proposed_finalized_blocks[label] += validator.proposed_blocks_finalized_total
                 missed_finalized_blocks[label] += validator.missed_blocks_finalized_total
+
                 future_blocks[label] += validator.future_blocks_proposal
 
                 labels.add(label)
@@ -271,12 +190,14 @@ class ValidatorWatcher:
             self._metrics.eth_missed_consecutive_attestations_count.labels(label).set(missed_consecutive_attestations[label])
 
             # Here we inc, it's fine since we previously reset the
-            # counters on each run.
+            # counters on each run; we can't use set because those
+            # metrics are counters.
 
             self._metrics.eth_block_proposals_head_total.labels(label).inc(proposed_blocks[label])
             self._metrics.eth_missed_block_proposals_head_total.labels(label).inc(missed_blocks[label])
             self._metrics.eth_block_proposals_finalized_total.labels(label).inc(proposed_finalized_blocks[label])
             self._metrics.eth_missed_block_proposals_finalized_total.labels(label).inc(missed_finalized_blocks[label])
+
             self._metrics.eth_future_block_proposals.labels(label).set(future_blocks[label])
 
         if not self._metrics_started:
@@ -316,7 +237,7 @@ class ValidatorWatcher:
                 rewards = self._beacon.get_rewards(epoch - 2)
                 process_rewards(watched_validators, rewards)
 
-            has_block = has_block_at_slot(self._beacon, slot)
+            has_block = self._beacon.has_block_at_slot(slot)
 
             process_block(watched_validators, self._schedule, slot, has_block)
             process_future_blocks(watched_validators, self._schedule, slot)
@@ -324,7 +245,7 @@ class ValidatorWatcher:
             last_finalized_slot = self._beacon.get_header(BlockIdentierType.FINALIZED).data.header.message.slot
             while last_processed_finalized_slot and last_processed_finalized_slot < last_finalized_slot:
                 logging.info(f'Processing finalized slot from {last_processed_finalized_slot or last_finalized_slot} to {last_finalized_slot}')
-                has_block = has_block_at_slot(self._beacon, last_processed_finalized_slot)
+                has_block = self._beacon.has_block_at_slot(last_processed_finalized_slot)
                 process_finalized_block(watched_validators, self._schedule, last_processed_finalized_slot, has_block)
                 last_processed_finalized_slot += 1
             last_processed_finalized_slot = last_finalized_slot
