@@ -47,7 +47,7 @@ def load_config(config_file: str) -> Config:
     The effective configuration used by the watcher
     """
     with open(config_file, 'r') as fh:
-        config = yaml.safe_load(fh) or dict()
+        config = yaml.load(fh, Loader=yaml.CLoader) or dict()
 
         from_env = Config().model_dump()
         from_yaml = Config(**config).model_dump()

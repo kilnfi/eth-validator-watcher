@@ -8,7 +8,6 @@ from prometheus_client import Gauge
 from slack_sdk import WebClient
 
 from .config import WatchedKeyConfig
-from .web3signer import Web3Signer
 
 NB_SLOT_PER_EPOCH = 32
 NB_SECOND_PER_SLOT = 12
@@ -170,35 +169,6 @@ def apply_mask(items: list[Any], mask: list[bool]) -> set[Any]:
     """
 
     return set(item for item, bit in zip(items, mask) if bit)
-
-
-def get_our_pubkeys(
-    watched_keys: List[WatchedKeyConfig] | None,
-    web3signer: Web3Signer | None,
-) -> set[str]:
-    """Get our pubkeys
-
-    Parameters:
-    watched_keys     : The list of validator keys we want to watch
-    web3signer       : Web3Signer instance signing for the keys to watch
-
-    Query pubkeys from either file path or Web3Signer instance.
-    If `our_pubkeys` is already set and we are not at the beginning of a new epoch,
-    returns `our_pubkeys`.
-    """
-
-    # Get public keys from config
-    pubkeys_from_config: set[str] = set(
-        k.public_key for k in watched_keys
-    )
-
-    pubkeys_from_web3signer = (
-        web3signer.load_pubkeys() if web3signer is not None else set()
-    )
-
-    our_pubkeys = pubkeys_from_config | pubkeys_from_web3signer
-    metric_keys_count.set(len(our_pubkeys))
-    return our_pubkeys
 
 
 def write_liveness_file(liveness_file: Path):

@@ -86,6 +86,15 @@ class WatchedValidator:
         configured = self._labels or []
         return configured + [LABEL_SCOPE_NETWORK]
 
+    def is_validating(self) -> bool:
+        """Check if the validator is validating.
+        """
+        return self.status in [
+            Validators.DataItem.StatusEnum.activeOngoing,
+            Validators.DataItem.StatusEnum.activeExiting,
+            Validators.DataItem.StatusEnum.activeSlashed,
+        ]
+
     def process_config(self, config: WatchedKeyConfig):
         """Processes a new configuration.
 
