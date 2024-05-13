@@ -33,4 +33,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-eth-validator-watcher = "eth_validator_watcher.entrypoint_v2:app"
+eth-validator-watcher = "eth_validator_watcher.entrypoint:app"
