@@ -76,14 +76,6 @@ class Beacon:
         self.__http.mount("http://", adapter)
         self.__http.mount("https://", adapter)
 
-    def get_url(self) -> str:
-        """Return the URL of the beacon."""
-        return self.__url
-
-    def get_timeout_sec(self) -> int:
-        """Return the timeout in seconds used to query the beacon."""
-        return self.__timeout_sec
-
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_fixed(3),
@@ -110,6 +102,14 @@ class Beacon:
     def __post_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
         """Wrapper around requests.get() with retry on 404"""
         return self.__http_retry_not_found.post(*args, **kwargs)
+
+    def get_url(self) -> str:
+        """Return the URL of the beacon."""
+        return self.__url
+
+    def get_timeout_sec(self) -> int:
+        """Return the timeout in seconds used to query the beacon."""
+        return self.__timeout_sec
 
     def get_genesis(self) -> Genesis:
         """Get genesis data."""
