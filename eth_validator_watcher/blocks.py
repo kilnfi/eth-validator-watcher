@@ -3,8 +3,6 @@ import functools
 from .proposer_schedule import ProposerSchedule
 from .watched_validators import WatchedValidators
 
-print = functools.partial(print, flush=True)
-
 
 def process_block(validators: WatchedValidators, schedule: ProposerSchedule, slot_id: int, has_block: bool):
     validator_index = schedule.get_head_proposer(slot_id)

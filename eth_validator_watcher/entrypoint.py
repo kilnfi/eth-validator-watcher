@@ -151,9 +151,6 @@ class ValidatorWatcher:
                 missed_attestations[label] += int(validator.missed_attestation == True)
                 missed_consecutive_attestations[label] += int(validator.previous_missed_attestation == True and validator.missed_attestation == True)
 
-                if int(validator.missed_attestation == True):
-                    logging.info(f'Validator {validator.pubkey[:10]} missed attestation at slot {slot}')
-
                 proposed_blocks[label] += validator.proposed_blocks_total
                 missed_blocks[label] += validator.missed_blocks_total
                 proposed_finalized_blocks[label] += validator.proposed_blocks_finalized_total
