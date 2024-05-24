@@ -1,0 +1,9 @@
+beacon_url: ~
+execution_url: ~
+web3signer_url: ~
+default_fee_recipient: ~
+slack_channel: ~
+slack_token: ~
+relays: ~
+liveness_file: ~
+watched_keys: ~
