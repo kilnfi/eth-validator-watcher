@@ -1,7 +1,6 @@
 # Example config file for the Ethereum watcher.
 
 beacon_url: http://localhost:5051/
-beacon_type: other
 beacon_timeout_sec: 90
 execution_url: http://localhost:8545/
 web3signer_url: http://web3signer:9000/

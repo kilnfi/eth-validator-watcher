@@ -127,14 +127,6 @@ class CoinbaseTrade(BaseModel):
     side: str
 
 
-class BeaconType(StrEnum):
-    LIGHTHOUSE = "lighthouse"
-    NIMBUS = "nimbus"
-    OLD_PRYSM = "old-prysm"
-    OLD_TEKU = "old-teku"
-    OTHER = "other"
-
-
 class BlockIdentierType(StrEnum):
     HEAD = "head"
     GENESIS = "genesis"
