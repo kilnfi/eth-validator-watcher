@@ -1,4 +1,3 @@
-from .models import BeaconType
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Any, List, Optional
@@ -19,9 +18,8 @@ class Config(BaseSettings):
     """Configuration of the Ethereum Validator Watcher.
     """
     model_config = SettingsConfigDict(case_sensitive=True, env_prefix='eth_watcher_')
-
+    network: Optional[str] = None
     beacon_url: Optional[str] = None
-    beacon_type: BeaconType = BeaconType.OTHER
     beacon_timeout_sec: int = 90
     execution_url: Optional[str] = None
     web3signer_url: Optional[str] = None
