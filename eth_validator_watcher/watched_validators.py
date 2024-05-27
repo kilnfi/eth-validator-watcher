@@ -21,7 +21,7 @@ from typing import Optional
 
 from .config import Config, WatchedKeyConfig
 from .models import Validators, ValidatorsLivenessResponse
-from .utils import LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED
+from .utils import LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED, LABEL_SCOPE_UNWATCHED
 
 
 def normalized_public_key(pubkey: str) -> str:
@@ -83,8 +83,9 @@ class WatchedValidator:
     def labels(self) -> list[str]:
         """Get the labels for the validator.
         """
-        configured = self._labels or []
-        return configured + [LABEL_SCOPE_NETWORK]
+        if self._labels:
+            return self._labels + [LABEL_SCOPE_NETWORK]
+        return [LABEL_SCOPE_UNWATCHED, LABEL_SCOPE_NETWORK]
 
     def is_validating(self) -> bool:
         """Check if the validator is validating.
