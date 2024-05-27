@@ -21,6 +21,7 @@ from .blocks import process_block, process_finalized_block, process_future_block
 from .models import BlockIdentierType, Validators
 from .rewards import process_rewards
 from .utils import (
+    SLOT_FOR_CONFIG_RELOAD,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
     SLOT_FOR_REWARDS_PROCESS,
     pct,
@@ -249,9 +250,10 @@ class ValidatorWatcher:
                 last_processed_finalized_slot += 1
             last_processed_finalized_slot = last_finalized_slot
 
-            logging.info('Processing configuration update')
-            self._reload_config()
-            watched_validators.process_config(self._cfg)
+            if (slot % SLOT_FOR_CONFIG_RELOAD == 0):
+                logging.info('Processing configuration update')
+                self._reload_config()
+                watched_validators.process_config(self._cfg)
 
             logging.info('Updating Prometheus metrics')
             self._update_metrics(watched_validators, epoch, slot)
