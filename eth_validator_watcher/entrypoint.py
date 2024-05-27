@@ -86,9 +86,11 @@ class ValidatorWatcher:
         epoch: Current epoch.
         slot: Current slot.
         """
-        self._metrics.eth_epoch.set(epoch)
-        self._metrics.eth_slot.set(slot)
-        self._metrics.eth_current_price_dollars.set(get_current_eth_price())
+        network = self._cfg.network
+
+        self._metrics.eth_epoch.labels(network).set(epoch)
+        self._metrics.eth_slot.labels(network).set(slot)
+        self._metrics.eth_current_price_dollars.labels(network).set(get_current_eth_price())
 
         # We iterate once on the validator set to optimize CPU as
         # there is a log of entries here, this makes code here a bit
@@ -172,30 +174,30 @@ class ValidatorWatcher:
 
         for label, status_count in validator_status_count.items():
             for status, count in status_count.items():
-                self._metrics.eth_validator_status_count.labels(label, status).set(count)
+                self._metrics.eth_validator_status_count.labels(label, status, network).set(count)
 
         for label in labels:
-            self._metrics.eth_suboptimal_sources_rate.labels(label).set(pct(suboptimal_source_count[label], optimal_source_count[label]))
-            self._metrics.eth_suboptimal_targets_rate.labels(label).set(pct(suboptimal_target_count[label], optimal_target_count[label]))
-            self._metrics.eth_suboptimal_heads_rate.labels(label).set(pct(suboptimal_head_count[label], optimal_head_count[label]))
+            self._metrics.eth_suboptimal_sources_rate.labels(label, network).set(pct(suboptimal_source_count[label], optimal_source_count[label]))
+            self._metrics.eth_suboptimal_targets_rate.labels(label, network).set(pct(suboptimal_target_count[label], optimal_target_count[label]))
+            self._metrics.eth_suboptimal_heads_rate.labels(label, network).set(pct(suboptimal_head_count[label], optimal_head_count[label]))
 
-            self._metrics.eth_ideal_consensus_rewards_gwei.labels(label).set(ideal_consensus_reward[label])
-            self._metrics.eth_actual_consensus_rewards_gwei.labels(label).set(actual_consensus_reward[label])
-            self._metrics.eth_consensus_rewards_rate.labels(label).set(pct(actual_consensus_reward[label], ideal_consensus_reward[label], True))
+            self._metrics.eth_ideal_consensus_rewards_gwei.labels(label, network).set(ideal_consensus_reward[label])
+            self._metrics.eth_actual_consensus_rewards_gwei.labels(label, network).set(actual_consensus_reward[label])
+            self._metrics.eth_consensus_rewards_rate.labels(label, network).set(pct(actual_consensus_reward[label], ideal_consensus_reward[label], True))
 
-            self._metrics.eth_missed_attestations_count.labels(label).set(missed_attestations[label])
-            self._metrics.eth_missed_consecutive_attestations_count.labels(label).set(missed_consecutive_attestations[label])
+            self._metrics.eth_missed_attestations_count.labels(label, network).set(missed_attestations[label])
+            self._metrics.eth_missed_consecutive_attestations_count.labels(label, network).set(missed_consecutive_attestations[label])
 
             # Here we inc, it's fine since we previously reset the
             # counters on each run; we can't use set because those
             # metrics are counters.
 
-            self._metrics.eth_block_proposals_head_total.labels(label).inc(proposed_blocks[label])
-            self._metrics.eth_missed_block_proposals_head_total.labels(label).inc(missed_blocks[label])
-            self._metrics.eth_block_proposals_finalized_total.labels(label).inc(proposed_finalized_blocks[label])
-            self._metrics.eth_missed_block_proposals_finalized_total.labels(label).inc(missed_finalized_blocks[label])
+            self._metrics.eth_block_proposals_head_total.labels(label, network).inc(proposed_blocks[label])
+            self._metrics.eth_missed_block_proposals_head_total.labels(label, network).inc(missed_blocks[label])
+            self._metrics.eth_block_proposals_finalized_total.labels(label, network).inc(proposed_finalized_blocks[label])
+            self._metrics.eth_missed_block_proposals_finalized_total.labels(label, network).inc(missed_finalized_blocks[label])
 
-            self._metrics.eth_future_block_proposals.labels(label).set(future_blocks[label])
+            self._metrics.eth_future_block_proposals.labels(label, network).set(future_blocks[label])
 
         if not self._metrics_started:
             start_http_server(self._cfg.metrics_port)
