@@ -19,7 +19,7 @@ ETH1_ADDRESS_LEN = 40
 ETH2_ADDRESS_LEN = 96
 LABEL_SCOPE_NETWORK="scope:network"
 LABEL_SCOPE_WATCHED="scope:watched"
-LABEL_SCOPED_UNWATCHED="scope:unwatched"
+LABEL_SCOPE_UNWATCHED="scope:unwatched"
 
 CHUCK_NORRIS = [
     "Chuck Norris doesn't stake Ethers; he stares at the blockchain, and it instantly "

@@ -98,7 +98,7 @@ class ValidatorWatcher:
         # more complex and entangled.
 
         # Count of validators by status
-        validator_status_count: dict[str, dict[StatusEnum, int]] = defaultdict(partial(defaultdict, int))
+        validator_status_count: dict[str, dict[str, int]] = defaultdict(partial(defaultdict, int))
 
         # Gauges
         suboptimal_source_count: dict[str, int] = defaultdict(int)
@@ -123,19 +123,28 @@ class ValidatorWatcher:
         # Gauge
         future_blocks: dict[str, int] = defaultdict(int)
 
+        # All labels and statuses so that we can set to 0 metrics that
+        # do not have any value for a given label/status.
         labels = set()
+        statuses = set()
 
         for validator in watched_validators.get_validators().values():
 
-            # Everything here implies to have a validator that is
-            # active on the beacon chain, this prevents miscounting
-            # missed attestation for instance.
-            if not validator.is_validating():
-                continue
+            status = str(validator.status)
+            statuses.add(status)
             
             for label in validator.labels:
 
-                validator_status_count[label][str(validator.status)] += 1
+                labels.add(label)
+
+                validator_status_count[label][status] += 1
+
+                # Everything below implies to have a validator that is
+                # active on the beacon chain, this prevents
+                # miscounting missed attestation for instance.
+
+                if not validator.is_validating():
+                    continue
 
                 # Looks weird but we want to explicitly have labels set
                 # for each set of labels even if they aren't validating
@@ -161,8 +170,6 @@ class ValidatorWatcher:
 
                 future_blocks[label] += validator.future_blocks_proposal
 
-                labels.add(label)
-
             # Here we reset the counters for the next run, we do not
             # touch gauges though.  This ensures we handle properly
             # changes of the labelling in real-time.
@@ -173,9 +180,11 @@ class ValidatorWatcher:
             validator.missed_blocks_finalized_total = 0
             validator.future_blocks_proposal = 0
 
-        for label, status_count in validator_status_count.items():
-            for status, count in status_count.items():
-                self._metrics.eth_validator_status_count.labels(label, status, network).set(count)
+
+        for label in labels:
+            for status in statuses:
+                value = validator_status_count.get(label, {}).get(status, 0)
+                self._metrics.eth_validator_status_count.labels(label, status, network).set(value)
 
         for label in labels:
             self._metrics.eth_suboptimal_sources_rate.labels(label, network).set(pct(suboptimal_source_count[label], optimal_source_count[label]))
