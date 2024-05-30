@@ -107,6 +107,7 @@ class ValidatorWatcher:
         optimal_source_count: dict[str, int] = defaultdict(int)
         optimal_target_count: dict[str, int] = defaultdict(int)
         optimal_head_count: dict[str, int] = defaultdict(int)
+        validator_slashes: dict[str, int] = defaultdict(int)
 
         # Gauges
         ideal_consensus_reward: dict[str, int] = defaultdict(int)
@@ -138,6 +139,8 @@ class ValidatorWatcher:
                 labels.add(label)
 
                 validator_status_count[label][status] += 1
+
+                validator_slashes[label] += int(validator.beacon_validator.validator.slashed == True)
 
                 # Everything below implies to have a validator that is
                 # active on the beacon chain, this prevents
@@ -197,6 +200,7 @@ class ValidatorWatcher:
 
             self._metrics.eth_missed_attestations_count.labels(label, network).set(missed_attestations[label])
             self._metrics.eth_missed_consecutive_attestations_count.labels(label, network).set(missed_consecutive_attestations[label])
+            self._metrics.eth_slashed_validators_count.labels(label, network).set(validator_slashes[label])
 
             # Here we inc, it's fine since we previously reset the
             # counters on each run; we can't use set because those
