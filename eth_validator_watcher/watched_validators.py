@@ -84,7 +84,7 @@ class WatchedValidator:
         """Get the labels for the validator.
         """
         if self._labels:
-            return self._labels + [LABEL_SCOPE_NETWORK]
+            return self._labels + [LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED]
         return [LABEL_SCOPE_UNWATCHED, LABEL_SCOPE_NETWORK]
 
     def is_validating(self) -> bool:
@@ -102,8 +102,7 @@ class WatchedValidator:
         Parameters:
             config: New configuration
         """
-        labels = config.labels or []
-        self._labels = labels + [LABEL_SCOPE_WATCHED]
+        self._labels = config.labels or []
 
     def process_epoch(self, validator: Validators.DataItem):
         """Processes a new epoch.
@@ -123,7 +122,7 @@ class WatchedValidator:
         liveness: Validator liveness data
         """
         self.previous_missed_attestation = self.missed_attestation
-        self.missed_attestation = not liveness.is_live
+        self.missed_attestation = liveness.is_live != True
 
 
 class WatchedValidators:

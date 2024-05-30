@@ -20,9 +20,6 @@ from .models import (
 )
 
 
-StatusEnum = Validators.DataItem.StatusEnum
-
-
 print = functools.partial(print, flush=True)
 
 
