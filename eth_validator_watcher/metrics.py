@@ -25,6 +25,7 @@ class PrometheusMetrics:
     eth_actual_consensus_rewards_gwei: Gauge
     eth_missed_attestations_count: Gauge
     eth_missed_consecutive_attestations_count: Gauge
+    eth_slashed_validators_count: Gauge
     
     eth_block_proposals_head_total: Counter
     eth_missed_block_proposals_head_total: Counter
@@ -58,6 +59,7 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_consensus_rewards_rate=Gauge("eth_consensus_rewards_rate", "Consensus rewards rate sampled every epoch", ['scope', 'network']),
             eth_missed_attestations_count=Gauge("eth_missed_attestations", "Missed attestations in the last epoch", ['scope', 'network']),
             eth_missed_consecutive_attestations_count=Gauge("eth_missed_consecutive_attestations", "Missed consecutive attestations in the last two epochs", ['scope', 'network']),
+            eth_slashed_validators_count=Gauge("eth_slashed_validators", "Slashed validators", ['scope', 'network']),
 
             eth_block_proposals_head_total=Counter("eth_block_proposals_head_total", "Total block proposals at head", ['scope', 'network']),
             eth_missed_block_proposals_head_total=Counter("eth_missed_block_proposals_head_total", "Total missed block proposals at head", ['scope', 'network']),
