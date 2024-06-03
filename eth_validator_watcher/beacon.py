@@ -113,18 +113,20 @@ class Beacon:
         response = self.__get_retry_not_found(
             f"{self.__url}/eth/v1/beacon/genesis", timeout=self.__timeout_sec
         )
+
         response.raise_for_status()
-        genesis_dict = response.json()
-        return Genesis(**genesis_dict)
+
+        return Genesis.model_validate_json(response.text)
 
     def get_spec(self) -> Spec:
         """Get spec data."""
         response = self.__get_retry_not_found(
             f"{self.__url}/eth/v1/config/spec", timeout=self.__timeout_sec
         )
+
         response.raise_for_status()
-        spec_dict = response.json()
-        return Spec(**spec_dict)
+
+        return Spec.model_validate_json(response.text)
 
     def get_header(self, block_identifier: Union[BlockIdentierType, int]) -> Header:
         """Get a header.
@@ -145,8 +147,8 @@ class Beacon:
             # If we are here, it's an other error
             raise
 
-        header_dict = response.json()
-        return Header(**header_dict)
+
+        return Header.model_validate_json(response.text)
 
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
         """Get proposer duties
@@ -159,23 +161,16 @@ class Beacon:
 
         response.raise_for_status()
 
-        proposer_duties_dict = response.json()
-        return ProposerDuties(**proposer_duties_dict)
+        return ProposerDuties.model_validate_json(response.text)
 
     def get_validators(self, slot: int) -> Validators:
         response = self.__get_retry_not_found(
             f"{self.__url}/eth/v1/beacon/states/{slot}/validators", timeout=self.__timeout_sec
         )
 
-        # Unsure if explicit del help with memory here, let's keep it
-        # for now and benchmark this in real conditions.
         response.raise_for_status()
-        validators_dict = response.json()
-        del response
-        validators = Validators(**validators_dict)
-        del validators_dict
 
-        return validators
+        return Validators.model_validate_json(response.text)
 
     def get_rewards(self, epoch: int) -> Rewards:
         """Get rewards.
@@ -190,11 +185,8 @@ class Beacon:
         )
 
         response.raise_for_status()
-        rewards_dict = response.json()
-        del response
-        rewards = Rewards(**rewards_dict)
-        del rewards_dict
-        return rewards
+
+        return Rewards.model_validate_json(response.text)
 
     def get_validators_liveness(self, epoch: int, indexes: list[int]) -> ValidatorsLivenessResponse:
         """Get validators liveness.
@@ -209,11 +201,8 @@ class Beacon:
         )
 
         response.raise_for_status()
-        validators_liveness_dict = response.json()
-        del response
-        validators_liveness = ValidatorsLivenessResponse(**validators_liveness_dict)
-        del validators_liveness_dict
-        return validators_liveness
+
+        return ValidatorsLivenessResponse.model_validate_json(response.text)
 
     def has_block_at_slot(self, block_identifier: BlockIdentierType | int) -> bool:
         """Returns the slot of a block identifier if it exists.
