@@ -21,29 +21,6 @@ LABEL_SCOPE_NETWORK="scope:network"
 LABEL_SCOPE_WATCHED="scope:watched"
 LABEL_SCOPE_UNWATCHED="scope:unwatched"
 
-CHUCK_NORRIS = [
-    "Chuck Norris doesn't stake Ethers; he stares at the blockchain, and it instantly "
-    "produces new coins.",
-    "When Chuck Norris sends Ethers, it doesn't need confirmations. The Ethereum "
-    "network just knows better than to mess with Chuck.",
-    "Chuck Norris once hacked into a smart contract without using a computer. He just "
-    "stared at the code, and it fixed itself.",
-    "Ethereum's gas fees are afraid of Chuck Norris. They lower themselves just to "
-    "avoid his wrath.",
-    "Chuck Norris doesn't need a private key to access his Ethereum wallet. He just "
-    "flexes his biceps, and it opens.",
-    "When Chuck Norris trades on a decentralized exchange, the price slippage goes in "
-    "his favor, no matter what.",
-    "Vitalik Buterin once challenged Chuck Norris to a coding contest. Chuck won by "
-    "writing Ethereum's whitepaper with his eyes closed.",
-    "Chuck Norris's Ethereum nodes are so fast that they can process transactions "
-    "before they even happen.",
-    'The Ethereum community calls Chuck Norris the "Smart Contract Whisperer" '
-    "because he can make any contract do his bidding.",
-    "When Chuck Norris checks his Ethereum balance, the wallet interface just says, "
-    '"Infinite."',
-]
-
 metric_keys_count = Gauge(
     "keys_count",
     "Keys count",
