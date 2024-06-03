@@ -17,7 +17,7 @@ exporter.
 
 import logging
 
-from typing import Optional
+from typing import Optional, Generator
 
 from .config import Config, WatchedKeyConfig
 from .models import Validators, ValidatorsLivenessResponse
@@ -43,9 +43,10 @@ class WatchedValidator:
     """
 
     def __init__(self):
-        self.index : int = 0
         self.previous_status : Validators.DataItem.StatusEnum | None = None
-        self._labels : Optional[list[str]] = None
+
+        # This gets overriden by process_config if the validator is watched.
+        self._labels : Optional[list[str]] = [LABEL_SCOPE_NETWORK, LABEL_SCOPE_UNWATCHED]
 
         # Gauges (updated each epoch) ; implies to use direct values
         # on the Prometheus side (no rate calculation).
@@ -83,9 +84,7 @@ class WatchedValidator:
     def labels(self) -> list[str]:
         """Get the labels for the validator.
         """
-        if self._labels:
-            return self._labels + [LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED]
-        return [LABEL_SCOPE_UNWATCHED, LABEL_SCOPE_NETWORK]
+        return self._labels
 
     def is_validating(self) -> bool:
         """Check if the validator is validating.
@@ -102,7 +101,10 @@ class WatchedValidator:
         Parameters:
             config: New configuration
         """
-        self._labels = config.labels or []
+        if config.labels:
+            self._labels = config.labels + [LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED]
+        else:
+            self._labels = [LABEL_SCOPE_NETWORK, LABEL_SCOPE_UNWATCHED]
 
     def process_epoch(self, validator: Validators.DataItem):
         """Processes a new epoch.
@@ -160,9 +162,10 @@ class WatchedValidators:
         """Get all validator indexes."""
         return list(self._validators.keys())
 
-    def get_validators(self) -> dict[int, WatchedValidator]:
-        """Get all validators."""
-        return self._validators
+    def validators(self) -> Generator[WatchedValidator, None, None]:
+        """Iterate over all validators."""
+        for validator in self._validators.values():
+            yield validator
 
     def process_config(self, config: Config):
         """Process a config update

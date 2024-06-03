@@ -2,6 +2,7 @@
 """
 
 from collections import defaultdict
+from dataclasses import dataclass, field
 from functools import partial
 from pathlib import Path
 from prometheus_client import start_http_server
@@ -97,50 +98,54 @@ class ValidatorWatcher:
         # there is a log of entries here, this makes code here a bit
         # more complex and entangled.
 
-        # Count of validators by status
-        validator_status_count: dict[str, dict[str, int]] = defaultdict(partial(defaultdict, int))
+        @dataclass
+        class MetricsByLabel():
+            """Helper class to reduce the number of look-ups per label in the validators loop.
 
-        # Gauges
-        suboptimal_source_count: dict[str, int] = defaultdict(int)
-        suboptimal_target_count: dict[str, int] = defaultdict(int)
-        suboptimal_head_count: dict[str, int] = defaultdict(int)
-        optimal_source_count: dict[str, int] = defaultdict(int)
-        optimal_target_count: dict[str, int] = defaultdict(int)
-        optimal_head_count: dict[str, int] = defaultdict(int)
-        validator_slashes: dict[str, int] = defaultdict(int)
+            This reduces the number of look-ups and processing time by ~10x.
+            """
+            # Count of validators by status
+            validator_status_count: dict[str, int] = field(default_factory=dict)
 
-        # Gauges
-        ideal_consensus_reward: dict[str, int] = defaultdict(int)
-        actual_consensus_reward: dict[str, int] = defaultdict(int)
-        missed_attestations: dict[str, int] = defaultdict(int)
-        missed_consecutive_attestations: dict[str, int] = defaultdict(int)
+            # Gauges
+            suboptimal_source_count: int = 0
+            suboptimal_target_count: int = 0
+            suboptimal_head_count: int = 0
+            optimal_source_count: int = 0
+            optimal_target_count: int = 0
+            optimal_head_count: int = 0
+            validator_slashes: int = 0
 
-        # Counters
-        proposed_blocks: dict[str, int] = defaultdict(int)
-        missed_blocks: dict[str, int] = defaultdict(int)
-        proposed_finalized_blocks: dict[str, int] = defaultdict(int)
-        missed_finalized_blocks: dict[str, int] = defaultdict(int)
+            # Gauges
+            ideal_consensus_reward: int = 0
+            actual_consensus_reward: int = 0
+            missed_attestations: int = 0
+            missed_consecutive_attestations: int = 0
 
-        # Gauge
-        future_blocks: dict[str, int] = defaultdict(int)
+            # Counters
+            proposed_blocks: int = 0
+            missed_blocks: int = 0
+            proposed_finalized_blocks: int = 0
+            missed_finalized_blocks: int = 0
 
-        # All labels and statuses so that we can set to 0 metrics that
-        # do not have any value for a given label/status.
-        labels = set()
-        statuses = set()
+            # Gauge
+            future_blocks: int = 0
 
-        for validator in watched_validators.get_validators().values():
+
+        metrics = defaultdict(MetricsByLabel)
+
+        for validator in watched_validators.validators():
 
             status = str(validator.status)
-            statuses.add(status)
-            
+
             for label in validator.labels:
+                m = metrics[label]
 
-                labels.add(label)
-
-                validator_status_count[label][status] += 1
-
-                validator_slashes[label] += int(validator.beacon_validator.validator.slashed == True)
+                if status not in m.validator_status_count:
+                    m.validator_status_count[status] = 0
+                m.validator_status_count[status] += 1
+ 
+                m.validator_slashes += int(validator.beacon_validator.validator.slashed == True)
 
                 # Everything below implies to have a validator that is
                 # active on the beacon chain, this prevents
@@ -153,25 +158,25 @@ class ValidatorWatcher:
                 # for each set of labels even if they aren't validating
                 # (in which case the validator attributes are None).
 
-                suboptimal_source_count[label] += int(validator.suboptimal_source == True)
-                suboptimal_target_count[label] += int(validator.suboptimal_target == True)
-                suboptimal_head_count[label] += int(validator.suboptimal_head == True)
-                optimal_source_count[label] += int(validator.suboptimal_source == False)
-                optimal_target_count[label] += int(validator.suboptimal_target == False)
-                optimal_head_count[label] += int(validator.suboptimal_head == False)
+                m.suboptimal_source_count += int(validator.suboptimal_source == True)
+                m.suboptimal_target_count += int(validator.suboptimal_target == True)
+                m.suboptimal_head_count += int(validator.suboptimal_head == True)
+                m.optimal_source_count += int(validator.suboptimal_source == False)
+                m.optimal_target_count += int(validator.suboptimal_target == False)
+                m.optimal_head_count += int(validator.suboptimal_head == False)
 
-                ideal_consensus_reward[label] += validator.ideal_consensus_reward or 0
-                actual_consensus_reward[label] += validator.actual_consensus_reward or 0
+                m.ideal_consensus_reward += validator.ideal_consensus_reward or 0
+                m.actual_consensus_reward += validator.actual_consensus_reward or 0
 
-                missed_attestations[label] += int(validator.missed_attestation == True)
-                missed_consecutive_attestations[label] += int(validator.previous_missed_attestation == True and validator.missed_attestation == True)
+                m.missed_attestations += int(validator.missed_attestation == True)
+                m.missed_consecutive_attestations += int(validator.previous_missed_attestation == True and validator.missed_attestation == True)
 
-                proposed_blocks[label] += validator.proposed_blocks_total
-                missed_blocks[label] += validator.missed_blocks_total
-                proposed_finalized_blocks[label] += validator.proposed_blocks_finalized_total
-                missed_finalized_blocks[label] += validator.missed_blocks_finalized_total
+                m.proposed_blocks += validator.proposed_blocks_total
+                m.missed_blocks += validator.missed_blocks_total
+                m.proposed_finalized_blocks += validator.proposed_blocks_finalized_total
+                m.missed_finalized_blocks += validator.missed_blocks_finalized_total
 
-                future_blocks[label] += validator.future_blocks_proposal
+                m.future_blocks += validator.future_blocks_proposal
 
             # Here we reset the counters for the next run, we do not
             # touch gauges though.  This ensures we handle properly
@@ -184,38 +189,39 @@ class ValidatorWatcher:
             validator.future_blocks_proposal = 0
 
 
-        for label in labels:
-            for status in statuses:
-                value = validator_status_count.get(label, {}).get(status, 0)
+        for label, m in metrics.items():
+            for status in Validators.DataItem.StatusEnum:
+                value = m.validator_status_count.get(status, 0)
                 self._metrics.eth_validator_status_count.labels(label, status, network).set(value)
 
-        for label in labels:
-            self._metrics.eth_suboptimal_sources_rate.labels(label, network).set(pct(suboptimal_source_count[label], optimal_source_count[label]))
-            self._metrics.eth_suboptimal_targets_rate.labels(label, network).set(pct(suboptimal_target_count[label], optimal_target_count[label]))
-            self._metrics.eth_suboptimal_heads_rate.labels(label, network).set(pct(suboptimal_head_count[label], optimal_head_count[label]))
+        for label, m in metrics.items():
+            self._metrics.eth_suboptimal_sources_rate.labels(label, network).set(pct(m.suboptimal_source_count, m.optimal_source_count))
+            self._metrics.eth_suboptimal_targets_rate.labels(label, network).set(pct(m.suboptimal_target_count, m.optimal_target_count))
+            self._metrics.eth_suboptimal_heads_rate.labels(label, network).set(pct(m.suboptimal_head_count, m.optimal_head_count))
 
-            self._metrics.eth_ideal_consensus_rewards_gwei.labels(label, network).set(ideal_consensus_reward[label])
-            self._metrics.eth_actual_consensus_rewards_gwei.labels(label, network).set(actual_consensus_reward[label])
-            self._metrics.eth_consensus_rewards_rate.labels(label, network).set(pct(actual_consensus_reward[label], ideal_consensus_reward[label], True))
+            self._metrics.eth_ideal_consensus_rewards_gwei.labels(label, network).set(m.ideal_consensus_reward)
+            self._metrics.eth_actual_consensus_rewards_gwei.labels(label, network).set(m.actual_consensus_reward)
+            self._metrics.eth_consensus_rewards_rate.labels(label, network).set(pct(m.actual_consensus_reward, m.ideal_consensus_reward, True))
 
-            self._metrics.eth_missed_attestations_count.labels(label, network).set(missed_attestations[label])
-            self._metrics.eth_missed_consecutive_attestations_count.labels(label, network).set(missed_consecutive_attestations[label])
-            self._metrics.eth_slashed_validators_count.labels(label, network).set(validator_slashes[label])
+            self._metrics.eth_missed_attestations_count.labels(label, network).set(m.missed_attestations)
+            self._metrics.eth_missed_consecutive_attestations_count.labels(label, network).set(m.missed_consecutive_attestations)
+            self._metrics.eth_slashed_validators_count.labels(label, network).set(m.validator_slashes)
 
             # Here we inc, it's fine since we previously reset the
             # counters on each run; we can't use set because those
             # metrics are counters.
 
-            self._metrics.eth_block_proposals_head_total.labels(label, network).inc(proposed_blocks[label])
-            self._metrics.eth_missed_block_proposals_head_total.labels(label, network).inc(missed_blocks[label])
-            self._metrics.eth_block_proposals_finalized_total.labels(label, network).inc(proposed_finalized_blocks[label])
-            self._metrics.eth_missed_block_proposals_finalized_total.labels(label, network).inc(missed_finalized_blocks[label])
+            self._metrics.eth_block_proposals_head_total.labels(label, network).inc(m.proposed_blocks)
+            self._metrics.eth_missed_block_proposals_head_total.labels(label, network).inc(m.missed_blocks)
+            self._metrics.eth_block_proposals_finalized_total.labels(label, network).inc(m.proposed_finalized_blocks)
+            self._metrics.eth_missed_block_proposals_finalized_total.labels(label, network).inc(m.missed_finalized_blocks)
 
-            self._metrics.eth_future_block_proposals.labels(label, network).set(future_blocks[label])
+            self._metrics.eth_future_block_proposals.labels(label, network).set(m.future_blocks)
 
         if not self._metrics_started:
             start_http_server(self._cfg.metrics_port)
             self._metrics_started = True
+
 
     def run(self) -> None:
         """Run the Ethereum Validator Watcher.
@@ -240,12 +246,12 @@ class ValidatorWatcher:
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
                 watched_validators.process_epoch(beacon_validators)
 
-            if validators_liveness == None or (slot % SLOT_FOR_MISSED_ATTESTATIONS_PROCESS == 0):
+            if validators_liveness == None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS):
                 logging.info('Processing validator liveness')
                 validators_liveness = self._beacon.get_validators_liveness(epoch - 1, watched_validators.get_indexes())
                 watched_validators.process_liveness(validators_liveness)
-
-            if rewards == None or (slot % SLOT_FOR_REWARDS_PROCESS == 0):
+ 
+            if rewards == None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_REWARDS_PROCESS):
                 logging.info('Processing rewards')
                 rewards = self._beacon.get_rewards(epoch - 2)
                 process_rewards(watched_validators, rewards)
@@ -263,7 +269,7 @@ class ValidatorWatcher:
                 last_processed_finalized_slot += 1
             last_processed_finalized_slot = last_finalized_slot
 
-            if (slot % SLOT_FOR_CONFIG_RELOAD == 0):
+            if (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_CONFIG_RELOAD):
                 logging.info('Processing configuration update')
                 self._reload_config()
                 watched_validators.process_config(self._cfg)
