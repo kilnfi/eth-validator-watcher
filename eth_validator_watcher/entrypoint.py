@@ -2,7 +2,6 @@
 """
 
 from collections import defaultdict
-from dataclasses import dataclass, field
 from functools import partial
 from pathlib import Path
 from prometheus_client import start_http_server
@@ -17,7 +16,7 @@ from .coinbase import  get_current_eth_price
 from .clock import BeaconClock
 from .beacon import Beacon, NoBlockError
 from .config import load_config, WatchedKeyConfig
-from .metrics import get_prometheus_metrics
+from .metrics import get_prometheus_metrics, compute_validator_metrics, AggregatedMetricsByLabel
 from .blocks import process_block, process_finalized_block, process_future_blocks
 from .models import BlockIdentierType, Validators
 from .rewards import process_rewards
@@ -97,96 +96,15 @@ class ValidatorWatcher:
         # there is a log of entries here, this makes code here a bit
         # more complex and entangled.
 
-        @dataclass
-        class MetricsByLabel():
-            """Helper class to reduce the number of look-ups per label in the validators loop.
+        metrics = compute_validator_metrics(watched_validators.validators())
 
-            This reduces the number of look-ups and processing time by ~10x.
-            """
-            # Count of validators by status
-            validator_status_count: dict[str, int] = field(default_factory=dict)
-
-            # Gauges
-            suboptimal_source_count: int = 0
-            suboptimal_target_count: int = 0
-            suboptimal_head_count: int = 0
-            optimal_source_count: int = 0
-            optimal_target_count: int = 0
-            optimal_head_count: int = 0
-            validator_slashes: int = 0
-
-            # Gauges
-            ideal_consensus_reward: int = 0
-            actual_consensus_reward: int = 0
-            missed_attestations: int = 0
-            missed_consecutive_attestations: int = 0
-
-            # Counters
-            proposed_blocks: int = 0
-            missed_blocks: int = 0
-            proposed_finalized_blocks: int = 0
-            missed_finalized_blocks: int = 0
-
-            # Gauge
-            future_blocks: int = 0
-
-
-        metrics = defaultdict(MetricsByLabel)
-
-        for validator in watched_validators.validators():
-
-            status = str(validator.status)
-
-            for label in validator.labels:
-                m = metrics[label]
-
-                if status not in m.validator_status_count:
-                    m.validator_status_count[status] = 0
-                m.validator_status_count[status] += 1
- 
-                m.validator_slashes += int(validator.beacon_validator.validator.slashed == True)
-
-                # Everything below implies to have a validator that is
-                # active on the beacon chain, this prevents
-                # miscounting missed attestation for instance.
-
-                if not validator.is_validating():
-                    continue
-
-                # Looks weird but we want to explicitly have labels set
-                # for each set of labels even if they aren't validating
-                # (in which case the validator attributes are None).
-
-                m.suboptimal_source_count += int(validator.suboptimal_source == True)
-                m.suboptimal_target_count += int(validator.suboptimal_target == True)
-                m.suboptimal_head_count += int(validator.suboptimal_head == True)
-                m.optimal_source_count += int(validator.suboptimal_source == False)
-                m.optimal_target_count += int(validator.suboptimal_target == False)
-                m.optimal_head_count += int(validator.suboptimal_head == False)
-
-                m.ideal_consensus_reward += validator.ideal_consensus_reward or 0
-                m.actual_consensus_reward += validator.actual_consensus_reward or 0
-
-                m.missed_attestations += int(validator.missed_attestation == True)
-                m.missed_consecutive_attestations += int(validator.previous_missed_attestation == True and validator.missed_attestation == True)
-
-                m.proposed_blocks += validator.proposed_blocks_total
-                m.missed_blocks += validator.missed_blocks_total
-                m.proposed_finalized_blocks += validator.proposed_blocks_finalized_total
-                m.missed_finalized_blocks += validator.missed_blocks_finalized_total
-
-                m.future_blocks += validator.future_blocks_proposal
-
-            # Here we reset the counters for the next run, we do not
-            # touch gauges though.  This ensures we handle properly
-            # changes of the labelling in real-time.
-
+        # To remove...
+        for _, validator in watched_validators.validators().items():
             validator.proposed_blocks_total = 0
             validator.missed_blocks_total = 0
             validator.proposed_blocks_finalized_total = 0
             validator.missed_blocks_finalized_total = 0
             validator.future_blocks_proposal = 0
-
 
         for label, m in metrics.items():
             for status in Validators.DataItem.StatusEnum:
