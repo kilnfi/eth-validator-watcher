@@ -37,12 +37,12 @@ class Beacon:
         url        : URL where the beacon can be reached
         timeout_sec: timeout in seconds used to query the beacon
         """
-        self.__url = url
-        self.__timeout_sec = timeout_sec
-        self.__http_retry_not_found = Session()
-        self.__http = Session()
-        self.__first_liveness_call = True
-        self.__first_rewards_call = True
+        self._url = url
+        self._timeout_sec = timeout_sec
+        self._http_retry_not_found = Session()
+        self._http = Session()
+        self._first_liveness_call = True
+        self._first_rewards_call = True
 
         adapter_retry_not_found = HTTPAdapter(
             max_retries=Retry(
@@ -67,51 +67,51 @@ class Beacon:
             )
         )
 
-        self.__http_retry_not_found.mount("http://", adapter_retry_not_found)
-        self.__http_retry_not_found.mount("https://", adapter_retry_not_found)
+        self._http_retry_not_found.mount("http://", adapter_retry_not_found)
+        self._http_retry_not_found.mount("https://", adapter_retry_not_found)
 
-        self.__http.mount("http://", adapter)
-        self.__http.mount("https://", adapter)
+        self._http.mount("http://", adapter)
+        self._http.mount("https://", adapter)
 
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_fixed(3),
         retry=retry_if_exception_type(ChunkedEncodingError),
     )
-    def __get_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
+    def _get_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
         """Wrapper around requests.get() with retry on 404"""
-        return self.__http_retry_not_found.get(*args, **kwargs)
+        return self._http_retry_not_found.get(*args, **kwargs)
 
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_fixed(3),
         retry=retry_if_exception_type(ChunkedEncodingError),
     )
-    def __get(self, *args: Any, **kwargs: Any) -> Response:
+    def _get(self, *args: Any, **kwargs: Any) -> Response:
         """Wrapper around requests.get()"""
-        return self.__http.get(*args, **kwargs)
+        return self._http.get(*args, **kwargs)
 
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_fixed(3),
         retry=retry_if_exception_type(ChunkedEncodingError),
     )
-    def __post_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
+    def _post_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
         """Wrapper around requests.get() with retry on 404"""
-        return self.__http_retry_not_found.post(*args, **kwargs)
+        return self._http_retry_not_found.post(*args, **kwargs)
 
     def get_url(self) -> str:
         """Return the URL of the beacon."""
-        return self.__url
+        return self._url
 
     def get_timeout_sec(self) -> int:
         """Return the timeout in seconds used to query the beacon."""
-        return self.__timeout_sec
+        return self._timeout_sec
 
     def get_genesis(self) -> Genesis:
         """Get genesis data."""
-        response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/beacon/genesis", timeout=self.__timeout_sec
+        response = self._get_retry_not_found(
+            f"{self._url}/eth/v1/beacon/genesis", timeout=self._timeout_sec
         )
 
         response.raise_for_status()
@@ -120,8 +120,8 @@ class Beacon:
 
     def get_spec(self) -> Spec:
         """Get spec data."""
-        response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/config/spec", timeout=self.__timeout_sec
+        response = self._get_retry_not_found(
+            f"{self._url}/eth/v1/config/spec", timeout=self._timeout_sec
         )
 
         response.raise_for_status()
@@ -136,8 +136,8 @@ class Beacon:
                           retrieve
         """
         try:
-            response = self.__get(
-                f"{self.__url}/eth/v1/beacon/headers/{block_identifier}", timeout=self.__timeout_sec
+            response = self._get(
+                f"{self._url}/eth/v1/beacon/headers/{block_identifier}", timeout=self._timeout_sec
             )
             response.raise_for_status()
         except HTTPError as e:
@@ -155,8 +155,8 @@ class Beacon:
 
         epoch: Epoch corresponding to the proposer duties to retrieve
         """
-        response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/validator/duties/proposer/{epoch}", timeout=self.__timeout_sec
+        response = self._get_retry_not_found(
+            f"{self._url}/eth/v1/validator/duties/proposer/{epoch}", timeout=self._timeout_sec
         )
 
         response.raise_for_status()
@@ -164,8 +164,8 @@ class Beacon:
         return ProposerDuties.model_validate_json(response.text)
 
     def get_validators(self, slot: int) -> Validators:
-        response = self.__get_retry_not_found(
-            f"{self.__url}/eth/v1/beacon/states/{slot}/validators", timeout=self.__timeout_sec
+        response = self._get_retry_not_found(
+            f"{self._url}/eth/v1/beacon/states/{slot}/validators", timeout=self._timeout_sec
         )
 
         response.raise_for_status()
@@ -178,10 +178,10 @@ class Beacon:
         Parameters:
         epoch: Epoch corresponding to the rewards to retrieve.
         """
-        response = self.__post_retry_not_found(
-            f"{self.__url}/eth/v1/beacon/rewards/attestations/{epoch}",
+        response = self._post_retry_not_found(
+            f"{self._url}/eth/v1/beacon/rewards/attestations/{epoch}",
             json=([]),
-            timeout=self.__timeout_sec,
+            timeout=self._timeout_sec,
         )
 
         response.raise_for_status()
@@ -194,10 +194,10 @@ class Beacon:
         Parameters:
         epoch: Epoch corresponding to the validators liveness to retrieve
         """
-        response = self.__post_retry_not_found(
-            f"{self.__url}/eth/v1/validator/liveness/{epoch}",
+        response = self._post_retry_not_found(
+            f"{self._url}/eth/v1/validator/liveness/{epoch}",
             json=[f"{i}" for i in indexes],
-            timeout=self.__timeout_sec,
+            timeout=self._timeout_sec,
         )
 
         response.raise_for_status()

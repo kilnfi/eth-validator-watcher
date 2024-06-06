@@ -34,7 +34,6 @@ from .watched_validators import WatchedValidators
 app = typer.Typer(add_completion=False)
 
 
-
 class ValidatorWatcher:
     """Ethereum Validator Watcher.
     """
