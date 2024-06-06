@@ -17,7 +17,7 @@ exporter.
 
 import logging
 
-from typing import Optional, Generator
+from typing import Optional
 
 from .config import Config, WatchedKeyConfig
 from .models import Validators, ValidatorsLivenessResponse
@@ -162,10 +162,9 @@ class WatchedValidators:
         """Get all validator indexes."""
         return list(self._validators.keys())
 
-    def validators(self) -> Generator[WatchedValidator, None, None]:
+    def validators(self) -> dict[int, WatchedValidator]:
         """Iterate over all validators."""
-        for validator in self._validators.values():
-            yield validator
+        return self._validators
 
     def process_config(self, config: Config):
         """Process a config update
