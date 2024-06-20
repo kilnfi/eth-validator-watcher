@@ -6,7 +6,7 @@ from tests import assets
 
 
 def test_null_config() -> None:
-    path = Path(assets.__file__).parent / "config.null.yaml"
+    path = str(Path(assets.__file__).parent / "config.null.yaml")
     config = load_config(path)
 
     assert config.beacon_url is None
@@ -23,7 +23,7 @@ def test_null_config() -> None:
 
 
 def test_empty_config() -> None:
-    path = Path(assets.__file__).parent / "config.empty.yaml"
+    path = str(Path(assets.__file__).parent / "config.empty.yaml")
     config = load_config(path)
 
     assert config.beacon_url is None
@@ -40,7 +40,7 @@ def test_empty_config() -> None:
 
 
 def test_filled_config() -> None:
-    path = Path(assets.__file__).parent / "config.yaml"
+    path = str(Path(assets.__file__).parent / "config.yaml")
     config = load_config(path)
 
     assert config.beacon_url == 'http://localhost:5051/'
@@ -71,7 +71,7 @@ def test_filled_config_overriden() -> None:
     os.environ['eth_watcher_liveness_file'] = '/tmp/override-liveness-file'
     os.environ['eth_watcher_network'] = 'sepolia'
 
-    path = Path(assets.__file__).parent / "config.yaml"
+    path = str(Path(assets.__file__).parent / "config.yaml")
     config = load_config(path)
 
     assert config.beacon_url == 'http://override-beacon/'

@@ -20,6 +20,8 @@ pydantic-yaml = "^1.2.0"
 pydantic-settings = "^2.1.0"
 cachetools = "^5.3.3"
 
+snakeviz = "^2.2.0"
+viztracer = "^0.16.3"
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.2.0"
 black = "^23.3.0"
