@@ -1,3 +1,4 @@
+import logging
 import os
 
 from collections import defaultdict
@@ -10,7 +11,7 @@ from prometheus_client import Counter, Gauge
 from .watched_validators import WatchedValidator
 
 
-PROCESSING_CHUNK_SIZE = 100000
+NB_THREADS = 4
 
 
 # This is global because Prometheus metrics don't support registration
@@ -92,7 +93,7 @@ def _aggregate_validator_metrics(validators: list[WatchedValidator]) -> dict[str
     Returns:
     dict[str, AggregatedMetricsByLabel]
     """
-    print(f'New thread aggregating data from {len(validators)} validators')
+    logging.info(f'New thread aggregating data from {len(validators)} validators')
 
     metrics = defaultdict(AggregatedMetricsByLabel)
 
@@ -157,12 +158,12 @@ def compute_validator_metrics(validators: dict[int, WatchedValidator]) -> dict[s
     with Pool() as p:
         v = validators.values()
         threads = []
-        for batch in batched(v, int(len(v) / os.cpu_count())):
+        for batch in batched(v, int(len(v) / NB_THREADS)):
             threads.append(p.apply_async(_aggregate_validator_metrics, (batch, )))
 
         for thread in threads:
             entry = thread.get()
-            print(f'Merging results from a thread')
+            logging.info(f'Aggregating results from a thread')
             for label, metric in entry.items():
                 m = metrics[label]
 

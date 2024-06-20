@@ -49,6 +49,7 @@ class ValidatorWatcher:
         self._metrics_started = False
         self._cfg_path = cfg_path
         self._cfg = None
+        self._cfg_last_modified = None
         self._beacon = None
         self._slot_duration = None
         self._genesis = None
@@ -62,6 +63,7 @@ class ValidatorWatcher:
             genesis,
             self._spec.data.SECONDS_PER_SLOT,
             self._spec.data.SLOTS_PER_EPOCH,
+            self._cfg.start_at
         )
 
         self._schedule = ProposerSchedule(self._spec)
@@ -70,7 +72,9 @@ class ValidatorWatcher:
         """Reload the configuration file.
         """
         try:
-            self._cfg = load_config(self._cfg_path)
+            if not self._cfg or self._cfg_path.stat().st_mtime != self._cfg_last_modified:
+                self._cfg = load_config(str(self._cfg_path))
+                self._cfg_last_modified = self._cfg_path.stat().st_mtime
         except ValidationError as err:
             raise typer.BadParameter(f'Invalid configuration file: {err}')
 
@@ -178,7 +182,6 @@ class ValidatorWatcher:
             process_block(watched_validators, self._schedule, slot, has_block)
             process_future_blocks(watched_validators, self._schedule, slot)
 
-            last_finalized_slot = self._beacon.get_header(BlockIdentierType.FINALIZED).data.header.message.slot
             while last_processed_finalized_slot and last_processed_finalized_slot < last_finalized_slot:
                 logging.info(f'Processing finalized slot from {last_processed_finalized_slot or last_finalized_slot} to {last_finalized_slot}')
                 has_block = self._beacon.has_block_at_slot(last_processed_finalized_slot)
@@ -186,19 +189,22 @@ class ValidatorWatcher:
                 last_processed_finalized_slot += 1
             last_processed_finalized_slot = last_finalized_slot
 
+            logging.info('Updating Prometheus metrics')
+            self._update_metrics(watched_validators, epoch, slot)
+
             if (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_CONFIG_RELOAD):
                 logging.info('Processing configuration update')
                 self._reload_config()
                 watched_validators.process_config(self._cfg)
 
-            logging.info('Updating Prometheus metrics')
-            self._update_metrics(watched_validators, epoch, slot)
-
             self._schedule.clear(slot, last_processed_finalized_slot)
-            self._clock.maybe_wait_for_slot(slot + 1, time.time())
+            self._clock.maybe_wait_for_slot(slot + 1)
 
             slot += 1
             epoch = slot // self._spec.data.SLOTS_PER_EPOCH
+
+            # Development only
+            break
 
 
 @app.command()

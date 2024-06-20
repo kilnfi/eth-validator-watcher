@@ -11,11 +11,27 @@ class BeaconClock:
     slot.
     """
 
-    def __init__(self, genesis: int, slot_duration: int, slots_per_epoch: int) -> None:
+    def __init__(self, genesis: int, slot_duration: int, slots_per_epoch: int, start_at: int | None) -> None:
         self._genesis = genesis
         self._slot_duration = slot_duration
         self._slots_per_epoch = slots_per_epoch
         self._lag_seconds = 4.0
+        self._init_at = time.time()
+        self._start_at = start_at
+
+        if start_at:
+            logging.info(f'Starting clock at timestamp @ {start_at}')
+
+    def now(self) -> float:
+        """Get the current time in seconds since the epoch.
+
+        Returns:
+        --------
+        float: Current time in seconds since the epoch.
+        """
+        if self._start_at is not None:
+            return self._start_at + time.time() - self._init_at
+        return time.time()
 
     def get_current_epoch(self) -> int:
         """Get the current epoch.
@@ -47,19 +63,18 @@ class BeaconClock:
         --------
         int: Current slot.
         """
-        return int((time.time() - self._lag_seconds - self._genesis) // self._slot_duration)
+        return int((self.now() - self._lag_seconds - self._genesis) // self._slot_duration)
 
-    def maybe_wait_for_slot(self, slot: int, now: float) -> None:
+    def maybe_wait_for_slot(self, slot: int) -> None:
         """Wait until the given slot is reached.
 
         Args:
         -----
         slot: int
             Slot to wait for.
-        now: float
-            Current time in seconds since the epoch.
         """
         target = self._genesis + slot * self._slot_duration + self._lag_seconds
+        now = self.now()
         if now < target:
             logging.info(f'Waiting {target - now:.2f} seconds for slot {slot}')
             time.sleep(target - now)
