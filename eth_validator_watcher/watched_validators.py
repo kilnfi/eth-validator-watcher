@@ -126,6 +126,16 @@ class WatchedValidator:
         self.previous_missed_attestation = self.missed_attestation
         self.missed_attestation = liveness.is_live != True
 
+    def reset_counters(self):
+        """Reset the counters for the next run.
+        """
+        self.missed_blocks_total = 0
+        self.missed_blocks_finalized_total = 0
+        self.proposed_blocks_total = 0
+        self.proposed_blocks_finalized_total = 0
+        self.future_blocks_proposal = 0
+
+
 
 class WatchedValidators:
     """Wrapper around watched validators.
