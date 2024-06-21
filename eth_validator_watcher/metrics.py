@@ -7,6 +7,7 @@ from itertools import batched
 
 from prometheus_client import Counter, Gauge
 
+from .utils import LABEL_SCOPE_WATCHED
 from .watched_validators import WatchedValidator
 
 
@@ -77,7 +78,7 @@ class AggregatedMetricsByLabel():
     future_blocks: int = 0
 
 
-def compute_validator_metrics(validators: dict[int, WatchedValidator]) -> dict[str, AggregatedMetricsByLabel]:
+def compute_validator_metrics(validators: dict[int, WatchedValidator], slot: int) -> dict[str, AggregatedMetricsByLabel]:
     """Compute the metrics from a list of validators.
 
     Parameters:
@@ -123,12 +124,22 @@ def compute_validator_metrics(validators: dict[int, WatchedValidator]) -> dict[s
             m.missed_attestations += int(v.missed_attestation == True)
             m.missed_consecutive_attestations += int(v.previous_missed_attestation == True and v.missed_attestation == True)
 
-            m.proposed_blocks += v.proposed_blocks_total
-            m.missed_blocks += v.missed_blocks_total
-            m.proposed_finalized_blocks += v.proposed_blocks_finalized_total
-            m.missed_finalized_blocks += v.missed_blocks_finalized_total
+            m.proposed_blocks += len(v.proposed_blocks)
+            m.missed_blocks += len(v.missed_blocks)
+            m.proposed_finalized_blocks += len(v.proposed_blocks_finalized)
+            m.missed_finalized_blocks += len(v.missed_blocks_finalized)
 
-            m.future_blocks += v.future_blocks_proposal
+            m.future_blocks += len(v.future_blocks_proposal)
+
+            if label == LABEL_SCOPE_WATCHED:
+                for proposed in v.proposed_blocks:
+                    logging.info(f"✨ Validator {v.pubkey} proposed block at head slot={proposed} ✨")
+                for proposed in v.proposed_blocks_finalized:
+                    logging.info(f"✅ Validator {v.pubkey} proposed block at finalized slot={proposed} ✅")
+                for miss in v.missed_blocks:
+                    logging.info(f"❗Validator {v.pubkey} missed blocks at head slot={miss} ❗")
+                for miss in v.missed_blocks_finalized:
+                    logging.info(f"❌ Validator {v.pubkey} missed blocks at finalized slot={miss} ❌")
 
         v.reset_counters()
  
