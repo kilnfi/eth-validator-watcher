@@ -13,6 +13,11 @@ The code is provided as-is with no warranties.
 
 ## Overview Dashboard
 
+The [overview dashboard](grafana/dashboard-breakdown.json) shows an
+overview of the entire set of watched keys and how they relate to the
+rest of the network (asset under management, state of keys,
+performances).
+
 ![overview-dashboard](docs/img/watcher-overview.png)
 
 ## Breakdown Dashboard
