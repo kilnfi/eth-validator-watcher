@@ -102,14 +102,6 @@ class ValidatorWatcher:
 
         metrics = compute_validator_metrics(watched_validators.validators())
 
-        # To remove...
-        for _, validator in watched_validators.validators().items():
-            validator.proposed_blocks_total = 0
-            validator.missed_blocks_total = 0
-            validator.proposed_blocks_finalized_total = 0
-            validator.missed_blocks_finalized_total = 0
-            validator.future_blocks_proposal = 0
-
         for label, m in metrics.items():
             for status in Validators.DataItem.StatusEnum:
                 value = m.validator_status_count.get(status, 0)
@@ -202,9 +194,6 @@ class ValidatorWatcher:
 
             slot += 1
             epoch = slot // self._spec.data.SLOTS_PER_EPOCH
-
-            # Development only
-            break
 
 
 @app.command()

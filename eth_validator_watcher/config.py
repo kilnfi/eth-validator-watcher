@@ -13,26 +13,19 @@ class WatchedKeyConfig(BaseModel):
     """
     public_key: str
     labels: Optional[list[str]] = None
-    fee_recipient: Optional[str] = None
 
 
 class Config(BaseSettings):
     """Configuration of the Ethereum Validator Watcher.
     """
     model_config = SettingsConfigDict(case_sensitive=True, env_prefix='eth_watcher_')
+
     network: Optional[str] = None
     beacon_url: Optional[str] = None
-    beacon_timeout_sec: int = 90
-    execution_url: Optional[str] = None
-    web3signer_url: Optional[str] = None
-    default_fee_recipient: Optional[str] = None
-    slack_channel: Optional[str] = None
-    slack_token: Optional[str] = None
-    relays: Optional[List[str]] = None
-    liveness_file: Optional[str] = None
-    watched_keys: Optional[List[WatchedKeyConfig]] = None
+    beacon_timeout_sec: Optional[int] = 90
     metrics_port: Optional[int] = 8000
     start_at: Optional[int] = None
+    watched_keys: Optional[List[WatchedKeyConfig]] = None
 
 
 def load_config(config_file: str) -> Config:
@@ -50,6 +43,8 @@ def load_config(config_file: str) -> Config:
     with open(config_file, 'r') as fh:
         logging.info(f'parsing configuration file {config_file}')
 
+        # We support json for large configuration files (500 MiB)
+        # which can take time to parse with PyYAML.
         if config_file.endswith('.json'):
             config = json.load(fh)
         else:
