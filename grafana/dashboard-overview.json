@@ -1581,7 +1581,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1694,7 +1695,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1808,7 +1810,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1848,7 +1851,7 @@
           "editorMode": "code",
           "expr": "max(eth_suboptimal_heads_rate{scope=\"scope:network\", network=\"${network}\"})",
           "instant": false,
-          "legendFormat": "scope:unwatched",
+          "legendFormat": "scope:network",
           "range": true,
           "refId": "A"
         },
@@ -1922,7 +1925,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1962,7 +1966,7 @@
           "editorMode": "code",
           "expr": "max(eth_missed_attestations{scope=\"scope:network\", network=\"${network}\"})",
           "instant": false,
-          "legendFormat": "scope:unwatched",
+          "legendFormat": "scope:network",
           "range": true,
           "refId": "A"
         },
@@ -2036,7 +2040,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2076,7 +2081,7 @@
           "editorMode": "code",
           "expr": "max(eth_missed_consecutive_attestations{scope=\"scope:network\", network=\"${network}\"})",
           "instant": false,
-          "legendFormat": "scope:unwatched",
+          "legendFormat": "scope:network",
           "range": true,
           "refId": "A"
         },
@@ -2150,7 +2155,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2190,7 +2196,7 @@
           "editorMode": "code",
           "expr": "max(increase(eth_missed_block_proposals_finalized_total{scope=\"scope:network\", network=\"${network}\"}[24h]))",
           "instant": false,
-          "legendFormat": "scope:unwatched",
+          "legendFormat": "scope:network",
           "range": true,
           "refId": "A"
         },
@@ -2262,6 +2268,6 @@
   "timezone": "utc",
   "title": "Ethereum Kiln Overview",
   "uid": "acc6771c-f2fb-4735-b747-6eb197064745",
-  "version": 2,
+  "version": 4,
   "weekStart": "monday"
 }
