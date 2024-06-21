@@ -133,25 +133,6 @@ class BlockIdentierType(StrEnum):
     FINALIZED = "finalized"
 
 
-class EthGetBlockByHashRequest(BaseModel):
-    jsonrpc: str = "2.0"
-    method: str = "eth_getBlockByHash"
-    params: list
-    id: str = "1"
-
-
-class ExecutionBlock(BaseModel):
-    class Result(BaseModel):
-        class Transaction(BaseModel):
-            to: str | None
-
-        transactions: list[Transaction]
-
-    jsonrpc: str
-    id: int
-    result: Result
-
-
 class Rewards(BaseModel):
     class Data(BaseModel):
         class IdealReward(BaseModel):
