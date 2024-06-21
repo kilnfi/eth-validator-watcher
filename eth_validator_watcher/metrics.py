@@ -130,12 +130,7 @@ def compute_validator_metrics(validators: dict[int, WatchedValidator]) -> dict[s
 
             m.future_blocks += v.future_blocks_proposal
 
-        # Reset the counters for the next run.
-        v.proposed_blocks_total = 0
-        v.missed_blocks_total = 0
-        v.proposed_blocks_finalized_total = 0
-        v.missed_blocks_finalized_total = 0
-        v.future_blocks_proposal = 0
+        v.reset_counters()
  
     return metrics
                 

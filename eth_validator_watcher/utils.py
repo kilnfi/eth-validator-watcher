@@ -9,12 +9,15 @@ from slack_sdk import WebClient
 
 from .config import WatchedKeyConfig
 
+# Slots at which processing is performed.
 SLOT_FOR_CONFIG_RELOAD = 15
 SLOT_FOR_MISSED_ATTESTATIONS_PROCESS = 16
 SLOT_FOR_REWARDS_PROCESS = 17
+
+# Default set of existing scopes.
 LABEL_SCOPE_NETWORK="scope:network"
 LABEL_SCOPE_WATCHED="scope:watched"
-LABEL_SCOPE_UNWATCHED="scope:unwatched"
+LABEL_SCOPE_UNWATCHED="scope:all-network"
 
 
 def pct(a: int, b: int, inclusive: bool=False) -> float:
