@@ -100,7 +100,7 @@ class ValidatorWatcher:
         # there is a log of entries here, this makes code here a bit
         # more complex and entangled.
 
-        metrics = compute_validator_metrics(watched_validators.validators())
+        metrics = compute_validator_metrics(watched_validators.validators(), slot)
 
         for label, m in metrics.items():
             for status in Validators.DataItem.StatusEnum:

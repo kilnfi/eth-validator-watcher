@@ -62,11 +62,11 @@ class WatchedValidator:
 
         # Counters (incremented continuously) ; implies to use rates()
         # on the Prometheus side to have meaningful graphs.
-        self.missed_blocks_total : int = 0
-        self.missed_blocks_finalized_total : int = 0
-        self.proposed_blocks_total : int = 0
-        self.proposed_blocks_finalized_total : int = 0
-        self.future_blocks_proposal : int = 0
+        self.missed_blocks : list = []
+        self.missed_blocks_finalized : list = []
+        self.proposed_blocks : list = []
+        self.proposed_blocks_finalized : list = []
+        self.future_blocks_proposal : list = []
 
     @property
     def pubkey(self) -> str:
@@ -129,11 +129,11 @@ class WatchedValidator:
     def reset_counters(self):
         """Reset the counters for the next run.
         """
-        self.missed_blocks_total = 0
-        self.missed_blocks_finalized_total = 0
-        self.proposed_blocks_total = 0
-        self.proposed_blocks_finalized_total = 0
-        self.future_blocks_proposal = 0
+        self.missed_blocks.clear()
+        self.missed_blocks_finalized.clear()
+        self.proposed_blocks.clear()
+        self.proposed_blocks_finalized.clear()
+        self.future_blocks_proposal.clear()
 
 
 
