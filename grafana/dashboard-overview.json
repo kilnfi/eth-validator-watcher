@@ -1,4 +1,59 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "11.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -25,7 +80,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 5,
+  "id": null,
   "links": [
     {
       "asDropdown": false,
@@ -58,7 +113,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "gridPos": {
@@ -84,7 +139,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Ethereum epoch",
       "fieldConfig": {
@@ -135,7 +190,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_epoch{network=\"${network}\"})",
@@ -151,7 +206,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Ethereum slot",
       "fieldConfig": {
@@ -202,7 +257,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_slot{network=\"${network}\"})",
@@ -218,7 +273,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -266,7 +321,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_slot{network=\"${network}\"}) % 32",
@@ -281,7 +336,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Estimation of the entry queue time. Add ~12 hours for actual entry time.",
       "fieldConfig": {
@@ -332,7 +387,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "(max(eth_validator_status_count{scope=\"scope:network\", status=\"pending_queued\", network=\"${network}\"} or vector(0)) / 8) * (12*32)",
@@ -347,7 +402,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -396,7 +451,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_current_price_dollars{network=\"${network}\"})",
@@ -424,7 +479,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -475,7 +530,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -489,7 +544,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_validator_status_count{status=~\"active_ongoing|active_exiting\", scope=\"scope:watched\", network=\"${network}\"} or vector(0))",
@@ -506,7 +561,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -560,7 +615,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_validator_status_count{status=~\"active_ongoing|active_exiting\", scope=\"scope:all-network\", network=\"${network}\"} or vector(0)) * max(eth_current_price_dollars{network=\"${network}\"}) * 32",
@@ -572,7 +627,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_validator_status_count{status=~\"active_ongoing|active_exiting\", scope=\"scope:watched\", network=\"${network}\"} or vector(0)) * max(eth_current_price_dollars{network=\"${network}\"}) * 32",
@@ -589,7 +644,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -652,7 +707,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(avg_over_time(eth_consensus_rewards_rate{scope=\"scope:all-network\", network=\"${network}\"}[$__interval]))",
@@ -665,7 +720,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(avg_over_time(eth_consensus_rewards_rate{scope=\"scope:watched\", network=\"${network}\"}[$__interval]))",
@@ -682,7 +737,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Block proposals expected from the watched keys within the next 2 epochs. This signal can be used to know when to upgrade/perform operations on your Ethereum validation stack.",
       "fieldConfig": {
@@ -732,7 +787,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(increase(eth_missed_block_proposals_finalized_total{scope=\"scope:all-network\", network=\"${network}\"}[$__range]))",
@@ -744,7 +799,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(increase(eth_missed_block_proposals_finalized_total{scope=\"scope:watched\", network=\"${network}\"}[$__range]))",
@@ -761,7 +816,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -827,7 +882,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -843,7 +898,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "100.0 - sum(avg_over_time(eth_suboptimal_heads_rate{scope=\"scope:watched\", network=\"${network}\"}[$__interval]))",
@@ -860,7 +915,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -911,7 +966,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -925,7 +980,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_validator_status_count{status=~\"pending_queued\", scope=\"scope:watched\", network=\"${network}\"} or vector(0))",
@@ -942,7 +997,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "Block proposals expected from the watched keys within the next 2 epochs. This signal can be used to know when to upgrade/perform operations on your Ethereum validation stack.",
       "fieldConfig": {
@@ -992,7 +1047,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_future_block_proposals{scope=\"scope:all-network\", network=\"${network}\"})",
@@ -1004,7 +1059,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_future_block_proposals{scope=\"scope:watched\", network=\"${network}\"})",
@@ -1021,7 +1076,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1087,7 +1142,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -1103,7 +1158,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "100.0 - sum(avg_over_time(eth_suboptimal_sources_rate{scope=\"scope:watched\", network=\"${network}\"}[$__interval]))",
@@ -1120,7 +1175,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1175,7 +1230,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "((max(eth_validator_status_count{status=~\"active_ongoing|active_exiting\", scope=\"scope:all-network\", network=\"${network}\"}) or vector(0)) / (max(eth_validator_status_count{status=~\"active_ongoing|active_exiting\", scope=\"scope:all-network\", network=\"${network}\"}) or vector(0))) * 100.0",
@@ -1187,7 +1242,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "((max(eth_validator_status_count{status=~\"active_ongoing|active_exiting\", scope=\"scope:watched\", network=\"${network}\"}) or vector(0)) / (max(eth_validator_status_count{status=~\"active_ongoing|active_exiting\", scope=\"scope:all-network\", network=\"${network}\"}) or vector(0))) * 100.0",
@@ -1204,7 +1259,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1255,7 +1310,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -1269,7 +1324,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_slashed_validators{scope=\"scope:watched\", network=\"${network}\"} or vector(0))",
@@ -1286,7 +1341,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1336,7 +1391,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(increase(eth_block_proposals_finalized_total{scope=\"scope:all-network\", network=\"${network}\"}[$__range]))",
@@ -1348,7 +1403,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(increase(eth_block_proposals_finalized_total{scope=\"scope:watched\", network=\"${network}\"}[$__range]))",
@@ -1365,7 +1420,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1431,7 +1486,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -1447,7 +1502,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "100.0 - sum(avg_over_time(eth_suboptimal_targets_rate{scope=\"scope:watched\", network=\"${network}\"}[$__interval]))",
@@ -1477,7 +1532,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1526,8 +1581,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1562,7 +1616,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_suboptimal_sources_rate{scope=\"scope:network\", network=\"${network}\"})",
@@ -1574,7 +1628,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_suboptimal_sources_rate{scope=\"scope:watched\", network=\"${network}\"})",
@@ -1591,7 +1645,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1640,8 +1694,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1676,7 +1729,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_suboptimal_targets_rate{scope=\"scope:network\", network=\"${network}\"})",
@@ -1688,7 +1741,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_suboptimal_targets_rate{scope=\"scope:watched\", network=\"${network}\"})",
@@ -1705,7 +1758,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1755,8 +1808,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1791,7 +1843,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_suboptimal_heads_rate{scope=\"scope:network\", network=\"${network}\"})",
@@ -1803,7 +1855,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_suboptimal_heads_rate{scope=\"scope:watched\", network=\"${network}\"})",
@@ -1820,7 +1872,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1870,8 +1922,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1906,7 +1957,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_missed_attestations{scope=\"scope:network\", network=\"${network}\"})",
@@ -1918,7 +1969,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_missed_attestations{scope=\"scope:watched\", network=\"${network}\"})",
@@ -1935,7 +1986,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -1985,8 +2036,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2021,7 +2071,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_missed_consecutive_attestations{scope=\"scope:network\", network=\"${network}\"})",
@@ -2033,7 +2083,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(eth_missed_consecutive_attestations{scope=\"scope:watched\", network=\"${network}\"})",
@@ -2050,7 +2100,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+        "uid": "${DS_PROMETHEUS}"
       },
       "description": "",
       "fieldConfig": {
@@ -2100,8 +2150,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2136,7 +2185,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "expr": "max(increase(eth_missed_block_proposals_finalized_total{scope=\"scope:network\", network=\"${network}\"}[24h]))",
@@ -2148,7 +2197,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+            "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -2170,14 +2219,10 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "None",
-          "value": "None"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "f0d83469-f640-41b2-97e4-85ce49434724"
+          "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(eth_future_block_proposals,network)",
         "hide": 0,
