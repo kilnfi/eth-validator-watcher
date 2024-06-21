@@ -11,6 +11,14 @@ The code is provided as-is with no warranties.
 - Youtube video of [Ethereum Validator Watcher talk during EthCC[6]](https://www.youtube.com/watch?v=SkyncLrME1g&t=12s&ab_channel=%5BEthCC%5DLivestream2)
 - Youtube video of [Ethereum Validator Watcher talk during EthStaker](https://www.youtube.com/watch?v=JrGz5FROgEg)
 
+## Overview Dashboard
+
+![overview-dashboard](docs/img/watcher-overview.png)
+
+## Breakdown Dashboard
+
+![breakdown-dashboard](docs/img/watcher-breakdown.png)
+
 # Description
 
 **Ethereum Validator Watcher** monitors the Ethereum beacon chain in
@@ -93,14 +101,15 @@ watched_keys:
     labels: ["vc:validator-2", "region:rbx"]
 ```
 
-In this example, we define 3 validator which are running on two
-validator clients in different regions. The labels can be anything you
+In this example, we define 3 validators which are running on two
+validator clients in separate regions. The labels can be anything you
 want as long as it follows the 'category:value' format. The breakdown
 dashboard uses it to offer per-value comparisons within a
 category. You can for instance compare your missed attestations
 between region rbx and sbg, or between validator-1 and
 validator-2. This comes handy when operating at scale, you can quickly
-isolate where an issue comes from if your groups match your infrastructure.
+isolate where an issue comes from if your groups match your
+infrastructure.
 
 Any set is possible, some plausible examples:
 
@@ -108,8 +117,11 @@ Any set is possible, some plausible examples:
 - by client version (i.e: prysm:v5.0.3)
 - by cluster (i.e: cluster:baremetal-1)
 - by operator (i.e: operator:kiln)
-- ...
 
+By default, the watcher exports the `scope:watched` (keys present in
+the configuration file), `scope:network` (entire network without the
+keys in the configuration file) `scope:all-network` (entire network)
+labels.
 
 ## Installation
 

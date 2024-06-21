@@ -21,7 +21,7 @@ from typing import Optional
 
 from .config import Config, WatchedKeyConfig
 from .models import Validators, ValidatorsLivenessResponse
-from .utils import LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED, LABEL_SCOPE_UNWATCHED
+from .utils import LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_WATCHED, LABEL_SCOPE_NETWORK
 
 
 def normalized_public_key(pubkey: str) -> str:
@@ -46,7 +46,7 @@ class WatchedValidator:
         self.previous_status : Validators.DataItem.StatusEnum | None = None
 
         # This gets overriden by process_config if the validator is watched.
-        self._labels : Optional[list[str]] = [LABEL_SCOPE_NETWORK, LABEL_SCOPE_UNWATCHED]
+        self._labels : Optional[list[str]] = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
 
         # Gauges (updated each epoch) ; implies to use direct values
         # on the Prometheus side (no rate calculation).
@@ -102,9 +102,9 @@ class WatchedValidator:
             config: New configuration
         """
         if config.labels:
-            self._labels = config.labels + [LABEL_SCOPE_NETWORK, LABEL_SCOPE_WATCHED]
+            self._labels = config.labels + [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_WATCHED]
         else:
-            self._labels = [LABEL_SCOPE_NETWORK, LABEL_SCOPE_UNWATCHED]
+            self._labels = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
 
     def process_epoch(self, validator: Validators.DataItem):
         """Processes a new epoch.
