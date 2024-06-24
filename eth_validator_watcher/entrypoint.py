@@ -164,12 +164,17 @@ class ValidatorWatcher:
                 validators_liveness = self._beacon.get_validators_liveness(epoch - 1, watched_validators.get_indexes())
                 watched_validators.process_liveness(validators_liveness)
  
-            if rewards == None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_REWARDS_PROCESS):
-                logging.info('Processing rewards')
-                rewards = self._beacon.get_rewards(epoch - 2)
-                process_rewards(watched_validators, rewards)
-
             has_block = self._beacon.has_block_at_slot(slot)
+
+            if rewards == None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_REWARDS_PROCESS):
+                # There is a possibility the slot is missed, in which
+                # case we'll have to wait for the next one.
+                if not has_block:
+                    rewards = None
+                else:
+                    logging.info('Trying to process rewards')
+                    rewards = self._beacon.get_rewards(epoch - 2)
+                    process_rewards(watched_validators, rewards)
 
             process_block(watched_validators, self._schedule, slot, has_block)
             process_future_blocks(watched_validators, self._schedule, slot)
