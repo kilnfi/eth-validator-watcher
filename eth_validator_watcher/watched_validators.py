@@ -170,6 +170,8 @@ class WatchedValidators:
         self._validators: dict[int, WatchedValidator] = {}
         self._pubkey_to_index: dict[str, int] = {}
 
+        self.config_initialized = False
+
     def get_validator_by_index(self, index: int) -> Optional[WatchedValidator]:
         """Get a validator by index.
 
@@ -205,17 +207,14 @@ class WatchedValidators:
         """
         logging.info('Processing config & validator labels')
 
-        unknown = 0
         for item in config.watched_keys:
-            updated = False
             index = self._pubkey_to_index.get(normalized_public_key(item.public_key), None)
             if index:
                 validator = self._validators.get(index)
                 if validator:
                     validator.process_config(item)
-                    updated = True
-            if not updated:
-                unknown += 1
+
+        self.config_initialized = True
 
         logging.info(f'Config reloaded')
 
