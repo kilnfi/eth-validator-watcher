@@ -16,7 +16,7 @@ from .coinbase import  get_current_eth_price
 from .clock import BeaconClock
 from .beacon import Beacon, NoBlockError
 from .config import load_config, WatchedKeyConfig
-from .metrics import get_prometheus_metrics, compute_validator_metrics, AggregatedMetricsByLabel
+from .metrics import get_prometheus_metrics, compute_validator_metrics
 from .blocks import process_block, process_finalized_block, process_future_blocks
 from .models import BlockIdentierType, Validators
 from .rewards import process_rewards
@@ -126,10 +126,10 @@ class ValidatorWatcher:
 
             self._metrics.eth_block_proposals_head_total.labels(label, network).inc(m.proposed_blocks)
             self._metrics.eth_missed_block_proposals_head_total.labels(label, network).inc(m.missed_blocks)
-            self._metrics.eth_block_proposals_finalized_total.labels(label, network).inc(m.proposed_finalized_blocks)
-            self._metrics.eth_missed_block_proposals_finalized_total.labels(label, network).inc(m.missed_finalized_blocks)
+            self._metrics.eth_block_proposals_finalized_total.labels(label, network).inc(m.proposed_blocks_finalized)
+            self._metrics.eth_missed_block_proposals_finalized_total.labels(label, network).inc(m.missed_blocks_finalized)
 
-            self._metrics.eth_future_block_proposals.labels(label, network).set(m.future_blocks)
+            self._metrics.eth_future_block_proposals.labels(label, network).set(m.future_blocks_proposal)
 
         if not self._metrics_started:
             start_http_server(self._cfg.metrics_port)
