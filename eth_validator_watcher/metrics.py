@@ -7,6 +7,8 @@ from itertools import batched
 
 from prometheus_client import Counter, Gauge
 
+from eth_validator_watcher_ext import fast_compute_validator_metrics
+
 from .utils import LABEL_SCOPE_WATCHED
 from .watched_validators import WatchedValidator
 
