@@ -1,18 +1,4 @@
 """Watched validators.
-
-This module provides a wrapper around per-validator computations
-before exposing them later to prometheus. There are different types of
-processing performed:
-
-- process_config: configuration update (per-key labels)
-- process_epoch: new epoch processing (beacon chain status update)
-- process_liveness: missed attestation processing (slot 16)
-- process_rewards: rewards processing (slot 17)
-
-WatchedValidator which holds the state of a validator while
-WatchedValidators handles the collection of all validators, providing
-efficient ways to access them which are then used by the prometheus
-exporter.
 """
 
 import logging

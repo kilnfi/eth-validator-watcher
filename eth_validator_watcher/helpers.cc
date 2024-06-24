@@ -8,7 +8,7 @@ namespace py = pybind11;
 // Flat structure to allow stupid simple conversions to Python without
 // having too-many levels of mental indirections. Processing is shared
 // between python (convenience) and cpp (fast).
-struct WatchedValidator {
+struct Validator {
   // Updated data from the config processing
   std::vector<std::string> labels;
 
@@ -38,36 +38,38 @@ struct WatchedValidator {
 
 PYBIND11_MODULE(eth_validator_watcher_ext, m) {
 
-  py::class_<WatchedValidator>(m, "Validator")
+  py::class_<Validator>(m, "Validator")
     .def(py::init<>())
-    .def_readwrite("labels", &WatchedValidator::labels)
-    .def_readwrite("missed_attestation", &WatchedValidator::missed_attestation)
-    .def_readwrite("previous_missed_attestation", &WatchedValidator::previous_missed_attestation)
-    .def_readwrite("suboptimal_source", &WatchedValidator::suboptimal_source)
-    .def_readwrite("suboptimal_target", &WatchedValidator::suboptimal_target)
-    .def_readwrite("suboptimal_head", &WatchedValidator::suboptimal_head)
-    .def_readwrite("ideal_consensus_reward", &WatchedValidator::ideal_consensus_reward)
-    .def_readwrite("actual_consensus_reward", &WatchedValidator::actual_consensus_reward)
-    .def_readwrite("missed_blocks", &WatchedValidator::missed_blocks)
-    .def_readwrite("missed_blocks_finalized", &WatchedValidator::missed_blocks_finalized)
-    .def_readwrite("proposed_blocks", &WatchedValidator::proposed_blocks)
-    .def_readwrite("proposed_blocks_finalized", &WatchedValidator::proposed_blocks_finalized)
-    .def_readwrite("future_blocks_proposal", &WatchedValidator::future_blocks_proposal)
-    .def_readwrite("consensus_pubkey", &WatchedValidator::consensus_pubkey)
-    .def_readwrite("consensus_effective_balance", &WatchedValidator::consensus_effective_balance)
-    .def_readwrite("consensus_slashed", &WatchedValidator::consensus_slashed)
-    .def_readwrite("consensus_index", &WatchedValidator::consensus_index)
-    .def_readwrite("consensus_status", &WatchedValidator::consensus_status);
+    .def_readwrite("labels", &Validator::labels)
+    .def_readwrite("missed_attestation", &Validator::missed_attestation)
+    .def_readwrite("previous_missed_attestation", &Validator::previous_missed_attestation)
+    .def_readwrite("suboptimal_source", &Validator::suboptimal_source)
+    .def_readwrite("suboptimal_target", &Validator::suboptimal_target)
+    .def_readwrite("suboptimal_head", &Validator::suboptimal_head)
+    .def_readwrite("ideal_consensus_reward", &Validator::ideal_consensus_reward)
+    .def_readwrite("actual_consensus_reward", &Validator::actual_consensus_reward)
+    .def_readwrite("missed_blocks", &Validator::missed_blocks)
+    .def_readwrite("missed_blocks_finalized", &Validator::missed_blocks_finalized)
+    .def_readwrite("proposed_blocks", &Validator::proposed_blocks)
+    .def_readwrite("proposed_blocks_finalized", &Validator::proposed_blocks_finalized)
+    .def_readwrite("future_blocks_proposal", &Validator::future_blocks_proposal)
+    .def_readwrite("consensus_pubkey", &Validator::consensus_pubkey)
+    .def_readwrite("consensus_effective_balance", &Validator::consensus_effective_balance)
+    .def_readwrite("consensus_slashed", &Validator::consensus_slashed)
+    .def_readwrite("consensus_index", &Validator::consensus_index)
+    .def_readwrite("consensus_status", &Validator::consensus_status);
     
-  m.def("fast_compute_validator_metrics", [](const py::list& validators) {
+  m.def("fast_compute_validator_metrics", [](const py::dict& pyvals) {
     py::dict metrics;
 
-    // No parallelization here for now, let's see how it performs with
-    // a single thread for now.
-    for (const auto& v : validators) {
+    std::vector<Validator> vals;
 
-    }
+    vals.reserve(pyvals.size());
     
+    for (auto& pyval: pyvals) {
+      vals.push_back(pyval.second.attr("_v").cast<Validator>());
+    }
+ 
     return metrics;
   });
 }

@@ -1,8 +1,17 @@
 FROM python:3.12-bookworm as builder
+
+RUN pip install poetry
+
 WORKDIR /app
 
-COPY . /app
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir --progress-bar off .
+COPY eth_validator_watcher /app/eth_validator_watcher
+COPY pyproject.toml /app/pyproject.toml
+COPY README.md /app/README.md
+COPY poetry.lock /app/poetry.lock
+COPY tests /app/tests
+COPY build.py /app/build.py
 
-ENTRYPOINT [ "python", "/usr/local/bin/eth-validator-watcher" ]
+RUN poetry build
+RUN poetry install
+
+ENTRYPOINT [ "poetry", "run", "eth-validator-watcher" ]
