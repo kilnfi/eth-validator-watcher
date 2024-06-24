@@ -158,6 +158,8 @@ class ValidatorWatcher:
                 logging.info(f'Processing epoch {epoch}')
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
                 watched_validators.process_epoch(beacon_validators)
+                if not watched_validators.config_initialized:
+                    watched_validators.process_config(self._cfg)
 
             if validators_liveness == None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS):
                 logging.info('Processing validator liveness')
