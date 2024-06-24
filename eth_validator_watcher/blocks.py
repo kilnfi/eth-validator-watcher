@@ -13,10 +13,7 @@ def process_block(validators: WatchedValidators, schedule: ProposerSchedule, slo
     if validator is None:
         return
 
-    if has_block:
-        validator.proposed_blocks.append(slot_id)
-    else:
-        validator.missed_blocks.append(slot_id)
+    validator.process_block(slot_id, has_block)
 
 
 def process_finalized_block(validators: WatchedValidators, schedule: ProposerSchedule, slot_id: int, has_block: bool):
@@ -28,10 +25,7 @@ def process_finalized_block(validators: WatchedValidators, schedule: ProposerSch
     if validator is None:
         return
 
-    if has_block:
-        validator.proposed_blocks_finalized.append(slot_id)
-    else:
-        validator.missed_blocks_finalized.append(slot_id)
+    validator.process_block_finalized(slot_id, has_block)
 
 
 def process_future_blocks(validators: WatchedValidators, schedule: ProposerSchedule, slot_id: int):
@@ -42,4 +36,4 @@ def process_future_blocks(validators: WatchedValidators, schedule: ProposerSched
         if validator is None:
             continue
 
-        validator.future_blocks_proposal.append(slot_id)
+        validator.process_future_block(slot_id)
