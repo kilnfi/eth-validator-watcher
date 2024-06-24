@@ -5,7 +5,7 @@ def build(setup_kwargs):
     ext_modules = [
         Pybind11Extension(
             "eth_validator_watcher_ext", [
-                "eth_validator_watcher/helpers.cc"
+                "eth_validator_watcher/mod.cc"
             ],
             extra_compile_args=['-O3', '-pthread'],
             language='c++',

@@ -7,7 +7,7 @@ from itertools import batched
 
 from prometheus_client import Counter, Gauge
 
-from eth_validator_watcher_ext import fast_compute_validator_metrics
+from eth_validator_watcher_ext import fast_compute_validator_metrics, MetricsByLabel
 
 from .utils import LABEL_SCOPE_WATCHED
 from .watched_validators import WatchedValidator
@@ -44,108 +44,23 @@ class PrometheusMetrics:
 
     eth_future_block_proposals: Gauge
 
-  
-@dataclass
-class AggregatedMetricsByLabel():
-    """Helper class used to aggregate metrics by label.
-    """
-    # Count of validators by status
-    validator_status_count: dict[str, int] = field(default_factory=dict)
 
-    # Gauges
-    suboptimal_source_count: int = 0
-    suboptimal_target_count: int = 0
-    suboptimal_head_count: int = 0
-    optimal_source_count: int = 0
-    optimal_target_count: int = 0
-    optimal_head_count: int = 0
-    validator_slashes: int = 0
-        
-    # Gauges
-    ideal_consensus_reward: int = 0
-    actual_consensus_reward: int = 0
-    missed_attestations: int = 0
-    missed_consecutive_attestations: int = 0
-            
-    # Counters
-    proposed_blocks: int = 0
-    missed_blocks: int = 0
-    proposed_finalized_blocks: int = 0
-    missed_finalized_blocks: int = 0
-
-    # Gauge
-    future_blocks: int = 0
-
-
-def compute_validator_metrics(validators: dict[int, WatchedValidator], slot: int) -> dict[str, AggregatedMetricsByLabel]:
+def compute_validator_metrics(validators: dict[int, WatchedValidator], slot: int) -> dict[str, MetricsByLabel]:
     """Compute the metrics from a list of validators.
 
     Parameters:
     validators: list[WatchedValidator]
 
     Returns:
-    dict[str, AggregatedMetricsByLabel]
+    dict[str, MetricsByLabel]
     """
     logging.info(f"📊 Computing metrics for {len(validators)} validators 📊")
-    fast_compute_validator_metrics(validators)
+    metrics = fast_compute_validator_metrics(validators)
     logging.info(f"📊 Metrics computed 📊")
     
-    metrics = defaultdict(AggregatedMetricsByLabel)
-
     for _, v in validators.items():
-        status = str(v.status)
-
-        for label in v._v.labels:
-            m = metrics[label]
-
-            if status not in m.validator_status_count:
-                m.validator_status_count[status] = 0
-            m.validator_status_count[status] += 1
- 
-            m.validator_slashes += int(v._v.consensus_slashed == True)
-
-            # Everything below implies to have a validator that is
-            # active on the beacon chain, this prevents
-            # miscounting missed attestation for instance.
-            if not v.is_validating():
-                continue
-
-            # Looks weird but we want to explicitly have labels set
-            # for each set of labels even if they aren't validating
-            # (in which case the validator attributes are None).
-
-            m.suboptimal_source_count += int(v._v.suboptimal_source == True)
-            m.suboptimal_target_count += int(v._v.suboptimal_target == True)
-            m.suboptimal_head_count += int(v._v.suboptimal_head == True)
-            m.optimal_source_count += int(v._v.suboptimal_source == False)
-            m.optimal_target_count += int(v._v.suboptimal_target == False)
-            m.optimal_head_count += int(v._v.suboptimal_head == False)
-
-            m.ideal_consensus_reward += v._v.ideal_consensus_reward or 0
-            m.actual_consensus_reward += v._v.actual_consensus_reward or 0
-
-            m.missed_attestations += int(v._v.missed_attestation == True)
-            m.missed_consecutive_attestations += int(v._v.previous_missed_attestation == True and v._v.missed_attestation == True)
-
-            m.proposed_blocks += len(v._v.proposed_blocks)
-            m.missed_blocks += len(v._v.missed_blocks)
-            m.proposed_finalized_blocks += len(v._v.proposed_blocks_finalized)
-            m.missed_finalized_blocks += len(v._v.missed_blocks_finalized)
-
-            m.future_blocks += len(v._v.future_blocks_proposal)
-
-            if label == LABEL_SCOPE_WATCHED:
-                for proposed in v._v.proposed_blocks:
-                    logging.info(f"✨ Validator {v._v.pubkey} proposed block at head slot={proposed} ✨")
-                for proposed in v._v.proposed_blocks_finalized:
-                    logging.info(f"✅ Validator {v._v.pubkey} proposed block at finalized slot={proposed} ✅")
-                for miss in v._v.missed_blocks:
-                    logging.info(f"❗Validator {v._v.pubkey} missed blocks at head slot={miss} ❗")
-                for miss in v._v.missed_blocks_finalized:
-                    logging.info(f"❌ Validator {v._v.pubkey} missed blocks at finalized slot={miss} ❌")
-
         v.reset_blocks()
- 
+
     return metrics
                 
                 
