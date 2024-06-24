@@ -16,14 +16,9 @@ def process_rewards(validators: WatchedValidators, rewards: Rewards) -> None:
         if not validator:
             continue
 
-        ideal = ideal_by_eb.get(validator.beacon_validator.validator.effective_balance)
+        ideal = ideal_by_eb.get(validator.effective_balance)
         if not ideal:
             continue
 
-        validator.suboptimal_source = reward.source != ideal.source
-        validator.suboptimal_target = reward.target != ideal.target
-        validator.suboptimal_head = reward.head != ideal.head
-
-        validator.ideal_consensus_reward = ideal.source + ideal.target + ideal.head
-        validator.actual_consensus_reward = reward.source + reward.target + reward.head
+        validator.process_rewards(ideal, reward)
 

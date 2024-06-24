@@ -19,8 +19,9 @@ import logging
 
 from typing import Optional
 
+from eth_validator_watcher_ext import Validator
 from .config import Config, WatchedKeyConfig
-from .models import Validators, ValidatorsLivenessResponse
+from .models import Validators, ValidatorsLivenessResponse, Rewards
 from .utils import LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_WATCHED, LABEL_SCOPE_NETWORK
 
 
@@ -38,53 +39,41 @@ def normalized_public_key(pubkey: str) -> str:
 class WatchedValidator:
     """Watched validator abstraction.
 
-    This needs to be optimized for both CPU and memory usage as it
-    will be instantiated for every validator of the network.
+    This is a wrapper around the C++ validator object which holds the
+    state of a validator.
     """
 
     def __init__(self):
-        self.previous_status : Validators.DataItem.StatusEnum | None = None
+        # State is wrapped in a C++ object so we can perform efficient
+        # operations without holding the GIL.
+        self._v = Validator()
 
         # This gets overriden by process_config if the validator is watched.
-        self._labels : Optional[list[str]] = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
-
-        # Gauges (updated each epoch) ; implies to use direct values
-        # on the Prometheus side (no rate calculation).
-        self.missed_attestation : bool | None = None
-        self.previous_missed_attestation : bool | None = None
-        self.future_proposals : int | None = None
-        self.suboptimal_source : bool | None = None
-        self.suboptimal_target : bool | None = None
-        self.suboptimal_head : bool | None = None
-        self.ideal_consensus_reward : int | None = None
-        self.actual_consensus_reward : int | None = None
-        self.beacon_validator : Validators.DataItem | None = None
-
-        # Counters (incremented continuously) ; implies to use rates()
-        # on the Prometheus side to have meaningful graphs.
-        self.missed_blocks : list = []
-        self.missed_blocks_finalized : list = []
-        self.proposed_blocks : list = []
-        self.proposed_blocks_finalized : list = []
-        self.future_blocks_proposal : list = []
+        self._v.labels : Optional[list[str]] = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
 
     @property
     def pubkey(self) -> str:
         """Get the public key of the validator.
         """
-        return normalized_public_key(self.beacon_validator.validator.pubkey)
+        return normalized_public_key(self._v.consensus_pubkey)
 
     @property
     def status(self) -> Validators.DataItem.StatusEnum:
         """Get the status of the validator.
         """
-        return self.beacon_validator.status
+        return self._v.consensus_status
+
+    @property
+    def effective_balance(self) -> int:
+        """Get the effective balance of the validator.
+        """
+        return self._v.consensus_effective_balance
 
     @property
     def labels(self) -> list[str]:
         """Get the labels for the validator.
         """
-        return self._labels
+        return self._v.labels
 
     def is_validating(self) -> bool:
         """Check if the validator is validating.
@@ -102,9 +91,9 @@ class WatchedValidator:
             config: New configuration
         """
         if config.labels:
-            self._labels = config.labels + [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_WATCHED]
+            self._v.labels = config.labels + [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_WATCHED]
         else:
-            self._labels = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
+            self._v.labels = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
 
     def process_epoch(self, validator: Validators.DataItem):
         """Processes a new epoch.
@@ -112,10 +101,11 @@ class WatchedValidator:
         Parameters:
             validator: Validator beacon state
         """
-        if self.beacon_validator is not None:
-            self.previous_status = self.status
-
-        self.beacon_validator = validator
+        self._v.consensus_pubkey = validator.validator.pubkey
+        self._v.consensus_effective_balance = validator.validator.effective_balance
+        self._v.consensus_slashed = validator.validator.slashed
+        self._v.consensus_index = validator.index
+        self._v.consensus_status = validator.status
 
     def process_liveness(self, liveness: ValidatorsLivenessResponse.Data):
         """Processes liveness data.
@@ -123,18 +113,63 @@ class WatchedValidator:
         Parameters:
         liveness: Validator liveness data
         """
-        self.previous_missed_attestation = self.missed_attestation
-        self.missed_attestation = liveness.is_live != True
+        self._v.previous_missed_attestation = self._v.missed_attestation
+        self._v.missed_attestation = liveness.is_live != True
 
-    def reset_counters(self):
+    def process_rewards(self, ideal: Rewards.Data.IdealReward, reward: Rewards.Data.TotalReward):
+        """Processes rewards data.
+
+        Parameters:
+            ideal: Ideal rewards
+            reward: Actual rewards
+        """
+        self._v.suboptimal_source = reward.source != ideal.source
+        self._v.suboptimal_target = reward.target != ideal.target
+        self._v.suboptimal_head = reward.head != ideal.head
+
+        self._v.ideal_consensus_reward = ideal.source + ideal.target + ideal.head
+        self._v.actual_consensus_reward = reward.source + reward.target + reward.head
+
+    def process_block(self, slot: int, has_block: bool):
+        """Processes a block proposal.
+
+        Parameters:
+            slot: Slot of the block proposal
+            missed: Whether the block was missed
+        """
+        if has_block:
+            self._v.proposed_blocks.append(slot)
+        else:
+            self._v.missed_blocks.append(slot)
+
+    def process_block_finalized(self, slot: int, has_block: bool):
+        """Processes a finalized block proposal.
+
+        Parameters:
+            slot: Slot of the block proposal
+            missed: Whether the block was missed
+        """
+        if has_block:
+            self._v.proposed_blocks_finalized.append(slot)
+        else:
+            self._v.missed_blocks_finalized.append(slot)
+
+    def process_future_block(self, slot: int):
+        """Processes a future block proposal.
+
+        Parameters:
+            slot: Slot of the block proposal
+        """
+        self._v.future_blocks_proposal.append(slot)
+
+    def reset_blocks(self):
         """Reset the counters for the next run.
         """
-        self.missed_blocks.clear()
-        self.missed_blocks_finalized.clear()
-        self.proposed_blocks.clear()
-        self.proposed_blocks_finalized.clear()
-        self.future_blocks_proposal.clear()
-
+        self._v.missed_blocks.clear()
+        self._v.missed_blocks_finalized.clear()
+        self._v.proposed_blocks.clear()
+        self._v.proposed_blocks_finalized.clear()
+        self._v.future_blocks_proposal.clear()
 
 
 class WatchedValidators:
@@ -172,7 +207,7 @@ class WatchedValidators:
         """Get all validator indexes."""
         return list(self._validators.keys())
 
-    def validators(self) -> dict[int, WatchedValidator]:
+    def get_validators(self) -> dict[int, WatchedValidator]:
         """Iterate over all validators."""
         return self._validators
 
