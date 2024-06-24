@@ -9,7 +9,7 @@ def build(setup_kwargs):
             ],
             extra_compile_args=['-O3', '-pthread'],
             language='c++',
-            cxx_std=17
+            cxx_std=23
         )
     ]
     setup_kwargs.update({

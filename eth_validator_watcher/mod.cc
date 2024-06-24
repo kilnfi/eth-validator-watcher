@@ -1,3 +1,4 @@
+#include <stdfloat>
 #include <vector>
 #include <thread>
 #include <pybind11/pybind11.h>
@@ -18,8 +19,8 @@ struct Validator {
   bool suboptimal_source = false;
   bool suboptimal_target = false;
   bool suboptimal_head = false;
-  uint64_t ideal_consensus_reward = 0;
-  uint64_t actual_consensus_reward = 0;
+  std::float64_t ideal_consensus_reward = 0;
+  std::float64_t actual_consensus_reward = 0;
 
   // Updated data from the blocks processing
   std::vector<uint64_t> missed_blocks;
@@ -49,8 +50,8 @@ struct MetricsByLabel {
   uint64_t optimal_head_count = 0;
   uint64_t validator_slashes = 0;
 
-  uint64_t ideal_consensus_reward = 0;
-  uint64_t actual_consensus_reward = 0;
+  std::float64_t ideal_consensus_reward = 0;
+  std::float64_t actual_consensus_reward = 0;
   uint64_t missed_attestations = 0;
   uint64_t missed_consecutive_attestations = 0;
 
