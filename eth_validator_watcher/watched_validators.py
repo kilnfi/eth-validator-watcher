@@ -79,10 +79,14 @@ class WatchedValidator:
         Parameters:
             config: New configuration
         """
+        # Even if there is no label in the config, we consider the
+        # validator as watched.  This method is only called for
+        # validators that are watched.
+        labels = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_WATCHED]
         if config.labels:
-            self._v.labels = config.labels + [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_WATCHED]
-        else:
-            self._v.labels = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
+            labels = labels + config.labels
+
+        self._v.labels = labels
 
     def process_epoch(self, validator: Validators.DataItem):
         """Processes a new epoch.
@@ -203,7 +207,7 @@ class WatchedValidators:
         return self._validators
 
     def process_config(self, config: Config):
-        """Process a config update
+        """Process a config update.
 
         Parameters:
             config: Updated configuration
