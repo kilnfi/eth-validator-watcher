@@ -76,5 +76,5 @@ class BeaconClock:
         target = self._genesis + slot * self._slot_duration + self._lag_seconds
         now = self.now()
         if now < target:
-            logging.info(f'⏳Waiting {target - now:.2f} seconds for slot {slot}')
+            logging.info(f'⏳️ Waiting {target - now:.2f} seconds for slot {slot}')
             time.sleep(target - now)
