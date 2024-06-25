@@ -22,10 +22,22 @@ class Config(BaseSettings):
 
     network: Optional[str] = None
     beacon_url: Optional[str] = None
-    beacon_timeout_sec: Optional[int] = 90
-    metrics_port: Optional[int] = 8000
+    beacon_timeout_sec: Optional[int] = None
+    metrics_port: Optional[int] = None
     start_at: Optional[int] = None
     watched_keys: Optional[List[WatchedKeyConfig]] = None
+
+
+def _default_config() -> Config:
+    """Returns the default configuration.
+    """
+    return Config(
+        network='mainnet',
+        beacon_url='http://localhost:5051/',
+        beacon_timeout_sec=90,
+        metrics_port=8000,
+        watched_keys=[],
+    )
 
 
 def load_config(config_file: str) -> Config:
@@ -51,12 +63,16 @@ def load_config(config_file: str) -> Config:
             config = yaml.load(fh, Loader=yaml.CLoader) or dict()
 
         logging.info(f'validating configuration file')
+        from_default = _default_config().model_dump()
         from_env = Config().model_dump()
         from_file = Config(**config).model_dump()
 
         logging.info(f'merging with environment variables')
-        merged = from_file.copy()
+        merged = from_default.copy()
+
+        merged.update({k: v for k, v in from_file.items() if v})
         merged.update({k: v for k, v in from_env.items() if v})
+
         r = Config(**merged)
 
         logging.info(f'configuration file is ready')
