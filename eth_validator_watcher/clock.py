@@ -20,7 +20,7 @@ class BeaconClock:
         self._start_at = start_at
 
         if start_at:
-            logging.info(f'⏲️ Starting clock at timestamp @ {start_at} ⏲️')
+            logging.info(f'⏲️ Starting clock at timestamp @ {start_at}')
 
     def now(self) -> float:
         """Get the current time in seconds since the epoch.
@@ -76,5 +76,5 @@ class BeaconClock:
         target = self._genesis + slot * self._slot_duration + self._lag_seconds
         now = self.now()
         if now < target:
-            logging.info(f'⏳Waiting {target - now:.2f} seconds for slot {slot} ⏳')
+            logging.info(f'⏳Waiting {target - now:.2f} seconds for slot {slot}')
             time.sleep(target - now)

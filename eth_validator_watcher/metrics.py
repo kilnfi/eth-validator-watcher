@@ -54,7 +54,7 @@ def compute_validator_metrics(validators: dict[int, WatchedValidator], slot: int
     Returns:
     dict[str, MetricsByLabel]
     """
-    logging.info(f"📊 Computing metrics for {len(validators)} validators 📊")
+    logging.info(f"📊 Computing metrics for {len(validators)} validators")
     metrics = fast_compute_validator_metrics(validators)
     
     for _, v in validators.items():
