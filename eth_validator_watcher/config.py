@@ -53,7 +53,7 @@ def load_config(config_file: str) -> Config:
     The effective configuration used by the watcher
     """
     with open(config_file, 'r') as fh:
-        logging.info(f'parsing configuration file {config_file}')
+        logging.info(f'⚙️ Parsing configuration file {config_file} ⚙️')
 
         # We support json for large configuration files (500 MiB)
         # which can take time to parse with PyYAML.
@@ -62,12 +62,12 @@ def load_config(config_file: str) -> Config:
         else:
             config = yaml.load(fh, Loader=yaml.CLoader) or dict()
 
-        logging.info(f'validating configuration file')
+        logging.info(f'⚙️ Validating configuration file ⚙️')
         from_default = _default_config().model_dump()
         from_env = Config().model_dump()
         from_file = Config(**config).model_dump()
 
-        logging.info(f'merging with environment variables')
+        logging.info(f'⚙️ Merging with environment variables ⚙️')
         merged = from_default.copy()
 
         merged.update({k: v for k, v in from_file.items() if v})
@@ -75,6 +75,6 @@ def load_config(config_file: str) -> Config:
 
         r = Config(**merged)
 
-        logging.info(f'configuration file is ready')
+        logging.info(f'⚙️ Configuration file is ready ⚙️')
 
         return r

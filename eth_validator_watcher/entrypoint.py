@@ -149,20 +149,20 @@ class ValidatorWatcher:
         last_processed_finalized_slot = None
 
         while True:
-            logging.info(f'Processing slot {slot}')
+            logging.info(f'🧮 Processing slot {slot} 🧮')
 
             last_finalized_slot = self._beacon.get_header(BlockIdentierType.FINALIZED).data.header.message.slot
             self._schedule.update(self._beacon, slot, last_processed_finalized_slot, last_finalized_slot)
 
             if beacon_validators == None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
-                logging.info(f'Processing epoch {epoch}')
+                logging.info(f'🧮 Processing epoch {epoch} 🧮')
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
                 watched_validators.process_epoch(beacon_validators)
                 if not watched_validators.config_initialized:
                     watched_validators.process_config(self._cfg)
 
             if validators_liveness == None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS):
-                logging.info('Processing validator liveness')
+                logging.info('🧮 Processing validator liveness 🧮')
                 validators_liveness = self._beacon.get_validators_liveness(epoch - 1, watched_validators.get_indexes())
                 watched_validators.process_liveness(validators_liveness)
  
@@ -174,7 +174,7 @@ class ValidatorWatcher:
                 if not has_block:
                     rewards = None
                 else:
-                    logging.info('Trying to process rewards')
+                    logging.info('🧮 Trying to process rewards 🧮')
                     rewards = self._beacon.get_rewards(epoch - 2)
                     process_rewards(watched_validators, rewards)
 
@@ -182,17 +182,17 @@ class ValidatorWatcher:
             process_future_blocks(watched_validators, self._schedule, slot)
 
             while last_processed_finalized_slot and last_processed_finalized_slot < last_finalized_slot:
-                logging.info(f'Processing finalized slot from {last_processed_finalized_slot or last_finalized_slot} to {last_finalized_slot}')
+                logging.info(f'🧮 Processing finalized slot from {last_processed_finalized_slot or last_finalized_slot} to {last_finalized_slot} 🧮')
                 has_block = self._beacon.has_block_at_slot(last_processed_finalized_slot)
                 process_finalized_block(watched_validators, self._schedule, last_processed_finalized_slot, has_block)
                 last_processed_finalized_slot += 1
             last_processed_finalized_slot = last_finalized_slot
 
-            logging.info('Updating Prometheus metrics')
+            logging.info('🧮 Updating Prometheus metrics 🧮')
             self._update_metrics(watched_validators, epoch, slot)
 
             if (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_CONFIG_RELOAD):
-                logging.info('Processing configuration update')
+                logging.info('🧮 Processing configuration update 🧮')
                 self._reload_config()
                 watched_validators.process_config(self._cfg)
 
