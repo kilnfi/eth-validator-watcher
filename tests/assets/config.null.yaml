@@ -1,4 +1,5 @@
 beacon_url: ~
 beacon_timeout_sec: ~
+metrics_port: ~
 network: ~
 watched_keys: ~
