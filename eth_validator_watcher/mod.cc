@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdfloat>
 #include <vector>
 #include <thread>
@@ -65,12 +66,12 @@ struct MetricsByLabel {
 
 namespace {
 
-  void process(std::size_t from, std::size_t to, const std::vector<Validator> &vals, std::map<std::string, MetricsByLabel> *out) {
+  void process(std::size_t from, std::size_t to, const std::vector<Validator> &vals, std::map<std::string, MetricsByLabel> &out) {
     for (std::size_t i = from; i < to; i++) {
-      const auto& v = vals[i];
+      auto &v = vals[i];
 
       for (const auto& label: v.labels) {
-        MetricsByLabel & m = (*out)[label];
+        MetricsByLabel & m = out[label];
 
         m.validator_status_count[v.consensus_status] += 1;
 
@@ -79,7 +80,7 @@ namespace {
         // Everything below implies to have a validator that is active
         // on the beacon chain, this prevents miscounting missed
         // attestation for instance.
-        if (v.consensus_status.find("active") != std::string::npos) {
+        if (v.consensus_status.find("active") == std::string::npos) {
           continue;
         }
 
@@ -105,10 +106,10 @@ namespace {
     }
   }
 
-  void merge(const std::vector<std::map<std::string, MetricsByLabel>> &thread_metrics, std::map<std::string, MetricsByLabel> *out) {
+  void merge(const std::vector<std::map<std::string, MetricsByLabel>> &thread_metrics, std::map<std::string, MetricsByLabel> &out) {
     for (const auto& thread_metric: thread_metrics) {
       for (const auto& [label, metric]: thread_metric) {
-        MetricsByLabel & m = (*out)[label];
+        MetricsByLabel & m = out[label];
 
         for (const auto& [status, count]: metric.validator_status_count) {
           m.validator_status_count[status] += count;
@@ -189,15 +190,16 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     }
 
     auto n = std::thread::hardware_concurrency();
-    std::size_t chunk = vals.size() / n;
+
+    std::size_t chunk = (vals.size() / n) + 1;
     std::vector<std::thread> threads;
     std::vector<std::map<std::string, MetricsByLabel>> thread_metrics(n);
 
     for (size_t i = 0; i < n; i++) {
-      threads.push_back(std::thread([i, n, chunk, &vals, &thread_metrics] {
+      threads.push_back(std::thread([i, chunk, &vals, &thread_metrics] {
         std::size_t from = i * chunk;
         std::size_t to = std::min(from + chunk, vals.size());
-        process(from, to, vals, &thread_metrics[i]);
+        process(from, to, vals, thread_metrics[i]);
       }));
     }
 
@@ -206,7 +208,7 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     }
 
     std::map<std::string, MetricsByLabel> metrics;
-    merge(thread_metrics, &metrics);
+    merge(thread_metrics, metrics);
 
     py::dict pymetrics;
     for (const auto& [label, metric]: metrics) {

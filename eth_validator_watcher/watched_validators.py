@@ -32,6 +32,11 @@ class WatchedValidator:
     def __init__(self):
         # State is wrapped in a C++ object so we can perform efficient
         # operations without holding the GIL.
+        #
+        # We need to be careful when dealing with _v as modifications
+        # can only be performed using explicit copies (i.e: do not
+        # call append() on a list but rather create a new list with
+        # the new element).
         self._v = Validator()
 
         # This gets overriden by process_config if the validator is watched.
@@ -99,8 +104,8 @@ class WatchedValidator:
         Parameters:
         liveness: Validator liveness data
         """
-        self._v.previous_missed_attestation = self._v.missed_attestation
-        self._v.missed_attestation = liveness.is_live != True
+        self._v.previous_missed_attestation = self._v.missed_attestation if self._v.missed_attestation is not None else False
+        self._v.missed_attestation = bool(not liveness.is_live)
 
     def process_rewards(self, ideal: Rewards.Data.IdealReward, reward: Rewards.Data.TotalReward):
         """Processes rewards data.
@@ -124,9 +129,9 @@ class WatchedValidator:
             missed: Whether the block was missed
         """
         if has_block:
-            self._v.proposed_blocks.append(slot)
+            self._v.proposed_blocks = self._v.proposed_blocks + [slot]
         else:
-            self._v.missed_blocks.append(slot)
+            self._v.missed_blocks = self._v.missed_blocks + [slot]
 
     def process_block_finalized(self, slot: int, has_block: bool):
         """Processes a finalized block proposal.
@@ -136,9 +141,9 @@ class WatchedValidator:
             missed: Whether the block was missed
         """
         if has_block:
-            self._v.proposed_blocks_finalized.append(slot)
+            self._v.proposed_blocks_finalized = self._v.proposed_blocks_finalized + [slot]
         else:
-            self._v.missed_blocks_finalized.append(slot)
+            self._v.missed_blocks_finalized = self._v.missed_blocks_finalized + [slot]
 
     def process_future_block(self, slot: int):
         """Processes a future block proposal.
@@ -146,16 +151,16 @@ class WatchedValidator:
         Parameters:
             slot: Slot of the block proposal
         """
-        self._v.future_blocks_proposal.append(slot)
+        self._v.future_blocks_proposal = self._v.future_blocks_proposal + [slot]
 
     def reset_blocks(self):
         """Reset the counters for the next run.
         """
-        self._v.missed_blocks.clear()
-        self._v.missed_blocks_finalized.clear()
-        self._v.proposed_blocks.clear()
-        self._v.proposed_blocks_finalized.clear()
-        self._v.future_blocks_proposal.clear()
+        self._v.missed_blocks = []
+        self._v.missed_blocks_finalized = []
+        self._v.proposed_blocks = []
+        self._v.proposed_blocks_finalized = []
+        self._v.future_blocks_proposal = []
 
 
 class WatchedValidators:
