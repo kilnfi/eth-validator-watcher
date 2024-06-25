@@ -1,8 +1,6 @@
 """Watched validators.
 """
 
-import logging
-
 from typing import Optional
 
 from eth_validator_watcher_ext import Validator
@@ -210,8 +208,6 @@ class WatchedValidators:
         Parameters:
             config: Updated configuration
         """
-        logging.info('Processing config & validator labels')
-
         for item in config.watched_keys:
             index = self._pubkey_to_index.get(normalized_public_key(item.public_key), None)
             if index:
@@ -221,8 +217,6 @@ class WatchedValidators:
 
         self.config_initialized = True
 
-        logging.info(f'Config reloaded')
-
     def process_epoch(self, validators: Validators):
         """Process a new epoch
 
@@ -230,8 +224,6 @@ class WatchedValidators:
             validators: New validator state for the epoch from the beaconchain.
             liveness: Whether or not the validator attested in the previous epoch.
         """
-        logging.info('Processing new epoch')
-
         for item in validators.data:
             validator = self._validators.get(item.index)
             if validator is None:
@@ -241,19 +233,13 @@ class WatchedValidators:
 
             validator.process_epoch(item)
 
-        logging.info(f'New epoch processed ({len(validators.data)} validators)')
-
     def process_liveness(self, liveness: ValidatorsLivenessResponse):
         """Process liveness data
 
         Parameters:
             liveness: Liveness data from the beacon chain
         """
-        logging.info('Processing liveness data')
-
         for item in liveness.data:
             validator = self._validators.get(item.index)
             if validator:
                 validator.process_liveness(item)
-
-        logging.info(f'Liveness data processed ({len(liveness.data)} validators)')
