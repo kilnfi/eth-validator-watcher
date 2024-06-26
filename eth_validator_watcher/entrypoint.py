@@ -16,7 +16,7 @@ from .coinbase import  get_current_eth_price
 from .clock import BeaconClock
 from .beacon import Beacon, NoBlockError
 from .config import load_config, WatchedKeyConfig
-from .log import log_details
+from .log import log_details, slack_send
 from .metrics import get_prometheus_metrics, compute_validator_metrics
 from .blocks import process_block, process_finalized_block, process_future_blocks
 from .models import BlockIdentierType, Validators
@@ -103,7 +103,7 @@ class ValidatorWatcher:
 
         metrics = compute_validator_metrics(watched_validators.get_validators(), slot)
 
-        log_details(self._cfg, watched_validators, metrics)
+        log_details(self._cfg, watched_validators, metrics, slot)
 
         for label, m in metrics.items():
             for status in Validators.DataItem.StatusEnum:
@@ -150,6 +150,8 @@ class ValidatorWatcher:
         validators_liveness = None
         rewards = None
         last_processed_finalized_slot = None
+
+        slack_send(self._cfg, f'🚀 Ethereum Validator Watcher started on {self._cfg.network}, watching {len(self._cfg.watched_keys)} validators 🚀')
 
         while True:
             logging.info(f'🔨 Processing slot {slot}')

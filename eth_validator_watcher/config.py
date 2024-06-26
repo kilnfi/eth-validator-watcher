@@ -24,8 +24,12 @@ class Config(BaseSettings):
     beacon_url: Optional[str] = None
     beacon_timeout_sec: Optional[int] = None
     metrics_port: Optional[int] = None
-    start_at: Optional[int] = None
     watched_keys: Optional[List[WatchedKeyConfig]] = None
+
+    slack_token: Optional[str] = None
+    slack_channel: Optional[str] = None
+
+    start_at: Optional[int] = None
 
 
 def _default_config() -> Config:
