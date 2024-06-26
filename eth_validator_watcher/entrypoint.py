@@ -151,7 +151,7 @@ class ValidatorWatcher:
         rewards = None
         last_processed_finalized_slot = None
 
-        slack_send(self._cfg, f'🚀 Ethereum Validator Watcher started on {self._cfg.network}, watching {len(self._cfg.watched_keys)} validators 🚀')
+        slack_send(self._cfg, f'🚀 *Ethereum Validator Watcher* started on {self._cfg.network}, watching {len(self._cfg.watched_keys)} validators')
 
         while True:
             logging.info(f'🔨 Processing slot {slot}')
