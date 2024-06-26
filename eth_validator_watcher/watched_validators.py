@@ -106,8 +106,8 @@ class WatchedValidator:
         Parameters:
         liveness: Validator liveness data
         """
-        self._v.previous_missed_attestation = self._v.missed_attestation if self._v.missed_attestation is not None else False
-        self._v.missed_attestation = bool(not liveness.is_live)
+        self._v.previous_missed_attestation = self._v.missed_attestation
+        self._v.missed_attestation = liveness.is_live != True
 
     def process_rewards(self, ideal: Rewards.Data.IdealReward, reward: Rewards.Data.TotalReward):
         """Processes rewards data.
