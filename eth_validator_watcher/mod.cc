@@ -6,6 +6,9 @@
 
 namespace py = pybind11;
 
+static constexpr int kMaxLogging = 5;
+static constexpr char kLogLabel[] = "scope:watched";
+
 using float64_t = double;
 
 // Flat structure to allow stupid simple conversions to Python without
@@ -61,12 +64,26 @@ struct MetricsByLabel {
   uint64_t missed_blocks = 0;
   uint64_t proposed_blocks_finalized = 0;
   uint64_t missed_blocks_finalized = 0;
-
   uint64_t future_blocks_proposal = 0;
+
+  std::vector<std::pair<uint64_t, std::string>> details_proposed_blocks;
+  std::vector<std::pair<uint64_t, std::string>> details_missed_blocks;
+  std::vector<std::pair<uint64_t, std::string>> details_missed_blocks_finalized;
+  std::vector<std::pair<uint64_t, std::string>> details_future_blocks;
+  std::vector<std::string> details_missed_attestations;
 };
 
 namespace {
 
+  void process_details(const std::string &validator, std::vector<uint64_t> slots, std::vector<std::pair<uint64_t, std::string>> *out) {
+    for (const auto& slot: slots) {
+      if (out->size() >= kMaxLogging) {
+        break;
+      }
+      out->push_back({slot, validator});
+    }
+  }
+  
   void process(std::size_t from, std::size_t to, const std::vector<Validator> &vals, std::map<std::string, MetricsByLabel> &out) {
     for (std::size_t i = from; i < to; i++) {
       auto &v = vals[i];
@@ -103,14 +120,31 @@ namespace {
         m.proposed_blocks_finalized += v.proposed_blocks_finalized.size();
         m.missed_blocks_finalized += v.missed_blocks_finalized.size();
         m.future_blocks_proposal += v.future_blocks_proposal.size();
+
+        process_details(v.consensus_pubkey, v.proposed_blocks, &m.details_proposed_blocks);
+        process_details(v.consensus_pubkey, v.missed_blocks, &m.details_missed_blocks);
+        process_details(v.consensus_pubkey, v.missed_blocks_finalized, &m.details_missed_blocks_finalized);
+        process_details(v.consensus_pubkey, v.future_blocks_proposal, &m.details_future_blocks);
+        if (v.missed_attestation && m.details_missed_attestations.size() < kMaxLogging) {
+          m.details_missed_attestations.push_back(v.consensus_pubkey);
+        }
       }
     }
   }
 
-  void merge(const std::vector<std::map<std::string, MetricsByLabel>> &thread_metrics, std::map<std::string, MetricsByLabel> &out) {
+  void merge_details(const std::vector<std::pair<uint64_t, std::string>> &details, std::vector<std::pair<uint64_t, std::string>> *out) {
+    for (const auto& detail: details) {
+      if (out->size() >= kMaxLogging) {
+        break;
+      }
+      out->push_back(detail);
+    }
+  }
+
+  void merge(const std::vector<std::map<std::string, MetricsByLabel>> &thread_metrics, std::map<std::string, MetricsByLabel> *out) {
     for (const auto& thread_metric: thread_metrics) {
       for (const auto& [label, metric]: thread_metric) {
-        MetricsByLabel & m = out[label];
+        MetricsByLabel & m = (*out)[label];
 
         for (const auto& [status, count]: metric.validator_status_count) {
           m.validator_status_count[status] += count;
@@ -134,6 +168,17 @@ namespace {
         m.proposed_blocks_finalized += metric.proposed_blocks_finalized;
         m.missed_blocks_finalized += metric.missed_blocks_finalized;
         m.future_blocks_proposal += metric.future_blocks_proposal;
+
+        merge_details(metric.details_proposed_blocks, &m.details_proposed_blocks);
+        merge_details(metric.details_missed_blocks, &m.details_missed_blocks);
+        merge_details(metric.details_missed_blocks_finalized, &m.details_missed_blocks_finalized);
+        merge_details(metric.details_future_blocks, &m.details_future_blocks);
+
+        for (const auto& missed_attestation: metric.details_missed_attestations) {
+          if (m.details_missed_attestations.size() < kMaxLogging) {
+            m.details_missed_attestations.push_back(missed_attestation);
+          }
+        }
       }
     }
   }
@@ -181,7 +226,12 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("missed_blocks", &MetricsByLabel::missed_blocks)
     .def_readwrite("proposed_blocks_finalized", &MetricsByLabel::proposed_blocks_finalized)
     .def_readwrite("missed_blocks_finalized", &MetricsByLabel::missed_blocks_finalized)
-    .def_readwrite("future_blocks_proposal", &MetricsByLabel::future_blocks_proposal);
+    .def_readwrite("future_blocks_proposal", &MetricsByLabel::future_blocks_proposal)
+    .def_readwrite("details_proposed_blocks", &MetricsByLabel::details_proposed_blocks)
+    .def_readwrite("details_missed_blocks", &MetricsByLabel::details_missed_blocks)
+    .def_readwrite("details_missed_blocks_finalized", &MetricsByLabel::details_missed_blocks_finalized)
+    .def_readwrite("details_future_blocks", &MetricsByLabel::details_future_blocks)
+    .def_readwrite("details_missed_attestations", &MetricsByLabel::details_missed_attestations);
     
   m.def("fast_compute_validator_metrics", [](const py::dict& pyvals) {
     std::vector<Validator> vals;
@@ -209,7 +259,7 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     }
 
     std::map<std::string, MetricsByLabel> metrics;
-    merge(thread_metrics, metrics);
+    merge(thread_metrics, &metrics);
 
     py::dict pymetrics;
     for (const auto& [label, metric]: metrics) {

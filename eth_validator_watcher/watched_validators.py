@@ -193,7 +193,7 @@ class WatchedValidators:
         Parameters:
             pubkey: Public key of the validator to retrieve
         """
-        index = self._pubkey_to_index.get(pubkey)
+        index = self._pubkey_to_index.get(normalized_public_key(pubkey))
         if index is None:
             return None
         return self._validators.get(index)
