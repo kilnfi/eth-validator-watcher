@@ -180,18 +180,28 @@ name                                             | description
 `our_actual_neg_targets_count`                   | Our actual negative targets count
 `our_actual_heads_count`                         | Our actual heads count
 
+New sets of data are exported in Prometheus:
+
+`future_block_proposals`                         | Future block proposals, showing the pk, index, slot, epoch, deployment and client of the proposer 
+`our_exited_validators`                          | Our validators that are exited, showing pk, index, status, effective balance                      
+`our_withdrawn_validators`                       | Our validators that are withdrawn, showing pk, index, status, effective balance    
+`metric_suboptimal_attestations`                 | Suboptimal attestations, showing pk, index, slot, epoch
+`metric_missed_attestations`                     | Validators that missed an attestation during an epoch, showing pk, index, epoch
+`metric_double_missed_attestations`              | Validators that missed two attestations in a row, showing pk, index, epoch
+
 Installation
 ------------
 
 From source:
+
 ```
 git clone git@github.com:kilnfi/eth-validator-watcher.git
 cd eth-validator-watcher
 pip install .
 ```
 
-Docker images
--------------
+## Docker images
+
 Docker images (built for AMD64 and ARM64) are available [here](https://github.com/kilnfi/eth-validator-watcher/pkgs/container/eth-validator-watcher).
 
 
@@ -221,6 +231,7 @@ You did not had ideal head rewards. | ```🗣️ Our validator 0x8005f5e8, 0x801
 The chain is not yet started.       | ```⏱️     The chain will start in  1 days,  1 hours,  3 minutes and 48 seconds.```
 
 If you see this kind of message:
+
 ```
 ❓     Missed attestations detection is disabled for epoch 238030.
 ❓     You can ignore this message if the watcher just started less than one epoch ago. Otherwise, please check that you used the correct `--beacon-type`` option (currently set to `other`).
@@ -286,3 +297,8 @@ To check this last transaction, the watcher needs to retrieve the execution bloc
 ## License
 
 [MIT License](LICENSE).
+
+## TODO:
+
+- [ ] export metrics how long it took for certain queries, maybe we can also add this in grafana
+- [ ] export val pub keys to prometheus, along with other data like deployment and client
