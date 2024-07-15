@@ -167,26 +167,35 @@ def apply_mask(items: list[Any], mask: list[bool]) -> set[Any]:
     """
 
     return set(item for item, bit in zip(items, mask) if bit)
-
-
-def load_pubkeys_from_file(path: Path) -> set[str]:
-    """Load public keys from a file.
+        
+def load_validator_data_from_file(path: Path) -> dict[str, tuple[str, str]]:
+    """Load validator data from a file.
 
     Parameters:
-    path: A path to a file containing a list of public keys.
+    path: A path to a file containing a list of validator public keys, deployment IDs, and validator IDs.
 
-        Returns the corresponding set of public keys.
+    Returns:
+    A dictionary where the key is the public key and the value is a tuple containing deployment ID and validator ID.
     """
     with path.open() as file_descriptor:
-        return set(
-            (eth2_address_lower_0x_prefixed(line.strip()) for line in file_descriptor)
-        )
+        # Skip the header
+        next(file_descriptor)
+
+        validator_data = {}
+        for line in file_descriptor:
+            parts = line.strip().split()
+            if len(parts) == 3:
+                pub_key, deployment_id, validator_id = parts
+                pub_key = eth2_address_lower_0x_prefixed(pub_key)
+                validator_data[pub_key] = (deployment_id, validator_id)
+
+        return validator_data
+
 
 
 def get_our_pubkeys(
     pubkeys_file_path: Path | None,
-    web3signer: Web3Signer | None,
-) -> set[str]:
+) -> dict[str, tuple[str, str]]:
     """Get our pubkeys
 
     Parameters:
@@ -199,17 +208,13 @@ def get_our_pubkeys(
     """
 
     # Get public keys to watch from file
-    pubkeys_from_file: set[str] = (
-        load_pubkeys_from_file(pubkeys_file_path)
+    pubkeys_from_file: dict[str, tuple[str, str]] = (
+        load_validator_data_from_file(pubkeys_file_path)
         if pubkeys_file_path is not None
         else set()
     )
 
-    pubkeys_from_web3signer = (
-        web3signer.load_pubkeys() if web3signer is not None else set()
-    )
-
-    our_pubkeys = pubkeys_from_file | pubkeys_from_web3signer
+    our_pubkeys = pubkeys_from_file 
     metric_keys_count.set(len(our_pubkeys))
     return our_pubkeys
 

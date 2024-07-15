@@ -21,7 +21,7 @@ from .missed_attestations import (
     process_missed_attestations,
 )
 from .missed_blocks import process_missed_blocks_finalized, process_missed_blocks_head
-from .models import BeaconType, Validators
+from .models import BeaconType, Status, Validators
 from .next_blocks_proposal import process_future_blocks_proposal
 from .relays import Relays
 from .rewards import process_rewards
@@ -42,11 +42,8 @@ from .utils import (
     slots,
     write_liveness_file,
 )
-from .web3signer import Web3Signer
 
 print = functools.partial(print, flush=True)
-
-Status = Validators.DataItem.StatusEnum
 
 app = typer.Typer(add_completion=False)
 
@@ -85,9 +82,6 @@ def handler(
         file_okay=True,
         dir_okay=False,
         show_default=False,
-    ),
-    web3signer_url: Optional[str] = Option(
-        None, help="URL to web3signer managing keys to watch", show_default=False
     ),
     fee_recipient: Optional[str] = Option(
         None,
@@ -175,7 +169,6 @@ def handler(
             beacon_url,
             execution_url,
             pubkeys_file_path,
-            web3signer_url,
             fee_recipient,
             slack_channel,
             beacon_type,
@@ -190,7 +183,6 @@ def _handler(
     beacon_url: str,
     execution_url: str | None,
     pubkeys_file_path: Path | None,
-    web3signer_url: str | None,
     fee_recipient: str | None,
     slack_channel: str | None,
     beacon_type: BeaconType,
@@ -225,10 +217,9 @@ def _handler(
     beacon = Beacon(beacon_url)
     execution = Execution(execution_url) if execution_url is not None else None
     coinbase = Coinbase()
-    web3signer = Web3Signer(web3signer_url) if web3signer_url is not None else None
     relays = Relays(relays_url)
 
-    our_pubkeys: set[str] = set()
+    our_validators: dict[str, tuple[str, str]] = dict()
     our_active_idx2val: dict[int, Validators.DataItem.Validator] = {}
     our_validators_indexes_that_missed_attestation: set[int] = set()
     our_validators_indexes_that_missed_previous_attestation: set[int] = set()
@@ -277,7 +268,7 @@ def _handler(
 
         if is_new_epoch:
             try:
-                our_pubkeys = get_our_pubkeys(pubkeys_file_path, web3signer)
+                our_validators = get_our_pubkeys(pubkeys_file_path)
             except ValueError:
                 raise typer.BadParameter("Some pubkeys are invalid")
 
@@ -310,7 +301,7 @@ def _handler(
                 status: {
                     index: validator
                     for index, validator in validator.items()
-                    if validator.pubkey in our_pubkeys
+                    if validator.pubkey in our_validators.keys()
                 }
                 for status, validator in net_status2idx2val.items()
             }
@@ -332,7 +323,7 @@ def _handler(
             with_done = our_status2idx2val.get(Status.withdrawalDone, {})
             our_withdrawable_idx2val = with_poss | with_done
 
-            exited_validators.process(our_exited_u_idx2val, our_withdrawable_idx2val)
+            exited_validators.process(our_exited_u_idx2val, with_poss, with_done)
 
             slashed_validators.process(
                 net_exited_s_idx2val,
@@ -389,10 +380,10 @@ def _handler(
 
             last_rewards_process_epoch = epoch
 
-        process_future_blocks_proposal(beacon, our_pubkeys, slot, is_new_epoch)
+        process_future_blocks_proposal(beacon, our_validators, slot, is_new_epoch)
 
         last_processed_finalized_slot = process_missed_blocks_finalized(
-            beacon, last_processed_finalized_slot, slot, our_pubkeys, slack
+            beacon, last_processed_finalized_slot, slot, our_validators, slack
         )
 
         delta_sec = MISSED_BLOCK_TIMEOUT_SEC - (time() - slot_start_time_sec)
@@ -418,7 +409,7 @@ def _handler(
             beacon,
             potential_block,
             slot,
-            our_pubkeys,
+            our_validators,
             slack,
         )
 

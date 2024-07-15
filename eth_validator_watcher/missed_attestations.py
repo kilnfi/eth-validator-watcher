@@ -22,6 +22,18 @@ metric_double_missed_attestations_count = Gauge(
     "Double missed attestations count",
 )
 
+metric_missed_attestations = Gauge(
+    "missed_attestations",
+    "Missed attestations",
+    ["pubkey", "index", "epoch"],
+)
+
+metric_double_missed_attestations = Gauge(
+    "double_missed_attestations",
+    "Double missed attestations",
+    ["pubkey", "index", "epoch"],
+)
+
 
 def process_missed_attestations(
     beacon: Beacon,
@@ -59,6 +71,14 @@ def process_missed_attestations(
     }
 
     metric_missed_attestations_count.set(len(dead_indexes))
+    
+    for index in dead_indexes:
+        validator = index_to_validator[index]
+        metric_missed_attestations.labels(
+            pubkey=validator.pubkey,
+            index=index,
+            epoch=epoch,
+        ).set(1)
 
     if len(dead_indexes) == 0:
         return set()
@@ -109,6 +129,14 @@ def process_double_missed_attestations(
 
     double_dead_indexes = dead_indexes & previous_dead_indexes
     metric_double_missed_attestations_count.set(len(double_dead_indexes))
+    
+    for index in double_dead_indexes:
+        validator = epoch_to_index_to_validator_index[epoch - 1][index]
+        metric_double_missed_attestations.labels(
+            pubkey=validator.pubkey,
+            index=index,
+            epoch=epoch,
+        ).set(1)
 
     if len(double_dead_indexes) == 0:
         return set()

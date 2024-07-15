@@ -30,6 +30,7 @@ class Validators(BaseModel):
 
     data: list[DataItem]
 
+Status = Validators.DataItem.StatusEnum
 
 class Genesis(BaseModel):
     class Data(BaseModel):

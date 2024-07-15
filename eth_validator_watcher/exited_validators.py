@@ -4,13 +4,35 @@ validators."""
 
 from prometheus_client import Gauge
 
-from .models import Validators
+from .models import Status, Validators
 from .utils import Slack
 
 metric_our_exited_validators_count = Gauge(
     "our_exited_validators_count",
     "Our exited validators count",
 )
+
+metric_our_exited_validators = Gauge(
+    "our_exited_validators",
+    "Our exited validators",
+    ["pubkey", "index", "status", "effective_balance", "slashed"],
+)
+
+metric_our_withdrawn_validators = Gauge(
+    "our_withdrawn_validators",
+    "Our withdrawn validators",
+    ["pubkey", "index", "status", "effective_balance", "slashed"],
+)
+
+def set_withdrawn_validators_metrics(validators_dict, status):
+    for index, validator in validators_dict.items():
+        metric_our_withdrawn_validators.labels(
+            pubkey=validator.pubkey,
+            index=index,
+            status=status,
+            effective_balance=validator.effective_balance,
+            slashed=validator.slashed,
+        ).set(1)
 
 
 class ExitedValidators:
@@ -30,7 +52,8 @@ class ExitedValidators:
         our_exited_unslashed_index_to_validator: dict[
             int, Validators.DataItem.Validator
         ],
-        our_withdrawal_index_to_validator: dict[int, Validators.DataItem.Validator],
+        our_withdrawal_possible_index_to_validator: dict[int, Validators.DataItem.Validator],
+        our_withdrawal_done_index_to_validator: dict[int, Validators.DataItem.Validator],
     ) -> None:
         """Process exited validators.
 
@@ -39,6 +62,8 @@ class ExitedValidators:
             key  : our exited validator index
             value: validator data corresponding to the validator index
         """
+        
+        our_withdrawal_index_to_validator = our_withdrawal_possible_index_to_validator | our_withdrawal_done_index_to_validator
 
         our_exited_unslashed_indexes = set(our_exited_unslashed_index_to_validator)
 
@@ -53,6 +78,18 @@ class ExitedValidators:
         )
 
         metric_our_exited_validators_count.set(len(our_exited_indexes))
+
+        for index, validator in our_exited_unslashed_index_to_validator.items():
+            metric_our_exited_validators.labels(
+                pubkey=validator.pubkey,
+                index=index,
+                status=Status.exitedUnslashed,
+                effective_balance=validator.effective_balance,
+                slashed=validator.slashed,
+            ).set(1)
+
+        set_withdrawn_validators_metrics(our_withdrawal_possible_index_to_validator, Status.withdrawalPossible)
+        set_withdrawn_validators_metrics(our_withdrawal_done_index_to_validator, Status.withdrawalDone)
 
         if self.__our_exited_unslashed_indexes is None:
             self.__our_exited_unslashed_indexes = our_exited_unslashed_indexes

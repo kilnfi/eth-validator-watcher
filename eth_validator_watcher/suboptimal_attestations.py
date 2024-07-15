@@ -23,6 +23,12 @@ metric_suboptimal_attestations_rate_gauge = Gauge(
     "Suboptimal attestations rate",
 )
 
+metric_suboptimal_attestations = Gauge(
+    "suboptimal_attestations",
+    "Suboptimal attestations",
+    ["pubkey", "index", "slot", "epoch"], # maybe to add "deployment_id", "validator_id"
+)
+
 
 def process_suboptimal_attestations(
     beacon: Beacon,
@@ -124,6 +130,16 @@ def process_suboptimal_attestations(
         our_validators_index_that_had_to_attest_during_previous_slot
         - our_validators_index_that_attested_optimally_during_previous_slot
     )
+    
+    for index in our_validators_index_that_did_not_attest_optimally_during_previous_slot:
+        validator = our_active_validators_index_to_validator[index]
+        metric_suboptimal_attestations.labels(
+            pubkey=validator.pubkey,
+            index=index,
+            slot=previous_slot,
+            epoch=epoch_of_previous_slot,
+        ).set(1)
+
 
     suboptimal_attestations_rate = (
         len(our_validators_index_that_did_not_attest_optimally_during_previous_slot)
