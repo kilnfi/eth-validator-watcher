@@ -21,16 +21,24 @@ def test_process_exited_validators():
         44: Validator(pubkey="0x9012", effective_balance=32000000000, slashed=False),
         45: Validator(pubkey="0x3456", effective_balance=32000000000, slashed=False),
     }
-
-    our_withdrawal_index_to_validator = {
+    
+    with_done = {
         46: Validator(pubkey="0x1234", effective_balance=32000000000, slashed=False),
+    }
+    
+    with_poss = {
         47: Validator(pubkey="0x5678", effective_balance=32000000000, slashed=True),
     }
+
+    # our_withdrawal_index_to_validator = {
+    #     46: Validator(pubkey="0x1234", effective_balance=32000000000, slashed=False),
+    #     47: Validator(pubkey="0x5678", effective_balance=32000000000, slashed=True),
+    # }
 
     exited_validators = ExitedValidators(slack)  # type: ignore
 
     exited_validators.process(
-        our_exited_unslashed_index_to_validator, our_withdrawal_index_to_validator
+        our_exited_unslashed_index_to_validator, with_poss, with_done
     )
 
     assert metric_our_exited_validators_count.collect()[0].samples[0].value == 3  # type: ignore
@@ -47,7 +55,7 @@ def test_process_exited_validators():
         48: Validator(pubkey="0x5432", effective_balance=32000000000, slashed=False),
     }
     exited_validators.process(
-        our_exited_unslashed_index_to_validator, our_withdrawal_index_to_validator
+        our_exited_unslashed_index_to_validator, with_poss, with_done
     )
 
     assert metric_our_exited_validators_count.collect()[0].samples[0].value == 4  # type: ignore

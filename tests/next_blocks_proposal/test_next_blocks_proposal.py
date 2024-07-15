@@ -23,12 +23,12 @@ class Beacon:
 
 def test_handle_next_blocks_proposal_no_work():
     assert (
-        process_future_blocks_proposal(Beacon(), set(), 1344, False) == 0  # type: ignore
+        process_future_blocks_proposal(Beacon(), dict(), 1344, False) == 0  # type: ignore
     )
 
 
 def test_handle_next_blocks_proposal_work():
     assert (
-        process_future_blocks_proposal(Beacon(), {"0xaaa"}, 1344, True)  # type: ignore
+        process_future_blocks_proposal(Beacon(), {"0xaaa": ("reth.0", "eth")}, 1344, True)  # type: ignore
         == 1
     )
