@@ -3,9 +3,11 @@ from pathlib import Path
 from time import sleep, time
 from typing import Any, Iterator, Optional, Tuple
 
+import requests
+
+from eth_validator_watcher.models import KeyReporterQueryResponse
 from more_itertools import chunked
 from prometheus_client import Gauge
-from slack_sdk import WebClient
 
 from .web3signer import Web3Signer
 
@@ -167,7 +169,8 @@ def apply_mask(items: list[Any], mask: list[bool]) -> set[Any]:
     """
 
     return set(item for item, bit in zip(items, mask) if bit)
-        
+
+
 def load_validator_data_from_file(path: Path) -> dict[str, tuple[str, str]]:
     """Load validator data from a file.
 
@@ -192,9 +195,32 @@ def load_validator_data_from_file(path: Path) -> dict[str, tuple[str, str]]:
         return validator_data
 
 
+def load_validator_data_from_key_reporter(
+    pubkeys_url: str,
+) -> dict[str, tuple[str, str]]:
+    """Load validator data from the key reporter.
+
+    Returns:
+    A dictionary where the key is the public key and the value is a tuple containing deployment ID and validator ID.
+    """
+    headers = {"content-type": "application/json", "user-agent": "hopper-dashboard"}
+    response = requests.post(pubkeys_url, headers=headers)
+    response.raise_for_status()
+    data = response.json()
+    key_reporter_response = KeyReporterQueryResponse(**data)
+    result = {
+        validator.validator_public_key: (
+            validator.deployment_id,
+            validator.validator_id,
+        )
+        for validator in key_reporter_response.validators
+    }
+
+    return result
+
 
 def get_our_pubkeys(
-    pubkeys_file_path: Path | None,
+    pubkeys_url: str,
 ) -> dict[str, tuple[str, str]]:
     """Get our pubkeys
 
@@ -208,13 +234,13 @@ def get_our_pubkeys(
     """
 
     # Get public keys to watch from file
-    pubkeys_from_file: dict[str, tuple[str, str]] = (
-        load_validator_data_from_file(pubkeys_file_path)
-        if pubkeys_file_path is not None
+    pubkeys_from_key_reporter: dict[str, tuple[str, str]] = (
+        load_validator_data_from_key_reporter(pubkeys_url)
+        if pubkeys_url is not None
         else set()
     )
 
-    our_pubkeys = pubkeys_from_file 
+    our_pubkeys = pubkeys_from_key_reporter
     metric_keys_count.set(len(our_pubkeys))
     return our_pubkeys
 
@@ -228,12 +254,19 @@ def write_liveness_file(liveness_file: Path):
 
 
 class Slack:
-    def __init__(self, channel: str, token: str) -> None:
+
+    def __init__(self, channel: str, webhook_url: str) -> None:
         self.__channel = channel
-        self.__client = WebClient(token=token)
+        self.__webhook_url = webhook_url
 
     def send_message(self, message: str) -> None:
-        self.__client.chat_postMessage(channel=self.__channel, text=message)
+        payload = {"text": message}
+        response = requests.post(self.__webhook_url, json=payload)
+
+        if response.status_code != 200:
+            raise ValueError(
+                f"Request to Slack returned an error {response.status_code}, the response is:\n{response.text}"
+            )
 
 
 def slots(genesis_time_sec: int) -> Iterator[Tuple[int, int]]:
