@@ -209,7 +209,7 @@ def load_validator_data_from_key_reporter(
     data = response.json()
     key_reporter_response = KeyReporterQueryResponse(**data)
     result = {
-        validator.validator_public_key: (
+        eth2_address_lower_0x_prefixed(validator.validator_public_key): (
             validator.deployment_id,
             validator.validator_id,
         )
@@ -225,10 +225,9 @@ def get_our_pubkeys(
     """Get our pubkeys
 
     Parameters:
-    pubkeys_file_path: The path of file containing keys to watch
-    web3signer       : Web3Signer instance signing for the keys to watch
+    pubkeys_url: The url of the key reporter containing keys to watch
 
-    Query pubkeys from either file path or Web3Signer instance.
+    Query pubkeys from the key reporter and return them as a dictionary.
     If `our_pubkeys` is already set and we are not at the beginning of a new epoch,
     returns `our_pubkeys`.
     """
