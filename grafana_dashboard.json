@@ -187,7 +187,7 @@
           "refId": "A"
         }
       ],
-      "title": "Kiln future blocks proposal",
+      "title": "Chorus One future blocks proposal",
       "type": "stat"
     },
     {
@@ -277,7 +277,7 @@
           "type": "math"
         }
       ],
-      "title": "Kiln assets under management",
+      "title": "Chorus One assets under management",
       "type": "stat"
     },
     {
@@ -411,7 +411,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "<div style=\"width:100%;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:center\">\n<img src=\"https://user-images.githubusercontent.com/79211569/170065083-5deff6bf-a786-4550-93f2-dd4eb5ae1f9f.svg\" height=\"100%\" width=\"100%\" style=\"max-width:100%;max-height:100%;\"/>\n</div>",
+        "content": "<div style=\"width:100%;height:100%;display:flex;flex-direction:row;align-items:center;justify-content:center\">\n<img src=\"data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTE4IiBoZWlnaHQ9IjMyIiB2aWV3Qm94PSIwIDAgMTE4IDMyIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8ZyBjbGlwLXBhdGg9InVybCgjY2xpcDBfMjE3XzgyNSkiPgo8bWFzayBpZD0ibWFzazBfMjE3XzgyNSIgc3R5bGU9Im1hc2stdHlwZTpsdW1pbmFuY2UiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9IjAiIHk9IjAiIHdpZHRoPSIxMTgiIGhlaWdodD0iMzIiPgo8cGF0aCBkPSJNMTE3LjAyOSAwSDBWMzJIMTE3LjAyOVYwWiIgZmlsbD0id2hpdGUiLz4KPC9tYXNrPgo8ZyBtYXNrPSJ1cmwoI21hc2swXzIxN184MjUpIj4KPHBhdGggZD0iTTQ0LjM3NTcgMTQuMzY3OUM0Ny40OTE1IDE0LjM2NzkgNDkuOTE2OCAxMi44MDkzIDUwLjE5MyA5LjMxMjE5SDQ3LjMxMzdDNDYuODk5NyAxMS4wNzA3IDQ1Ljc5NTUgMTEuNzkwMSA0NC4zNzU3IDExLjc5MDFDNDEuOTUgMTEuNzkwMSA0MC45ODM4IDkuNzkxNzcgNDAuOTgzOCA3LjE3Mzk4QzQwLjk4MzggNC41NTYxNiA0MS45NyAyLjU3NzgzIDQ0LjM3NTcgMi41Nzc4M0M0NS44MTUxIDIuNTc3ODMgNDYuODk5NyAzLjI5NzIyIDQ3LjMxMzcgNS4wMzU3OEg1MC4xOTNDNDkuOTE2OCAxLjU1ODY5IDQ3LjQ5MTUgMCA0NC4zNzU3IDBDNDAuNDcxIDAgMzcuOTQ3IDIuNjU3NzcgMzcuOTQ3IDcuMTczOThDMzcuOTQ3IDExLjcxMDIgNDAuNDcxIDE0LjM2NzkgNDQuMzc1NyAxNC4zNjc5WiIgZmlsbD0iIzM1MzUzNSIvPgo8cGF0aCBkPSJNNzEuNDc2MSAxNC4zNjc5Qzc1LjQ1OTUgMTQuMzY3OSA3OC4wNjIzIDExLjQ1MDMgNzguMDYyMyA3LjE3Mzk4Qzc4LjA2MjMgMi44Nzc1OCA3NS40NTk1IDAgNzEuNDc2MSAwQzY3LjQ5MjcgMCA2NC44ODk2IDIuODc3NTggNjQuODg5NiA3LjE3Mzk4QzY0Ljg4OTYgMTEuNDUwMyA2Ny40OTI3IDE0LjM2NzkgNzEuNDc2MSAxNC4zNjc5Wk03MS40NzYxIDExLjc5MDFDNjkuMjA4MyAxMS43OTAxIDY3LjkyNjQgOS45NTE2NSA2Ny45MjY0IDcuMTczOThDNjcuOTI2NCA0LjM3NjMyIDY5LjIwODMgMi41Nzc4MyA3MS40NzYxIDIuNTc3ODNDNzMuNzQzNiAyLjU3NzgzIDc1LjAyNTYgNC4zNzYzMiA3NS4wMjU2IDcuMTczOThDNzUuMDI1NiA5Ljk1MTY1IDczLjc0MzYgMTEuNzkwMSA3MS40NzYxIDExLjc5MDFaIiBmaWxsPSIjMzUzNTM1Ii8+CjxwYXRoIGQ9Ik05OC4wNjY3IDE0LjM2NzNDMTAxLjQxOSAxNC4zNjczIDEwMy43NDYgMTIuNTg4OCAxMDMuNzQ2IDguODUxOTJWMC4xNzkxOTlIMTAwLjc2OFY4LjYzMjA4QzEwMC43NjggMTAuNzEwMyA5OS43NjI2IDExLjc2OTQgOTguMDY2NyAxMS43Njk0Qzk2LjM3MDcgMTEuNzY5NCA5NS4zNDUzIDEwLjcxMDMgOTUuMzQ1MyA4LjYzMjA4VjAuMTc5MTk5SDkyLjM2NzdWOC44NTE5MkM5Mi4zNjc3IDEyLjU4ODggOTQuNjc0NyAxNC4zNjczIDk4LjA2NjcgMTQuMzY3M1oiIGZpbGw9IiMzNTM1MzUiLz4KPHBhdGggZD0iTTExMS4yNzUgMTQuMzY3OUMxMTQuNDExIDE0LjM2NzkgMTE2Ljg3NiAxMy4wNjkgMTE2Ljg3NiAxMC4wNTE2QzExNi44NzYgNy45MzMzNCAxMTUuNjMzIDYuNjc0NCAxMTIuMzk5IDYuMDU0OTFMMTEwLjU0NiA1LjY5NTIzQzEwOS4zMDMgNS40NzUzOSAxMDguOTY3IDQuNzk1OTcgMTA4Ljk2NyA0LjE1NjUxQzEwOC45NjcgMy4yOTcyMiAxMDkuNTYgMi40Nzc5MiAxMTEuMTM3IDIuNDc3OTJDMTEyLjQ3OCAyLjQ3NzkyIDExMy41MDMgMy4wMzc0NSAxMTMuNDY0IDQuMjk2MzhIMTE2LjVDMTE2LjUgMS40Mzg3OSAxMTQuMjUzIDAgMTExLjA5OCAwQzEwOC4wMDIgMCAxMDUuODcyIDEuMzU4ODYgMTA1Ljg3MiA0LjAzNjYxQzEwNS44NzIgNi41NzQ0NiAxMDcuNzA1IDcuNTczNjMgMTA5Ljg3NSA4LjAxMzI4TDExMS44NjcgOC4zOTI5NkMxMTMuMTA5IDguNjMyNzQgMTEzLjc0IDkuMTEyMzUgMTEzLjc0IDEwLjA3MTZDMTEzLjc0IDExLjIxMDYgMTEyLjg5MiAxMS44OSAxMTEuMjk0IDExLjg5QzEwOS40MDIgMTEuODkgMTA4LjYxMyAxMC44NTA5IDEwOC41NTQgOS41OTE5NEgxMDUuNDk3QzEwNS40OTcgMTIuNjY5MyAxMDcuNzQ1IDE0LjM2NzkgMTExLjI3NSAxNC4zNjc5WiIgZmlsbD0iIzM1MzUzNSIvPgo8cGF0aCBkPSJNNjAuNTk0OCAwLjMyMDgwMVY1Ljk4MjA1SDU3LjY5MDdWOC40MTk1NUg2MC41OTQ4VjE0LjA4MDhINjMuNTcwNVYwLjMyMDgwMUg2MC41OTQ4WiIgZmlsbD0iIzM1MzUzNSIvPgo8cGF0aCBkPSJNNTUuMTY0MiA1Ljk4MjA1TDU1LjE2NDggOC40MTk1NUw1NS4xNjQyIDE0LjA4MDhINTIuMTg4NVYwLjMyMDgwMUg1NS4xNjQyVjUuOTgyMDVaIiBmaWxsPSIjMzUzNTM1Ii8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNzQuNzQzMyAzMS42ODA5SDY1LjEyMDFWMTcuOTIwOUg3NC41NDYzVjIwLjQ3NjNINjguMDc4MVYyMy41NjI1SDczLjk1NDVWMjUuODYyM0g2OC4wNzgxVjI5LjEyNTVINzQuNzQzM1YzMS42ODA5WiIgZmlsbD0iIzM1MzUzNSIvPgo8cGF0aCBkPSJNNDQuNTMzNSAzMS45NjhDNDguNTE2OSAzMS45NjggNTEuMTE5NyAyOS4wNTA0IDUxLjExOTcgMjQuNzc0MUM1MS4xMTk3IDIwLjQ3NzYgNDguNTE2OSAxNy42MDAxIDQ0LjUzMzUgMTcuNjAwMUM0MC41NTAxIDE3LjYwMDEgMzcuOTQ3IDIwLjQ3NzYgMzcuOTQ3IDI0Ljc3NDFDMzcuOTQ3IDI5LjA1MDQgNDAuNTUwMSAzMS45NjggNDQuNTMzNSAzMS45NjhaTTQ0LjUzMzUgMjkuMzkwMkM0Mi4yNjU3IDI5LjM5MDIgNDAuOTgzOCAyNy41NTE4IDQwLjk4MzggMjQuNzc0MUM0MC45ODM4IDIxLjk3NjQgNDIuMjY1NyAyMC4xNzc5IDQ0LjUzMzUgMjAuMTc3OUM0Ni44MDEgMjAuMTc3OSA0OC4wODMgMjEuOTc2NCA0OC4wODMgMjQuNzc0MUM0OC4wODMgMjcuNTUxOCA0Ni44MDEgMjkuMzkwMiA0NC41MzM1IDI5LjM5MDJaIiBmaWxsPSIjMzUzNTM1Ii8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNMC4wMTYzNTc0IDI4LjQzNjJMMy41NDYwMyAzMS45OTFMNy4wNzU3MSAyOC40MzYyTDMuNTQ2MDMgMjQuODgxM0wwLjAxNjM1NzQgMjguNDM2MloiIGZpbGw9IiMxNjhGOUMiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0zMS43NzgyIDMuNTU0ODhMMjguMjQ4NCAwTDI0LjcxODggMy41NTQ4OEwyOC4yNDg0IDcuMTA5NzZMMzEuNzc4MiAzLjU1NDg4WiIgZmlsbD0iIzE2OEY5QyIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE5LjQyNzUgMTkuNTQ5M0wxNS44OTc4IDIzLjEwNDJMMTIuMzY4MSAxOS41NDkzTDguODM4NDMgMTUuOTk0NUwxMi4zNjgxIDEyLjQzOTZMMTUuODk3OCA4Ljg4NDc1TDE5LjQyNzUgMTIuNDM5NkwyMi45NTcxIDE1Ljk5NDVMMTkuNDI3NSAxOS41NDkzWk0zMC4wMTY1IDE1Ljk5NDVMMjYuNDg2NyAxMi40Mzk2TDIyLjk1NzEgOC44ODQ2NUwxOS40Mjc0IDUuMzI5NzdMMTUuODk3OCAxLjc3NDlMMTIuMzY4IDUuMzI5NzdMOC44Mzg0IDguODg0NjVMNS4zMDg3MiAxMi40Mzk2TDEuNzc5MDUgMTUuOTk0NUw1LjMwODcyIDE5LjU0OTJMOC44Mzg0IDIzLjEwNDJMMTIuMzY4IDI2LjY1OTFMMTUuODk3OCAzMC4yMTM5TDE5LjQyNzQgMjYuNjU5MUwyMi45NTcxIDIzLjEwNDJMMjYuNDg2NyAxOS41NDkyTDMwLjAxNjUgMTUuOTk0NVoiIGZpbGw9IiMxNjhGOUMiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0yNC43MTg4IDI4LjQ0NDVMMjguMjQ4NSAzMS45OTk0TDMxLjc3OCAyOC40NDQ1TDI4LjI0ODUgMjQuODg5NkwyNC43MTg4IDI4LjQ0NDVaIiBmaWxsPSIjMTY4RjlDIi8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNy4wNTkzNSAzLjU1OTI4TDMuNTI5NjggMC4wMDQzOTQ1M0wwIDMuNTU5MjhMMy41Mjk2OCA3LjExNDE2TDcuMDU5MzUgMy41NTkyOFoiIGZpbGw9IiMxNjhGOUMiLz4KPHBhdGggZD0iTTU1LjA3ODggMTcuOTIwOUg1Mi4xODg1VjMxLjY4MDlINTUuMDc4NVYyMi44MTU1TDU1LjA3ODggMTcuOTIwOVoiIGZpbGw9IiMzNTM1MzUiLz4KPHBhdGggZD0iTTU3LjYxNjUgMjYuOTM4Mkw2MC40NjEyIDMxLjY4MDlINjMuNTgyNFYxNy45MjA5SDYwLjY5MjRWMjYuOTYzMUg2MC42MzQ1TDU3LjYxNjUgMjEuOTQwMlYyNi45MzgyWiIgZmlsbD0iIzM1MzUzNSIvPgo8cGF0aCBkPSJNODcuOTE2MyA5LjExMTdMOTAuODE0OCAxNC4xNjc0SDg3Ljg5NjVMODUuMzE4OSA5LjU5MTM1VjYuOTEzNTZDODYuOTMxNyA2LjkxMTY0IDg3LjY0MDMgNi4wOTI3OSA4Ny42NDAzIDQuODU1MjhDODcuNjQwMyAzLjU5NjM0IDg2LjkzMDEgMi43NzcwMSA4NS4zMTMyIDIuNzc3MDFIODIuNzg5M1Y1Ljg5ODc3TDgyLjc4ODUgOS44NTY2TDgyLjc4OTMgMTQuMTY3NEg3OS44MzEzVjAuMTc5MTk5SDg1LjQxMTlDODkuMDc5NiAwLjE3OTE5OSA5MC42NzY5IDIuMTE3NTcgOTAuNjc2OSA0Ljg1NTI4QzkwLjY3NjkgNi44NTM1OSA4OS44Mjg5IDguNDEyMjggODcuOTE2MyA5LjExMTdaIiBmaWxsPSIjMzUzNTM1Ii8+CjwvZz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8yMTdfODI1Ij4KPHJlY3Qgd2lkdGg9IjExNy4wMjkiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==\" height=\"100%\" width=\"100%\" style=\"max-width:100%;max-height:100%;\"/>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "10.0.2",
@@ -481,7 +481,7 @@
           "refId": "A"
         }
       ],
-      "title": "Kiln slashed validators",
+      "title": "Chorus One slashed validators",
       "type": "stat"
     },
     {
@@ -748,7 +748,7 @@
           "refId": "A"
         }
       ],
-      "title": "Kiln queued validators",
+      "title": "Chorus One queued validators",
       "type": "stat"
     },
     {
@@ -903,7 +903,7 @@
           "type": "math"
         }
       ],
-      "title": "Kiln's share of validators in entry queue",
+      "title": "Chorus One's share of validators in entry queue",
       "type": "stat"
     },
     {
@@ -1102,7 +1102,7 @@
           "refId": "A"
         }
       ],
-      "title": "Kiln exited validators",
+      "title": "Chorus One exited validators",
       "type": "stat"
     },
     {
@@ -1234,7 +1234,7 @@
           "refId": "A"
         }
       ],
-      "title": "Kiln active validators",
+      "title": "Chorus One active validators",
       "type": "stat"
     },
     {
@@ -1390,7 +1390,7 @@
           "type": "math"
         }
       ],
-      "title": "Kiln's share of active validators",
+      "title": "Chorus One's share of active validators",
       "type": "stat"
     },
     {
@@ -1488,7 +1488,7 @@
           "type": "math"
         }
       ],
-      "title": "Kiln ideal att. rewards (24H)",
+      "title": "Chorus One ideal att. rewards (24H)",
       "type": "stat"
     },
     {
@@ -1613,7 +1613,7 @@
           "type": "math"
         }
       ],
-      "title": "Kiln actual att. rewards (24H)",
+      "title": "Chorus One actual att. rewards (24H)",
       "type": "stat"
     },
     {
@@ -1795,7 +1795,7 @@
           "type": "math"
         }
       ],
-      "title": "Kiln att. rewards shortfall & penalties (24H)",
+      "title": "Chorus One att. rewards shortfall & penalties (24H)",
       "type": "stat"
     },
     {
@@ -1984,7 +1984,7 @@
           "type": "math"
         }
       ],
-      "title": "Kiln att. rewards rate (24H)",
+      "title": "Chorus One att. rewards rate (24H)",
       "type": "gauge"
     },
     {
@@ -2752,7 +2752,7 @@
           "refId": "B"
         }
       ],
-      "title": "Kiln Suboptimal attestations rate",
+      "title": "Chorus One Suboptimal attestations rate",
       "type": "timeseries"
     },
     {
@@ -2967,7 +2967,7 @@
           "refId": "B"
         }
       ],
-      "title": "Kiln missed block proposals in the last 24H",
+      "title": "Chorus One missed block proposals in the last 24H",
       "type": "timeseries"
     },
     {
@@ -3223,7 +3223,7 @@
           "refId": "B"
         }
       ],
-      "title": "Kiln missed attestations during the last epoch",
+      "title": "Chorus One missed attestations during the last epoch",
       "type": "timeseries"
     },
     {
