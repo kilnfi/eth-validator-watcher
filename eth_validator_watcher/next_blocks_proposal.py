@@ -1,6 +1,7 @@
 """Contains function to handle next blocks proposal"""
 
 import functools
+from time import time
 
 from prometheus_client import Gauge
 
@@ -20,6 +21,12 @@ metric_future_block_proposals = Gauge(
     ["pubkey","index", "slot", "epoch", "deployment_id", "validator_id"]
 )
 
+metric_future_block_proposals_duration_sec = Gauge(
+    "future_block_proposals_duration_sec",
+    "Future block proposals duration in seconds",
+    ["slot", "number_of_validators"]
+)
+
 
 def process_future_blocks_proposal(
     beacon: Beacon,
@@ -30,11 +37,12 @@ def process_future_blocks_proposal(
     """Handle next blocks proposal
 
     Parameters:
-    beacon      : Beacon
+    beacon         : Beacon
     our_validators : A dictionary with public keys as keys and a tuple with the deployment_id and the validator_id as values
-    slot        : Slot
-    is_new_epoch: Is new epoch
+    slot           : Slot
+    is_new_epoch   : Is new epoch
     """
+    now = time()
     epoch = slot // NB_SLOT_PER_EPOCH
     proposers_duties_current_epoch = beacon.get_proposer_duties(epoch)
     proposers_duties_next_epoch = beacon.get_proposer_duties(epoch + 1)
@@ -60,6 +68,11 @@ def process_future_blocks_proposal(
             deployment_id=our_validators[item.pubkey][0],
             validator_id=our_validators[item.pubkey][1]
         ).set(1)
+        
+    metric_future_block_proposals_duration_sec.labels(
+        slot=slot,
+        number_of_validators=len(our_validators)
+    ).set(time() - now)
 
     if is_new_epoch:
         for item in filtered:

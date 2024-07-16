@@ -1,8 +1,6 @@
 Ethereum Validator Watcher
 ==========================
 
-![kiln-logo](docs/img/Kiln_Logo-Transparent-Dark.svg)
-
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
 The code is provided as-is with no warranties.
@@ -65,7 +63,7 @@ Command line options
 ╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ *  --beacon-url               TEXT                                          URL of beacon node [required]                                                    │
 │    --execution-url            TEXT                                          URL of execution node                                                            │
-│    --pubkeys-file-path        FILE                                          File containing the list of public keys to watch                                 │
+│    --pubkeys-url              TEXT                                          URL of the key reportter containing the list of public keys to watch             │
 │    --web3signer-url           TEXT                                          URL to web3signer managing keys to watch                                         │
 │    --fee-recipient            TEXT                                          Fee recipient address - --execution-url must be set                              │
 │    --slack-channel            TEXT                                          Slack channel to send alerts - SLACK_TOKEN env var must be set                   │
@@ -112,7 +110,7 @@ eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type lighthous
 
 Example with Lighthouse, with keys to watch retrieved from a file, and with a specified fee recipient:
 ```
-eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type lighthouse --execution-url http://localhost:8545 --pubkeys-file-path keys.txt --fee-recipient 0x4675c7e5baafbffbca748158becba61ef3b0a263
+eth-validator-watcher --beacon-url http://localhost:5052 --beacon-type lighthouse --execution-url http://localhost:8545 --pubkeys-url http://key-reporter.... --fee-recipient 0x4675c7e5baafbffbca748158becba61ef3b0a263
 ```
 
 With the following `keys.txt` file:
@@ -122,11 +120,11 @@ With the following `keys.txt` file:
 0x8adf063f810e2321a1aea258fd3a6ee5560911cee631980e1ef32bd88bf8c3dd5d28724e22a8987bfe411dd731f6dd38
 ```
 
- `--pubkeys-file-path` and `--fee-recipient` flag allow both `0x` prefixed and non `0x` prefixed ETH1 address / pubkeys.
+ `--pubkeys-url` and `--fee-recipient` flag allow both `0x` prefixed and non `0x` prefixed ETH1 address / pubkeys.
 
 Example with Prysm, with keys to watch retrieved from Web3Signer and with Slack alerting:
 ```
-export SLACK_TOKEN=xoxb-xxxxxxxxxxxxx-xxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxx
+export SLACK_URL=https://hooks.slack.com/services/xxxxx/yyy/zzzzzzzzzzzzzzzzzzzzzzzz      
 eth-validator-watcher --beacon-url http://localhost:3500 --web3signer-url http://localhost:9000 --slack-channel eth-alerting
 ```
 
@@ -181,13 +179,17 @@ name                                             | description
 `our_actual_heads_count`                         | Our actual heads count
 
 New sets of data are exported in Prometheus:
-
+name                                             | description
+-------------------------------------------------|------------
 `future_block_proposals`                         | Future block proposals, showing the pk, index, slot, epoch, deployment and client of the proposer 
 `our_exited_validators`                          | Our validators that are exited, showing pk, index, status, effective balance                      
 `our_withdrawn_validators`                       | Our validators that are withdrawn, showing pk, index, status, effective balance    
-`metric_suboptimal_attestations`                 | Suboptimal attestations, showing pk, index, slot, epoch
-`metric_missed_attestations`                     | Validators that missed an attestation during an epoch, showing pk, index, epoch
-`metric_double_missed_attestations`              | Validators that missed two attestations in a row, showing pk, index, epoch
+`suboptimal_attestations`                        | Suboptimal attestations, showing pk, index, slot, epoch
+`missed_attestations`                            | Validators that missed an attestation during an epoch, showing pk, index, epoch
+`double_missed_attestations`                     | Validators that missed two attestations in a row, showing pk, index, epoch
+`missed_attestations_duration_sec`               | Duration in seconds of the liveness query
+`double_missed_attestations_duration_sec`        | Duration in seconds of the liveness query for 2 epochs in a row
+`suboptimal_attestations_duration_sec`           | Duration in seconds of getting the suboptimal attestations
 
 Installation
 ------------
@@ -297,8 +299,3 @@ To check this last transaction, the watcher needs to retrieve the execution bloc
 ## License
 
 [MIT License](LICENSE).
-
-## TODO:
-
-- [ ] export metrics how long it took for certain queries, maybe we can also add this in grafana
-- [ ] export val pub keys to prometheus, along with other data like deployment and client
