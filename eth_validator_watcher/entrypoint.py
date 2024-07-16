@@ -75,14 +75,7 @@ metric_net_active_validators_gauge = Gauge(
 def handler(
     beacon_url: str = Option(..., help="URL of beacon node", show_default=False),
     execution_url: str = Option(None, help="URL of execution node", show_default=False),
-    pubkeys_file_path: Optional[Path] = Option(
-        None,
-        help="File containing the list of public keys to watch",
-        exists=True,
-        file_okay=True,
-        dir_okay=False,
-        show_default=False,
-    ),
+    pubkeys_url: str = Option(..., help="Key reporter url", show_default=False),
     fee_recipient: Optional[str] = Option(
         None,
         help="Fee recipient address - --execution-url must be set",
@@ -168,7 +161,7 @@ def handler(
         _handler(
             beacon_url,
             execution_url,
-            pubkeys_file_path,
+            pubkeys_url,
             fee_recipient,
             slack_channel,
             beacon_type,
@@ -182,7 +175,7 @@ def handler(
 def _handler(
     beacon_url: str,
     execution_url: str | None,
-    pubkeys_file_path: Path | None,
+    pubkeys_url: str,
     fee_recipient: str | None,
     slack_channel: str | None,
     beacon_type: BeaconType,
@@ -190,7 +183,7 @@ def _handler(
     liveness_file: Path | None,
 ) -> None:
     """Just a wrapper to be able to test the handler function"""
-    slack_token = environ.get("SLACK_TOKEN")
+    slack_url = environ.get("SLACK_URL")
 
     if fee_recipient is not None and execution_url is None:
         raise typer.BadParameter(
@@ -203,16 +196,19 @@ def _handler(
         except ValueError:
             raise typer.BadParameter("`fee-recipient` should be a valid ETH1 address")
 
-    if slack_channel is not None and slack_token is None:
+    if slack_channel is not None and slack_url is None:
         raise typer.BadParameter(
-            "SLACK_TOKEN env var must be set if you want to use `slack-channel`"
+            "SLACK_URL env var must be set if you want to use `slack-channel`"
         )
 
     slack = (
-        Slack(slack_channel, slack_token)
-        if slack_channel is not None and slack_token is not None
+        Slack(slack_channel, slack_url)
+        if slack_channel is not None and slack_url is not None
         else None
     )
+
+    if slack is not None:
+        slack.send_message("👋    Second test!")
 
     beacon = Beacon(beacon_url)
     execution = Execution(execution_url) if execution_url is not None else None
@@ -268,7 +264,7 @@ def _handler(
 
         if is_new_epoch:
             try:
-                our_validators = get_our_pubkeys(pubkeys_file_path)
+                our_validators = get_our_pubkeys(pubkeys_url)
             except ValueError:
                 raise typer.BadParameter("Some pubkeys are invalid")
 
@@ -349,7 +345,7 @@ def _handler(
         if should_process_missed_attestations:
             our_validators_indexes_that_missed_attestation = (
                 process_missed_attestations(
-                    beacon, beacon_type, our_epoch2active_idx2val, epoch
+                    beacon, beacon_type, our_epoch2active_idx2val, epoch, slack
                 )
             )
 
