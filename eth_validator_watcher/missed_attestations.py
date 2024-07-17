@@ -169,16 +169,16 @@ def process_double_missed_attestations(
             epoch=epoch,
         ).set(1)
 
-    metric_double_missed_attestations_duration_sec.labels(
-        label="double_missed_attestations",
-        epoch=epoch,
-        number_of_validators=len(epoch_to_index_to_validator_index[epoch - 1]),
-    ).set((time() - now))
-
     if len(double_dead_indexes) == 0:
         return set()
 
     index_to_validator = epoch_to_index_to_validator_index[epoch - 1]
+
+    metric_double_missed_attestations_duration_sec.labels(
+        label="double_missed_attestations",
+        epoch=epoch,
+        number_of_validators=len(index_to_validator),
+    ).set((time() - now))
     first_indexes = list(double_dead_indexes)[:5]
 
     first_pubkeys = (
