@@ -87,7 +87,7 @@ def process_missed_attestations(
     }
 
     metric_missed_attestations_count.set(len(dead_indexes))
-    metric_missed_attestations_duration_sec.label(
+    metric_missed_attestations_duration_sec.labels(
         label="missed_attestations",
         epoch=epoch,
         number_of_validators=len(index_to_validator),
@@ -169,7 +169,7 @@ def process_double_missed_attestations(
             epoch=epoch,
         ).set(1)
 
-    metric_double_missed_attestations_duration_sec.label(
+    metric_double_missed_attestations_duration_sec.labels(
         label="double_missed_attestations",
         epoch=epoch,
         number_of_validators=len(epoch_to_index_to_validator_index[epoch - 1]),

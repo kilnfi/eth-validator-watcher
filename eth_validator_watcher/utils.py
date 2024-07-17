@@ -232,7 +232,7 @@ def get_our_pubkeys(
     returns `our_pubkeys`.
     """
 
-    # Get public keys to watch from file
+    # Get public keys to watch from key reporter
     pubkeys_from_key_reporter: dict[str, tuple[str, str]] = (
         load_validator_data_from_key_reporter(pubkeys_url)
         if pubkeys_url is not None

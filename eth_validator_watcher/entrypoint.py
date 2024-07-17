@@ -207,9 +207,6 @@ def _handler(
         else None
     )
 
-    if slack is not None:
-        slack.send_message("👋    Second test!")
-
     beacon = Beacon(beacon_url)
     execution = Execution(execution_url) if execution_url is not None else None
     coinbase = Coinbase()
