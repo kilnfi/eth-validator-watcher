@@ -37,7 +37,7 @@ metric_suboptimal_attestations = Gauge(
 metric_suboptimal_attestations_duration_sec = Gauge(
     "suboptimal_attestations_duration_sec",
     "Suboptimal attestations duration in seconds",
-    ["slot", "number_of_validators"],
+    ["label", "slot", "number_of_validators"],
 )
 
 
@@ -155,7 +155,9 @@ def process_suboptimal_attestations(
         ).set(1)
 
     metric_suboptimal_attestations_duration_sec.labels(
-        slot=previous_slot, number_of_validators=len(our_active_validators_index)
+        label="suboptimal_attestations",
+        slot=previous_slot,
+        number_of_validators=len(our_active_validators_index),
     ).set(time() - now)
 
     suboptimal_attestations_rate = (

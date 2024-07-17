@@ -38,11 +38,13 @@ metric_double_missed_attestations = Gauge(
 metric_missed_attestations_duration_sec = Gauge(
     "missed_attestations_duration_sec",
     "Missed attestations duration in seconds",
+    ["label", "epoch", "number_of_validators"],
 )
 
 metric_double_missed_attestations_duration_sec = Gauge(
     "double_missed_attestations_duration_sec",
     "Double missed attestations duration in seconds",
+    ["label", "epoch", "number_of_validators"],
 )
 
 
@@ -85,7 +87,11 @@ def process_missed_attestations(
     }
 
     metric_missed_attestations_count.set(len(dead_indexes))
-    metric_missed_attestations_duration_sec.set(time() - now)
+    metric_missed_attestations_duration_sec.label(
+        label="missed_attestations",
+        epoch=epoch,
+        number_of_validators=len(index_to_validator),
+    ).set((time() - now))
 
     for index in dead_indexes:
         validator = index_to_validator[index]
@@ -162,7 +168,12 @@ def process_double_missed_attestations(
             index=index,
             epoch=epoch,
         ).set(1)
-    metric_double_missed_attestations_duration_sec.set(time() - now)
+
+    metric_double_missed_attestations_duration_sec.label(
+        label="double_missed_attestations",
+        epoch=epoch,
+        number_of_validators=len(epoch_to_index_to_validator_index[epoch - 1]),
+    ).set((time() - now))
 
     if len(double_dead_indexes) == 0:
         return set()

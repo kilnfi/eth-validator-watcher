@@ -18,13 +18,13 @@ metric_future_block_proposals_count = Gauge(
 metric_future_block_proposals = Gauge(
     "future_block_proposals",
     "Future block proposals",
-    ["pubkey","index", "slot", "epoch", "deployment_id", "validator_id"]
+    ["pubkey", "index", "slot", "epoch", "deployment_id", "validator_id"],
 )
 
 metric_future_block_proposals_duration_sec = Gauge(
     "future_block_proposals_duration_sec",
     "Future block proposals duration in seconds",
-    ["slot", "number_of_validators"]
+    ["label", "slot", "number_of_validators"],
 )
 
 
@@ -56,7 +56,6 @@ def process_future_blocks_proposal(
         for item in concatenated_data
         if item.pubkey in our_validators.keys() and item.slot >= slot
     ]
-    
     metric_future_block_proposals_count.set(len(filtered))
 
     for item in filtered:
@@ -66,12 +65,13 @@ def process_future_blocks_proposal(
             slot=item.slot,
             epoch=epoch,
             deployment_id=our_validators[item.pubkey][0],
-            validator_id=our_validators[item.pubkey][1]
+            validator_id=our_validators[item.pubkey][1],
         ).set(1)
-        
+
     metric_future_block_proposals_duration_sec.labels(
+        label="future_block_proposals",
         slot=slot,
-        number_of_validators=len(our_validators)
+        number_of_validators=len(our_validators),
     ).set(time() - now)
 
     if is_new_epoch:
