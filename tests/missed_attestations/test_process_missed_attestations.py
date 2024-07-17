@@ -16,6 +16,7 @@ def test_process_missed_attestations_low_epoch() -> None:
         beacon_type=BeaconType.OLD_TEKU,
         epoch_to_index_to_validator_index=LimitedDict(0),
         epoch=0,
+        slack=None,
     )
 
     expected: set[int] = set()
@@ -49,6 +50,7 @@ def test_process_missed_attestations_some_dead_indexes() -> None:
         beacon_type=BeaconType.OLD_TEKU,
         epoch_to_index_to_validator_index=epoch_to_index_to_validator_client,
         epoch=1,
+        slack=None,
     )
 
     assert expected == actual
@@ -80,6 +82,7 @@ def test_process_missed_attestations_no_dead_indexes() -> None:
         beacon_type=BeaconType.OLD_TEKU,
         epoch_to_index_to_validator_index=epoch_to_index_to_validator_client,
         epoch=1,
+        slack=None,
     )
 
     assert expected == actual

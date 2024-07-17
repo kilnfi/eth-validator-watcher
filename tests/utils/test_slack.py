@@ -1,18 +1,18 @@
 from eth_validator_watcher import utils
-
-
-class WebClient:
-    def __init__(self, token: str):
-        assert token == "my_slack_token"
-
-    def chat_postMessage(self, channel: str, text: str):
-        assert channel == "MY CHANNEL"
-        assert text == "MY TEXT"
-
-
-utils.WebClient = WebClient  # type: ignore
+import requests_mock
 
 
 def test_slack() -> None:
-    slack = utils.Slack("MY CHANNEL", "my_slack_token")
-    slack.send_message("MY TEXT")
+    slack = utils.Slack(
+        "MY CHANNEL",
+        "https://hooks.slack.com/services/xxxxx/yyy/zzzzzzzzzzzzzzzzzzzzzzzz",
+    )
+    with requests_mock.Mocker() as mock:
+        mock.post(
+            "https://hooks.slack.com/services/xxxxx/yyy/zzzzzzzzzzzzzzzzzzzzzzzz",
+            status_code=200,
+        )
+        slack.send_message("MY TEXT")
+        assert mock.called
+        assert mock.call_count == 1
+        assert mock.request_history[0].json() == {"text": "MY TEXT"}

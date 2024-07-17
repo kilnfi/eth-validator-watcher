@@ -21,7 +21,6 @@ def test_fee_recipient_set_while_execution_url_not_set() -> None:
             beacon_url="",
             execution_url=None,
             pubkeys_url=None,
-            # web3signer_url=None,
             fee_recipient="something",
             slack_channel="MY SLACK CHANNEL",
             beacon_type=BeaconType.OLD_TEKU,
@@ -36,23 +35,7 @@ def test_fee_recipient_not_valid() -> None:
             beacon_url="",
             execution_url="http://localhost:8545",
             pubkeys_url=None,
-            # web3signer_url=None,
             fee_recipient="something",
-            slack_channel="MY SLACK CHANNEL",
-            beacon_type=BeaconType.OLD_TEKU,
-            relays_url=[],
-            liveness_file=None,
-        )
-
-
-def test_slack_token_not_defined() -> None:
-    with raises(BadParameter):
-        _handler(
-            beacon_url="",
-            execution_url=None,
-            pubkeys_url=None,
-            # web3signer_url=None,
-            fee_recipient=None,
             slack_channel="MY SLACK CHANNEL",
             beacon_type=BeaconType.OLD_TEKU,
             relays_url=[],
@@ -238,6 +221,7 @@ def test_nominal() -> None:
         beacon_type: BeaconType,
         epoch_to_index_to_validator_index: LimitedDict,
         epoch: int,
+        slack: Slack | None,
     ) -> set[int]:
         assert isinstance(beacon, Beacon)
         assert beacon_type is BeaconType.OLD_TEKU
