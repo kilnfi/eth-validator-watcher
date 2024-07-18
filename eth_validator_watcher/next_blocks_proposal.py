@@ -27,6 +27,9 @@ metric_future_block_proposals_duration_sec = Gauge(
     ["label", "slot", "number_of_validators"],
 )
 
+# Dictionary to keep track of previously processed items
+processed_items = {}
+
 
 def process_future_blocks_proposal(
     beacon: Beacon,
@@ -58,15 +61,19 @@ def process_future_blocks_proposal(
     ]
     metric_future_block_proposals_count.set(len(filtered))
 
+    # Track processed items to avoid duplicates
     for item in filtered:
-        metric_future_block_proposals.labels(
-            pubkey=item.pubkey,
-            index=item.validator_index,
-            slot=item.slot,
-            epoch=epoch,
-            deployment_id=our_validators[item.pubkey][0],
-            validator_id=our_validators[item.pubkey][1],
-        ).set(1)
+        key = (item.pubkey, item.slot)
+        if key not in processed_items:
+            metric_future_block_proposals.labels(
+                pubkey=item.pubkey,
+                index=item.validator_index,
+                slot=item.slot,
+                epoch=epoch,
+                deployment_id=our_validators[item.pubkey][0],
+                validator_id=our_validators[item.pubkey][1],
+            ).set(1)
+            processed_items[key] = True
 
     metric_future_block_proposals_duration_sec.labels(
         label="future_block_proposals",
