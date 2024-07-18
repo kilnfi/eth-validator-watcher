@@ -140,8 +140,7 @@ def handler(
 
     \b
     Optionally, you can specify the following parameters:
-    - the path to a file containing the list of public your keys to watch, or / and
-    - a URL to a Web3Signer instance managing your keys to watch.
+    - a URL to a Key reporter managing your keys to watch.
 
     \b
     Pubkeys are dynamically loaded, at each epoch start.
