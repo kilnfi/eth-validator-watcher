@@ -2,7 +2,7 @@
 
 import functools
 
-from prometheus_client import Counter
+from prometheus_client import Counter, Gauge
 
 from .beacon import Beacon, NoBlockError
 from .models import Block, BlockIdentierType
@@ -15,9 +15,21 @@ metric_missed_block_proposals_head_count = Counter(
     "Missed block proposals head count",
 )
 
+metric_missed_block_proposals_head = Gauge(
+    "missed_block_proposals_head",
+    "Missed block proposals head",
+    ["pubkey", "slot", "deployment_id", "validator_id"],
+)
+
 metric_missed_block_proposals_finalized_count = Counter(
     "missed_block_proposals_finalized_count",
     "Missed block proposals finalized count",
+)
+
+metric_missed_block_proposals_finalized = Gauge(
+    "missed_block_proposals_finalized",
+    "Missed block proposals finalized",
+    ["pubkey", "slot", "deployment_id", "validator_id"],
 )
 
 
@@ -25,7 +37,7 @@ def process_missed_blocks_head(
     beacon: Beacon,
     potential_block: Block | None,
     slot: int,
-    our_pubkeys: set[str],
+    our_pubkeys: dict[str, tuple[str, str]],
     slack: Slack | None,
 ) -> bool:
     """Process missed block proposals detection at head
@@ -34,7 +46,7 @@ def process_missed_blocks_head(
     beacon         : Beacon
     potential_block: Potential block
     slot           : Slot
-    our_pubkeys    : Set of our validators public keys
+    our_pubkeys    : Dict of our validators public keys to deployment_id and validator_id
     slack          : Slack instance
 
     Returns `True` if we had to propose the block, `False` otherwise
@@ -58,7 +70,7 @@ def process_missed_blocks_head(
     )
 
     # Check if the validator that has to propose is ours
-    is_our_validator = proposer_pubkey in our_pubkeys
+    is_our_validator = proposer_pubkey in our_pubkeys.keys()
     positive_emoji = "✨" if is_our_validator else "✅"
     negative_emoji = "🔺" if is_our_validator else "💩"
 
@@ -89,6 +101,13 @@ def process_missed_blocks_head(
     if is_our_validator and missed:
         metric_missed_block_proposals_head_count.inc()
 
+        metric_missed_block_proposals_head.labels(
+            pubkey=proposer_pubkey,
+            slot=slot,
+            deployment_id=our_pubkeys[proposer_pubkey][0],
+            validator_id=our_pubkeys[proposer_pubkey][1],
+        ).set(1)
+
     return is_our_validator
 
 
@@ -96,7 +115,7 @@ def process_missed_blocks_finalized(
     beacon: Beacon,
     last_processed_finalized_slot: int,
     slot: int,
-    our_pubkeys: set[str],
+    our_pubkeys: dict[str, tuple[str, str]],
     slack: Slack | None,
 ) -> int:
     """Process missed block proposals detection at finalized
@@ -105,12 +124,15 @@ def process_missed_blocks_finalized(
     beacon         : Beacon
     potential_block: Potential block
     slot           : Slot
-    our_pubkeys    : Set of our validators public keys
+    our_pubkeys    : Dict of our validators public keys to deployment_id and validator_id
     slack          : Slack instance
 
     Returns the last finalized slot
     """
     assert last_processed_finalized_slot <= slot, "Last processed finalized slot > slot"
+
+    # print first 2 vals
+    print("✅ vals ", list(our_pubkeys.values())[0])
 
     last_finalized_header = beacon.get_header(BlockIdentierType.FINALIZED)
     last_finalized_slot = last_finalized_header.data.header.message.slot
@@ -139,7 +161,7 @@ def process_missed_blocks_finalized(
         )
 
         # Check if the validator that has to propose is ours
-        is_our_validator = proposer_pubkey in our_pubkeys
+        is_our_validator = proposer_pubkey in our_pubkeys.keys()
 
         if not is_our_validator:
             continue
@@ -166,5 +188,12 @@ def process_missed_blocks_finalized(
                 slack.send_message(message_slack)
 
             metric_missed_block_proposals_finalized_count.inc()
+
+            metric_missed_block_proposals_finalized.labels(
+                pubkey=proposer_pubkey,
+                slot=slot_,
+                deployment_id=our_pubkeys[proposer_pubkey][0],
+                validator_id=our_pubkeys[proposer_pubkey][1],
+            ).set(1)
 
     return last_finalized_slot
