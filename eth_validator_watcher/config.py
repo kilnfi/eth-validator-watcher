@@ -29,7 +29,8 @@ class Config(BaseSettings):
     slack_token: Optional[str] = None
     slack_channel: Optional[str] = None
 
-    start_at: Optional[int] = None
+    replay_start_at_ts: Optional[int] = None
+    replay_end_at_ts: Optional[int] = None
 
 
 def _default_config() -> Config:

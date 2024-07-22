@@ -6,7 +6,7 @@ from slack_sdk.errors import SlackApiError
 
 from eth_validator_watcher_ext import MetricsByLabel
 from .config import Config
-from .utils import LABEL_SCOPE_WATCHED
+from .utils import LABEL_SCOPE_WATCHED, SLOT_FOR_MISSED_ATTESTATIONS_PROCESS
 from .watched_validators import WatchedValidators
 
 # We colorize anything related to validators so that it's easy to spot
@@ -69,7 +69,7 @@ def log_single_entry(cfg: Config, validator: str, registry: WatchedValidators, m
     slack_send(cfg, msg_slack)
 
 
-def log_multiple_entries(cfg: Config, validators: list[str], registry: WatchedValidators, msg: str, emoji: str, slot: int, color: str) -> None:
+def log_multiple_entries(cfg: Config, validators: list[str], registry: WatchedValidators, msg: str, emoji: str, color: str) -> None:
     """Logs a multiple validator entries.
     """
 
@@ -82,16 +82,18 @@ def log_multiple_entries(cfg: Config, validators: list[str], registry: WatchedVa
                     impacted_labels[label] += 1
     top_labels = sorted(impacted_labels, key=impacted_labels.get, reverse=True)[:5]
 
-    label_msg = ''
+    label_msg_slack = ''
+    label_msg_shell = ''
     if top_labels:
-        label_msg = f' ({", ".join(top_labels)}...)'
+        label_msg_slack = f' ({", ".join([f"`{l}`" for l in top_labels])})'
+        label_msg_shell = f' ({", ".join(top_labels)})'
 
     msg_validators_shell = f'{", ".join([shorten_validator(v) for v in validators])} and more'
-    msg_shell = f'{color}{emoji} Validator(s) {msg_validators}{label_msg} {msg} on slot {slot}{COLOR_RESET}'
+    msg_shell = f'{color}{emoji} Validator(s) {msg_validators_shell}{label_msg_shell} {msg}{COLOR_RESET}'
     logging.info(msg_shell)
 
     msg_validators_slack = f'{", ".join([beaconcha_validator_link(cfg, v) for v in validators])} and more'
-    msg_slack = f'{emoji} Validator(s) {msg_validators}{label_msg} {msg} on slot {beaconcha_slot_link(cfg, slot)}'
+    msg_slack = f'{emoji} Validator(s) {msg_validators_slack}{label_msg_slack} {msg}'
     slack_send(cfg, msg_slack)
 
 
@@ -117,4 +119,6 @@ def log_details(cfg: Config, registry: WatchedValidators, metrics: MetricsByLabe
         log_single_entry(cfg, validator, registry, f'missed a block for real', '😭', slot, COLOR_BOLD_RED)
 
     if m.details_missed_attestations:
-        log_multiple_entries(cfg, m.details_missed_attestations, registry, f'missed an attestation', '😞', slot, COLOR_YELLOW)
+        # Only log once per epoch future block proposals.
+        if current_slot % 32 == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS:
+            log_multiple_entries(cfg, m.details_missed_attestations, registry, f'missed an attestation', '😞', COLOR_YELLOW)
