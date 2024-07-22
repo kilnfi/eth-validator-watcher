@@ -23,8 +23,8 @@ class BeaconClock:
         self._replay_end_at = replay_end_at
         self._replay_elapsed_ = 0.0
 
-        if start_at:
-            logging.info(f'⏰ Starting clock at timestamp @ {start_at}')
+        if self._replay_start_at is not None:
+            logging.info(f'⏰ Starting clock at timestamp @ {self._replay_start_at}')
 
     def now(self) -> float:
         """Get the current time in seconds since the epoch.

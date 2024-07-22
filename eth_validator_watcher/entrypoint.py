@@ -64,10 +64,12 @@ class ValidatorWatcher:
             genesis,
             self._spec.data.SECONDS_PER_SLOT,
             self._spec.data.SLOTS_PER_EPOCH,
-            self._cfg.start_at
+            self._cfg.replay_start_at_ts,
+            self._cfg.replay_end_at_ts,
         )
 
         self._schedule = ProposerSchedule(self._spec)
+        self._slot_hook = None
 
     def _reload_config(self) -> None:
         """Reload the configuration file.
@@ -203,6 +205,9 @@ class ValidatorWatcher:
 
             self._schedule.clear(slot, last_processed_finalized_slot)
             self._clock.maybe_wait_for_slot(slot + 1)
+
+            if self._slot_hook:
+                self._slot_hook(slot)
 
             if self._cfg.replay_end_at_ts and self._clock.now() >= self._cfg.replay_end_at_ts:
                 logging.info('💨 Replay mode ended, exiting')
