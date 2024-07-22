@@ -1,7 +1,7 @@
 beacon_url: http://localhost:3500/
 beacon_timeout_sec: 90
 network: sepolia
-metrics_port: 4242
+metrics_port: 8000
 
 # We have data for:
 #
