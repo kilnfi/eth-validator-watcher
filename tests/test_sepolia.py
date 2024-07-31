@@ -2,6 +2,7 @@ import os
 import requests
 import vcr
 
+from functools import wraps
 from pathlib import Path
 from tests import assets
 from vcr.unittest import VCRTestCase
@@ -9,15 +10,73 @@ from vcr.unittest import VCRTestCase
 from eth_validator_watcher.entrypoint import ValidatorWatcher
 
 
-class SepoliaTestCase(VCRTestCase):
-    """This is a full end-to-end test.
+def sepolia_test(config_path: str):
+    """Decorator to "simplify" a bit the writing of unit tests.
 
-    We mock a beacon with data recorded with cassette during ~2-3 epochs,
-    slightly adapted to expose specific edge cases:
+    We expect tests to provide self.slot_hook which is a function that
+    tests the current slot from the watcher's perspective. Prometheus
+    metrics exposed at the slot are available to the hook via:
+
+    self.metrics
+
+    The test is then expected to assert values there.
+    """
+
+    def wrapper(f):
+        @wraps(f)
+        def _run_test(self, *args, **kwargs):
+            with self.vcr.use_cassette('tests/assets/cassettes/test_sepolia.yaml'):
+
+                self.watcher = ValidatorWatcher(
+                    Path(assets.__file__).parent / config_path
+                )
+
+                f(self, *args, **kwargs)
+
+                def h(slot: int):
+                    self.slot_hook_calls += 1
+                    slot_hook = self.slot_hook
+                    if slot_hook:
+                        self.metrics = self.get_metrics()
+                        slot_hook(slot)
+
+                self.watcher._slot_hook = h
+                self.watcher.run()
+
+                self.assertGreater(self.slot_hook_calls, 0)
+
+        return _run_test
+
+    return wrapper
+
+
+class SepoliaTestCase(VCRTestCase):
+    """This is a series of full end-to-end test.
+
+    We mock a beacon with data recorded with cassette during ~2-3
+    epochs, slightly adapted to expose specific edge cases. The
+    available beacon data spans between:
 
     - slot 5493884 (timestamp=1721660208)
     - slot 6356780 (timestamp=1721661324)
     """
+
+    def setUp(self):
+
+        def ignore_metrics_cb(request):
+            # Do not mock /metrics endpoint as this is exposed by our
+            # service and we need it to validate metrics we expose are
+            # correct.
+            if request.uri == 'http://localhost:8000/metrics':
+                return None
+            return request
+
+        self.slot_hook = None
+        self.slot_hook_calls = 0
+        self.vcr = vcr.VCR(before_record=ignore_metrics_cb)
+
+    def tearDown(self):
+        pass
 
     def get_metrics(self):
         url = 'http://localhost:8000/metrics'
@@ -31,48 +90,22 @@ class SepoliaTestCase(VCRTestCase):
                 result[key] = float(value)
         return result
 
-    def slot_5493884(self):
-        metrics = self.get_metrics()
-
-        self.assertEqual(metrics['eth_slot{network="sepolia"}'], 5493884.0)
-        self.assertEqual(metrics['eth_epoch{network="sepolia"}'], 171683.0)
-
-    def slot_5493887(self):
-        metrics = self.get_metrics()
-
-        self.assertEqual(metrics['eth_slot{network="sepolia"}'], 5493887.0)
-        self.assertEqual(metrics['eth_epoch{network="sepolia"}'], 171683.0)
-
-    def test_sepolia(self):
-        """Main entrypoint for entire Sepolia unit test.
+    @sepolia_test("config.sepolia_replay_2_slots.yaml")
+    def test_sepolia_metric_slot(self):
+        """Verifies that the slot metric is exposed.
         """
 
-        def ignore_metrics_cb(request):
-            if request.uri == 'http://localhost:8000/metrics':
-                return None
-            return request
+        def hook(slot: int):
+            self.assertEqual(float(slot), self.metrics['eth_slot{network="sepolia"}'])
 
-        v = vcr.VCR(before_record=ignore_metrics_cb)
-        
-        with v.use_cassette('tests/assets/cassettes/test_sepolia.yaml'):
-            self.watcher = ValidatorWatcher(
-                Path(assets.__file__).parent / "config.sepolia.yaml"
-            )
+        self.slot_hook = hook
 
-            callbacks = {
-                5493884: self.slot_5493884,
-                5493887: self.slot_5493887,
-            }
+    @sepolia_test("config.sepolia_replay_2_slots.yaml")
+    def test_sepolia_metric_epoch(self):
+        """Verifies that the epoch metric is exposed.
+        """
 
-            called = {}
+        def hook(slot: int):
+            self.assertEqual(int(slot) // 32, self.metrics['eth_epoch{network="sepolia"}'])
 
-            def slot_hook(slot: int):
-                if slot in callbacks:
-                    callbacks[slot]()
-                    called[slot] = True
-
-            self.watcher._slot_hook = slot_hook
-            self.watcher.run()
-
-            for slot in callbacks.keys():
-                self.assertTrue(called.get(slot))
+        self.slot_hook = hook

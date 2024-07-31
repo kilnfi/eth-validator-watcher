@@ -33,6 +33,12 @@ from .watched_validators import WatchedValidators
 
 app = typer.Typer(add_completion=False)
 
+# This needs to be global for unit tests as there doesn't seem to be a
+# way to stop the prometheus HTTP server in a clean way. We have to
+# re-use it from test to test and so need to know whether or not it
+# was already started.
+prometheus_metrics_thread_started = False
+
 
 class ValidatorWatcher:
     """Ethereum Validator Watcher.
@@ -136,9 +142,10 @@ class ValidatorWatcher:
 
             self._metrics.eth_future_block_proposals.labels(label, network).set(m.future_blocks_proposal)
 
-        if not self._metrics_started:
+        global prometheus_metrics_thread_started
+        if not prometheus_metrics_thread_started:
             start_http_server(self._cfg.metrics_port)
-            self._metrics_started = True
+            prometheus_metrics_thread_started = True
 
 
     def run(self) -> None:
