@@ -38,16 +38,6 @@ class BeaconClock:
 
         return time.time()
 
-    def advance(self, seconds: float) -> None:
-        """Advance the clock by the given number of seconds.
-
-        Args:
-        -----
-        seconds: float
-            Number of seconds to advance the clock.
-        """
-        self._replay_elapsed_ += seconds
-
     def get_current_epoch(self) -> int:
         """Get the current epoch.
 
