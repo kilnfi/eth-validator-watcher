@@ -8,8 +8,8 @@ metrics_port: 8000
 # - slot 5493884: 1721660208
 # - slot 6356780: 1721661324
 
-replay_start_at_ts: 1721660208
-replay_end_at_ts: 1721660232
+replay_start_at_ts: 1721660207
+replay_end_at_ts: 1721660225
 
 watched_keys:
   - public_key: '0x832b8286f5d6535fd941c6c4ed8b9b20d214fc6aa726ce4fba1c9dbb4f278132646304f550e557231b6932aa02cf08d3'
