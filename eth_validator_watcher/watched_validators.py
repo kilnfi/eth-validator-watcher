@@ -41,18 +41,6 @@ class WatchedValidator:
         self._v.labels : Optional[list[str]] = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
 
     @property
-    def pubkey(self) -> str:
-        """Get the public key of the validator.
-        """
-        return normalized_public_key(self._v.consensus_pubkey)
-
-    @property
-    def status(self) -> Validators.DataItem.StatusEnum:
-        """Get the status of the validator.
-        """
-        return self._v.consensus_status
-
-    @property
     def effective_balance(self) -> int:
         """Get the effective balance of the validator.
         """
@@ -63,15 +51,6 @@ class WatchedValidator:
         """Get the labels for the validator.
         """
         return self._v.labels
-
-    def is_validating(self) -> bool:
-        """Check if the validator is validating.
-        """
-        return self.status in [
-            Validators.DataItem.StatusEnum.activeOngoing,
-            Validators.DataItem.StatusEnum.activeExiting,
-            Validators.DataItem.StatusEnum.activeSlashed,
-        ]
 
     def process_config(self, config: WatchedKeyConfig):
         """Processes a new configuration.
