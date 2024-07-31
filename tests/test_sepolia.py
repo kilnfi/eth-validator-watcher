@@ -143,15 +143,23 @@ class SepoliaTestCase(VCRTestCase):
         test_for_label("operator:kiln", active_ongoing=100)
         test_for_label("vc:prysm-validator-1", active_ongoing=50)
         test_for_label("vc:teku-validator-1", active_ongoing=50)
-        
-    @sepolia_test("config.sepolia.yaml")
+
+    @sepolia_test("config.sepolia_replay_2_slots.yaml")
     def test_sepolia_missed_attestation(self, slot: int):
         """Verifies attestation misses and consecutive ones
         """
-        if slot == 5493883:
-            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="operator:kiln"}'], 0.0)
-            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="vc:prysm-validator-1"}'], 0.0)
-            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="vc:teku-validator-1"}'], 0.0)
-            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:watched"}'], 0.0)
-            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:all-network"}'], 350.0)
-            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:network"}'], 350.0)
+        if slot != 5493883:
+            return
+
+        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="operator:kiln"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="vc:prysm-validator-1"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="vc:teku-validator-1"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:watched"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:all-network"}'], 350.0)
+        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:network"}'], 350.0)
+
+    @sepolia_test("config.sepolia.yaml")
+    def test_sepolia_full(self, slot: int):
+        """Runs a complete iteration of the watcher over two epochs.
+        """
+        self.assertEqual(float(slot), self.metrics['eth_slot{network="sepolia"}'])
