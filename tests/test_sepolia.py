@@ -36,7 +36,6 @@ def sepolia_test(config_path: str):
 
                 def h(slot: int):
                     self.slot_hook_calls += 1
-                    print('GET METRICS')
                     self.metrics = self._get_metrics()
                     self.assertIsNone(f(self, slot))
 
@@ -146,7 +145,7 @@ class SepoliaTestCase(VCRTestCase):
 
     @sepolia_test("config.sepolia_replay_2_slots.yaml")
     def test_sepolia_missed_attestation(self, slot: int):
-        """Verifies attestation misses and consecutive ones
+        """Verifies attestation misses
         """
         if slot != 5493883:
             return
@@ -157,6 +156,18 @@ class SepoliaTestCase(VCRTestCase):
         self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:watched"}'], 0.0)
         self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:all-network"}'], 350.0)
         self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:network"}'], 350.0)
+
+    @sepolia_test("config.sepolia.yaml")
+    def test_sepolia_blocks(self, slot: int):
+        """Verifies block proposals and misses.
+        """
+        if slot != 5493975:
+            return
+
+        self.assertEqual(self.metrics['eth_block_proposals_head_total{network="sepolia",scope="operator:kiln"}'], 6.0)
+        self.assertEqual(self.metrics['eth_missed_block_proposals_head_total{network="sepolia",scope="operator:kiln"}'], 0.0)
+        self.assertEqual(self.metrics['eth_block_proposals_finalized_total{network="sepolia",scope="operator:kiln"}'], 2.0)
+        self.assertEqual(self.metrics['eth_missed_block_proposals_finalized_total{network="sepolia",scope="operator:kiln"}'], 0.0)
 
     @sepolia_test("config.sepolia.yaml")
     def test_sepolia_full(self, slot: int):

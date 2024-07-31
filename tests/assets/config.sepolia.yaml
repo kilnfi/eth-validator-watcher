@@ -6,7 +6,7 @@ metrics_port: 8000
 # We have data for:
 #
 # - slot 5493884: 1721660208
-# - slot 6356780: 1721661324
+# - slot 5493975: 1721661324
 
 replay_start_at_ts: 1721660208
 replay_end_at_ts: 1721661324

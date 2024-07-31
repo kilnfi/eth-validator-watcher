@@ -147,7 +147,6 @@ class Beacon:
             # If we are here, it's an other error
             raise
 
-
         return Header.model_validate_json(response.text)
 
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
