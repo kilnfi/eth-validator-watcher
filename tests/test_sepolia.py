@@ -13,13 +13,16 @@ from eth_validator_watcher.entrypoint import ValidatorWatcher
 def sepolia_test(config_path: str):
     """Decorator to "simplify" a bit the writing of unit tests.
 
-    We expect tests to provide self.slot_hook which is a function that
-    tests the current slot from the watcher's perspective. Prometheus
-    metrics exposed at the slot are available to the hook via:
+    Tests using it will see their method called at the end of each
+    slot processing on the watcher, with the dict `self.metrics`
+    filled with what's exposed on prometheus.
 
-    self.metrics
+    Example:
 
-    The test is then expected to assert values there.
+        @sepolia_test('config_path'):
+        def my_test(self, slot: int):
+            self.assertEqual(self.metrics['eth_slot{network="sepolia"}', float(slot)))
+
     """
 
     def wrapper(f):
@@ -33,15 +36,13 @@ def sepolia_test(config_path: str):
 
                 def h(slot: int):
                     self.slot_hook_calls += 1
+                    print('GET METRICS')
                     self.metrics = self._get_metrics()
-                    f(self, slot)
+                    self.assertIsNone(f(self, slot))
 
                 self.watcher._slot_hook = h
-
                 self.slot_hook_calls = 0
-
                 self.watcher.run()
-
                 self.assertGreater(self.slot_hook_calls, 0)
 
         return _run_test
@@ -143,3 +144,14 @@ class SepoliaTestCase(VCRTestCase):
         test_for_label("vc:prysm-validator-1", active_ongoing=50)
         test_for_label("vc:teku-validator-1", active_ongoing=50)
         
+    @sepolia_test("config.sepolia.yaml")
+    def test_sepolia_missed_attestation(self, slot: int):
+        """Verifies attestation misses and consecutive ones
+        """
+        if slot == 5493883:
+            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="operator:kiln"}'], 0.0)
+            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="vc:prysm-validator-1"}'], 0.0)
+            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="vc:teku-validator-1"}'], 0.0)
+            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:watched"}'], 0.0)
+            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:all-network"}'], 350.0)
+            self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:network"}'], 350.0)
