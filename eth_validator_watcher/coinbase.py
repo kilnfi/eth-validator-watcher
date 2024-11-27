@@ -7,7 +7,7 @@ from requests import Session
 from .models import CoinbaseTrade
 
 
-URL = "https://api.pro.coinbase.com/products/ETH-USD/trades"
+URL = "https://api.exchange.coinbase.com/products/ETH-USD/trades"
 
 
 @func.ttl_cache(ttl=600)
