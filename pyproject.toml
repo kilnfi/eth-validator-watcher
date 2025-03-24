@@ -1,42 +1,50 @@
-[tool.poetry]
+[project]
 name = "eth-validator-watcher"
 version = "1.0.0-beta.4"
 description = "Ethereum Validator Watcher"
-authors = ["Manu NALEPA <emmanuel.nalepa@kiln.fi>, Sébastien Rannou <mxs@kiln.fi>"]
+authors = [
+    {name = "Manu NALEPA", email = "emmanuel.nalepa@kiln.fi"},
+    {name = "Sébastien Rannou", email = "mxs@kiln.fi"}
+]
 readme = "README.md"
-packages = [{include = "eth_validator_watcher"}]
+requires-python = ">=3.12"
+dependencies = [
+    "more-itertools>=9.1.0",
+    "prometheus-client>=0.17.0",
+    "pydantic>=2.0",
+    "requests>=2.31.0",
+    "typer>=0.9.0",
+    "slack-sdk>=3.21.3",
+    "tenacity>=8.2.2",
+    "pyyaml>=6.0.1",
+    "pydantic-yaml>=1.2.0",
+    "pydantic-settings>=2.1.0",
+    "cachetools>=5.3.3",
+    "pybind11>=2.12.0",
+    "vcrpy>=6.0.1"
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-more-itertools = "^9.1.0"
-prometheus-client = "^0.17.0"
-pydantic = "^2.0"
-requests = "^2.31.0"
-typer = "^0.9.0"
-slack-sdk = "^3.21.3"
-tenacity = "^8.2.2"
-pyyaml = "^6.0.1"
-pydantic-yaml = "^1.2.0"
-pydantic-settings = "^2.1.0"
-cachetools = "^5.3.3"
-pybind11 = "^2.12.0"
-
-vcrpy = "^6.0.1"
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.2.0"
-black = "^23.3.0"
-pytest = "^7.3.1"
-pytest-cov = "^4.0.0"
-requests-mock = "^1.10.0"
-freezegun = "^1.2.2"
-
-[tool.poetry.build]
-script = "build.py"
-generate-setup-file = true
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.2.0",
+    "black>=23.3.0",
+    "pytest>=7.3.1",
+    "pytest-cov>=4.0.0",
+    "requests-mock>=1.10.0",
+    "freezegun>=1.2.2"
+]
 
 [build-system]
-requires = ["poetry-core", "pybind11", "setuptools"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0", "pybind11>=2.12.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry.scripts]
+[project.scripts]
 eth-validator-watcher = "eth_validator_watcher.entrypoint:app"
+
+[tool.setuptools]
+packages = ["eth_validator_watcher"]
+include-package-data = true
+
+# Custom build script needs to be handled differently with setuptools
+[tool.custom]
+build-script = "build.py"
