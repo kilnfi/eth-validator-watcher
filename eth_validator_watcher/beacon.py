@@ -46,8 +46,8 @@ class Beacon:
 
         adapter_retry_not_found = HTTPAdapter(
             max_retries=Retry(
-                backoff_factor=0.5,
-                total=3,
+                backoff_factor=1,
+                total=5,
                 status_forcelist=[
                     codes.not_found,
                     codes.bad_gateway,
@@ -150,7 +150,7 @@ class Beacon:
         return Header.model_validate_json(response.text)
 
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
-        """Get proposer duties
+        """Maybe get proposer duties
 
         epoch: Epoch corresponding to the proposer duties to retrieve
         """

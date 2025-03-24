@@ -34,6 +34,11 @@ class ProposerSchedule:
 
     def update(self, beacon: Beacon, slot: int, last_processed_finalized: int, last_finalized: int) -> None:
         # Current slots & future proposals.
+
+        # There is a case to handle here: on the very first slot of an
+        # epoch, some beacons will return 404 and will only expose the
+        # schedule on the next slot.
+
         epoch = self.epoch(slot)
         if slot not in self._head_schedule:
             duties = beacon.get_proposer_duties(epoch)
