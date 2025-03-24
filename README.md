@@ -151,6 +151,16 @@ cd eth-validator-watcher
 pip install .
 ```
 
+Or with uv:
+
+```
+git clone git@github.com:kilnfi/eth-validator-watcher.git
+cd eth-validator-watcher
+uv venv
+source .venv/bin/activate
+uv pip install .
+```
+
 We recommend using the Docker images.
 
 ## Docker images
@@ -160,21 +170,24 @@ Docker images (built for AMD64 and ARM64) are available
 
 ## Developer guide
 
-We use [Poetry](https://python-poetry.org/) to manage dependencies and packaging.
+We use [uv](https://github.com/astral-sh/uv) to manage dependencies and packaging.
 
 **Installation:**
 
 ```
 git clone git@github.com:kilnfi/validator-watcher.git
 cd validator-watcher
-poetry install --with dev
-poetry shell # To activate Python virtual environment
+uv venv
+source .venv/bin/activate
+uv pip install -e ".[dev]"
 ```
 
 **Running tests:**
 
 ```
-poetry run pytest
+source .venv/bin/activate
+cd tests
+python -m pytest
 ```
 
 ## License
