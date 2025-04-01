@@ -1,4 +1,3 @@
-import os
 import requests
 import vcr
 
@@ -112,7 +111,7 @@ class SepoliaTestCase(VCRTestCase):
         """
         if slot != 5493883:
             return
-        
+
         def test_for_label(
                 label: str,
                 pending_initialized: int = 0,
@@ -138,7 +137,7 @@ class SepoliaTestCase(VCRTestCase):
 
         test_for_label("scope:watched", active_ongoing=100)
         test_for_label("scope:all-network", active_ongoing=1771, withdrawal_possible=200, withdrawal_done=2)
-        test_for_label("scope:network", active_ongoing=1671, withdrawal_possible=200, withdrawal_done=2) 
+        test_for_label("scope:network", active_ongoing=1671, withdrawal_possible=200, withdrawal_done=2)
         test_for_label("operator:kiln", active_ongoing=100)
         test_for_label("vc:prysm-validator-1", active_ongoing=50)
         test_for_label("vc:teku-validator-1", active_ongoing=50)

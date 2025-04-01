@@ -1,15 +1,11 @@
 import logging
-import os
 
-from collections import defaultdict
-from dataclasses import dataclass, field
-from itertools import batched
+from dataclasses import dataclass
 
 from prometheus_client import Counter, Gauge
 
 from eth_validator_watcher_ext import fast_compute_validator_metrics, MetricsByLabel
 
-from .utils import LABEL_SCOPE_WATCHED
 from .watched_validators import WatchedValidator
 
 
@@ -36,7 +32,6 @@ class PrometheusMetrics:
     eth_missed_attestations_count: Gauge
     eth_missed_consecutive_attestations_count: Gauge
     eth_slashed_validators_count: Gauge
-    
     eth_block_proposals_head_total: Counter
     eth_missed_block_proposals_head_total: Counter
     eth_block_proposals_finalized_total: Counter
@@ -56,13 +51,13 @@ def compute_validator_metrics(validators: dict[int, WatchedValidator], slot: int
     """
     logging.info(f"📊 Computing metrics for {len(validators)} validators")
     metrics = fast_compute_validator_metrics(validators)
-    
+
     for _, v in validators.items():
         v.reset_blocks()
 
     return metrics
-                
-                
+
+
 def get_prometheus_metrics() -> PrometheusMetrics:
     """Get the Prometheus metrics.
 

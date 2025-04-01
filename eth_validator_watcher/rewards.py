@@ -21,4 +21,3 @@ def process_rewards(validators: WatchedValidators, rewards: Rewards) -> None:
             continue
 
         validator.process_rewards(ideal, reward)
-

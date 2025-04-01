@@ -1,7 +1,6 @@
 """This module contains facilities to keep track of which validator proposes blocks.
 """
 
-from dataclasses import dataclass
 
 from .beacon import Beacon
 from .models import Spec

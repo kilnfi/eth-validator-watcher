@@ -1,10 +1,9 @@
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Any, List, Optional
+from typing import List, Optional
 
 import logging
 import json
-import os
 import yaml
 
 
@@ -50,7 +49,6 @@ def load_config(config_file: str) -> Config:
 
     Environment variables have priority (can be used to set secrets
     and override the config file).
-    
     Parameters:
     config_file : path to the YAML configuration file
 
@@ -67,12 +65,12 @@ def load_config(config_file: str) -> Config:
         else:
             config = yaml.load(fh, Loader=yaml.CLoader) or dict()
 
-        logging.info(f'⚙️ Validating configuration file')
+        logging.info('⚙️ Validating configuration file')
         from_default = _default_config().model_dump()
         from_env = Config().model_dump()
         from_file = Config(**config).model_dump()
 
-        logging.info(f'⚙️ Merging with environment variables')
+        logging.info('⚙️ Merging with environment variables')
         merged = from_default.copy()
 
         merged.update({k: v for k, v in from_file.items() if v})
@@ -80,6 +78,6 @@ def load_config(config_file: str) -> Config:
 
         r = Config(**merged)
 
-        logging.info(f'⚙️ Configuration file is ready')
+        logging.info('⚙️ Configuration file is ready')
 
         return r

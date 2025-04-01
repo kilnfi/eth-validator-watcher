@@ -38,7 +38,7 @@ class WatchedValidator:
         self._v = Validator()
 
         # This gets overriden by process_config if the validator is watched.
-        self._v.labels : Optional[list[str]] = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
+        self._v.labels: Optional[list[str]] = [LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_NETWORK]
 
     @property
     def effective_balance(self) -> int:
@@ -86,7 +86,7 @@ class WatchedValidator:
         liveness: Validator liveness data
         """
         self._v.previous_missed_attestation = self._v.missed_attestation
-        self._v.missed_attestation = liveness.is_live != True
+        self._v.missed_attestation = not liveness.is_live
 
     def process_rewards(self, ideal: Rewards.Data.IdealReward, reward: Rewards.Data.TotalReward):
         """Processes rewards data.
