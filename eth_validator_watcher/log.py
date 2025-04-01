@@ -14,7 +14,7 @@ from .watched_validators import WatchedValidators
 COLOR_GREEN = "\x1b[32;20m"
 COLOR_BOLD_GREEN = "\x1b[32;1m"
 COLOR_YELLOW = "\x1b[33;20m"
-COLOR_RED     = "\x1b[31;20m"
+COLOR_RED = "\x1b[31;20m"
 COLOR_BOLD_RED = "\x1b[31;1m"
 COLOR_RESET = "\x1b[0m"
 
@@ -59,7 +59,7 @@ def log_single_entry(cfg: Config, validator: str, registry: WatchedValidators, m
     if v:
         labels = [label for label in v.labels if not label.startswith('scope:')]
         if labels:
-            label_msg_slack = f' ({", ".join([f"`{l}`" for l in labels])})'
+            label_msg_slack = f' ({", ".join([f"`{label}`" for label in labels])})'
             label_msg_shell = f' ({", ".join(labels)})'
 
     msg_shell = f'{color}{emoji} Validator {shorten_validator(validator)}{label_msg_shell} {msg}{COLOR_RESET}'
@@ -85,7 +85,7 @@ def log_multiple_entries(cfg: Config, validators: list[str], registry: WatchedVa
     label_msg_slack = ''
     label_msg_shell = ''
     if top_labels:
-        label_msg_slack = f' ({", ".join([f"`{l}`" for l in top_labels])})'
+        label_msg_slack = f' ({", ".join([f"`{label}`" for label in top_labels])})'
         label_msg_shell = f' ({", ".join(top_labels)})'
 
     msg_validators_shell = f'{", ".join([shorten_validator(v) for v in validators])} and more'
@@ -107,18 +107,18 @@ def log_details(cfg: Config, registry: WatchedValidators, metrics: MetricsByLabe
     for slot, validator in m.details_future_blocks:
         # Only log once per epoch future block proposals.
         if current_slot % 32 == 0 and slot >= current_slot + 32:
-            log_single_entry(cfg, validator, registry, f'will propose a block', '🙏', slot, COLOR_GREEN)
+            log_single_entry(cfg, validator, registry, 'will propose a block', '🙏', slot, COLOR_GREEN)
 
     for slot, validator in m.details_proposed_blocks:
-        log_single_entry(cfg, validator, registry, f'proposed a block', '🏅', slot, COLOR_BOLD_GREEN)
+        log_single_entry(cfg, validator, registry, 'proposed a block', '🏅', slot, COLOR_BOLD_GREEN)
 
     for slot, validator in m.details_missed_blocks:
-        log_single_entry(cfg, validator, registry, f'likely missed a block', '😩', slot, COLOR_RED)
+        log_single_entry(cfg, validator, registry, 'likely missed a block', '😩', slot, COLOR_RED)
 
     for slot, validator in m.details_missed_blocks_finalized:
-        log_single_entry(cfg, validator, registry, f'missed a block for real', '😭', slot, COLOR_BOLD_RED)
+        log_single_entry(cfg, validator, registry, 'missed a block for real', '😭', slot, COLOR_BOLD_RED)
 
     if m.details_missed_attestations:
         # Only log once per epoch future block proposals.
         if current_slot % 32 == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS:
-            log_multiple_entries(cfg, m.details_missed_attestations, registry, f'missed an attestation', '😞', COLOR_YELLOW)
+            log_multiple_entries(cfg, m.details_missed_attestations, registry, 'missed an attestation', '😞', COLOR_YELLOW)

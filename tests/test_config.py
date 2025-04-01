@@ -1,7 +1,6 @@
 import os
-
 from pathlib import Path
-from eth_validator_watcher.config import load_config, WatchedKeyConfig
+from eth_validator_watcher.config import load_config
 from tests import assets
 
 

@@ -1,5 +1,3 @@
-import functools
-
 from .proposer_schedule import ProposerSchedule
 from .watched_validators import WatchedValidators
 

@@ -7,4 +7,4 @@ test:
 
 # Run linter
 lint:
-    uv run flake8 --ignore=E501
+    uv run flake8 eth_validator_watcher tests --ignore=E501

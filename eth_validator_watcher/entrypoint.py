@@ -1,8 +1,6 @@
 """Draft entrypoint for the eth-validator-watcher v1.0.0.
 """
 
-from collections import defaultdict
-from functools import partial
 from pathlib import Path
 from prometheus_client import start_http_server
 from pydantic import ValidationError
@@ -10,12 +8,11 @@ from typing import Optional
 
 import logging
 import typer
-import time
 
-from .coinbase import  get_current_eth_price
+from .coinbase import get_current_eth_price
 from .clock import BeaconClock
-from .beacon import Beacon, NoBlockError
-from .config import load_config, WatchedKeyConfig
+from .beacon import Beacon
+from .config import load_config
 from .log import log_details, slack_send
 from .metrics import get_prometheus_metrics, compute_validator_metrics
 from .blocks import process_block, process_finalized_block, process_future_blocks
@@ -63,7 +60,7 @@ class ValidatorWatcher:
 
         self._reload_config()
 
-        self._spec = self._beacon.get_spec()        
+        self._spec = self._beacon.get_spec()
         genesis = self._beacon.get_genesis().data.genesis_time
 
         self._clock = BeaconClock(
@@ -147,7 +144,6 @@ class ValidatorWatcher:
             start_http_server(self._cfg.metrics_port)
             prometheus_metrics_thread_started = True
 
-
     def run(self) -> None:
         """Run the Ethereum Validator Watcher.
         """
@@ -168,21 +164,21 @@ class ValidatorWatcher:
             last_finalized_slot = self._beacon.get_header(BlockIdentierType.FINALIZED).data.header.message.slot
             self._schedule.update(self._beacon, slot, last_processed_finalized_slot, last_finalized_slot)
 
-            if beacon_validators == None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
+            if beacon_validators is None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
                 logging.info(f'🔨 Processing epoch {epoch}')
                 beacon_validators = self._beacon.get_validators(self._clock.epoch_to_slot(epoch))
                 watched_validators.process_epoch(beacon_validators)
                 if not watched_validators.config_initialized:
                     watched_validators.process_config(self._cfg)
 
-            if validators_liveness == None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS):
+            if validators_liveness is None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS):
                 logging.info('🔨 Processing validator liveness')
                 validators_liveness = self._beacon.get_validators_liveness(epoch - 1, watched_validators.get_indexes())
                 watched_validators.process_liveness(validators_liveness)
- 
+
             has_block = self._beacon.has_block_at_slot(slot)
 
-            if rewards == None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_REWARDS_PROCESS):
+            if rewards is None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_REWARDS_PROCESS):
                 # There is a possibility the slot is missed, in which
                 # case we'll have to wait for the next one.
                 if not has_block:

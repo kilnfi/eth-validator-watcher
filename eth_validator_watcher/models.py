@@ -44,7 +44,7 @@ class Spec(BaseModel):
         SLOTS_PER_EPOCH: int
 
     data: Data
-    
+
 
 class Header(BaseModel):
     class Data(BaseModel):

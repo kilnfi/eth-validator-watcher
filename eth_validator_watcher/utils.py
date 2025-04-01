@@ -1,13 +1,3 @@
-import re
-from pathlib import Path
-from time import sleep, time
-from typing import Any, Iterator, List, Optional, Tuple
-
-from more_itertools import chunked
-from prometheus_client import Gauge
-from slack_sdk import WebClient
-
-from .config import WatchedKeyConfig
 
 # Slots at which processing is performed.
 SLOT_FOR_CONFIG_RELOAD = 15
@@ -15,12 +5,12 @@ SLOT_FOR_MISSED_ATTESTATIONS_PROCESS = 16
 SLOT_FOR_REWARDS_PROCESS = 17
 
 # Default set of existing scopes.
-LABEL_SCOPE_ALL_NETWORK="scope:all-network"
-LABEL_SCOPE_WATCHED="scope:watched"
-LABEL_SCOPE_NETWORK="scope:network"
+LABEL_SCOPE_ALL_NETWORK = "scope:all-network"
+LABEL_SCOPE_WATCHED = "scope:watched"
+LABEL_SCOPE_NETWORK = "scope:network"
 
 
-def pct(a: int, b: int, inclusive: bool=False) -> float:
+def pct(a: int, b: int, inclusive: bool = False) -> float:
     """Helper function to calculate the percentage of a over b.
     """
     total = a + b if not inclusive else b
