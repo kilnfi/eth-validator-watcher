@@ -186,8 +186,14 @@ uv pip install -e ".[dev]"
 
 ```
 source .venv/bin/activate
-cd tests
-python -m pytest
+just test
+```
+
+**Running linter:**
+
+```
+source .venv/bin/activate
+just lint
 ```
 
 ## License
