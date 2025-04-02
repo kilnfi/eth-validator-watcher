@@ -87,15 +87,6 @@ class Block(BaseModel):
     data: Data
 
 
-class Committees(BaseModel):
-    class Data(BaseModel):
-        index: int
-        slot: int
-        validators: list[int]
-
-    data: list[Data]
-
-
 class ProposerDuties(BaseModel):
     class Data(BaseModel):
         pubkey: str
@@ -154,12 +145,12 @@ class Rewards(BaseModel):
 
 
 class Committees(BaseModel):
-    class Committee(BaseModel):
+    class Data(BaseModel):
         index: int
         slot: int
         validators: list[int]
 
-    data: list[Committee]
+    data: list[Data]
 
 
 class Attestations(BaseModel):
