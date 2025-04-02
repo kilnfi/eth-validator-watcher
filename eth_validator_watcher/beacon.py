@@ -9,7 +9,9 @@ from requests.exceptions import ChunkedEncodingError
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 from .models import (
+    Attestations,
     BlockIdentierType,
+    Committees,
     Genesis,
     Header,
     ProposerDuties,
@@ -128,10 +130,44 @@ class Beacon:
 
         return Spec.model_validate_json(response.text)
 
+    def get_committees(self, slot: int) -> Committees:
+        """Get committees.
+
+        Parameters:
+        slot: Slot corresponding to the committees to retrieve
+
+        Returns:
+        --------
+        Committees
+        """
+        response = self._get(
+            f"{self._url}/eth/v1/beacon/states/{slot}/committees?slot={slot}", timeout=self._timeout_sec
+        )
+        response.raise_for_status()
+
+        return Committees.model_validate_json(response.text)
+
+    def get_attestations(self, slot: int) -> Attestations:
+        """Get Attestations
+
+        Parameters:
+        slot: Slot corresponding to the block in which attestations are present.
+
+        Returns:
+        --------
+        Attestations
+        """
+        response = self._get(
+            f"{self._url}/eth/v2/beacon/blocks/{slot}/attestations", timeout=self._timeout_sec
+        )
+        response.raise_for_status()
+
+        return Attestations.model_validate_json(response.text)
+
     def get_header(self, block_identifier: Union[BlockIdentierType, int]) -> Header:
         """Get a header.
 
-        Parameters
+        Parameters:
         block_identifier: Block identifier or slot corresponding to the block to
                           retrieve
         """

@@ -9,14 +9,16 @@ from typing import Optional
 import logging
 import typer
 
+from .beacon import Beacon
+from .blocks import process_block, process_finalized_block, process_future_blocks
 from .coinbase import get_current_eth_price
 from .clock import BeaconClock
-from .beacon import Beacon
 from .config import load_config
+from .duties import process_duties
 from .log import log_details, slack_send
 from .metrics import get_prometheus_metrics, compute_validator_metrics
-from .blocks import process_block, process_finalized_block, process_future_blocks
 from .models import BlockIdentierType, Validators
+from .proposer_schedule import ProposerSchedule
 from .rewards import process_rewards
 from .utils import (
     SLOT_FOR_CONFIG_RELOAD,
@@ -24,7 +26,6 @@ from .utils import (
     SLOT_FOR_REWARDS_PROCESS,
     pct,
 )
-from .proposer_schedule import ProposerSchedule
 from .watched_validators import WatchedValidators
 
 
@@ -127,6 +128,8 @@ class ValidatorWatcher:
             self._metrics.eth_missed_attestations_count.labels(label, network).set(m.missed_attestations)
             self._metrics.eth_missed_consecutive_attestations_count.labels(label, network).set(m.missed_consecutive_attestations)
             self._metrics.eth_slashed_validators_count.labels(label, network).set(m.validator_slashes)
+            self._metrics.eth_missed_duties_count.labels(label, network).set(m.missed_duties_count)
+            self._metrics.eth_performed_duties_count.labels(label, network).set(m.performed_duties_count)
 
             # Here we inc, it's fine since we previously reset the
             # counters on each run; we can't use set because those
@@ -197,6 +200,11 @@ class ValidatorWatcher:
                 process_finalized_block(watched_validators, self._schedule, last_processed_finalized_slot, has_block)
                 last_processed_finalized_slot += 1
             last_processed_finalized_slot = last_finalized_slot
+
+            logging.info('🔨 Processing committees')
+            previous_slot_committees = self._beacon.get_committees(slot - 1)
+            current_attestations = self._beacon.get_attestations(slot)
+            process_duties(watched_validators, previous_slot_committees, current_attestations, slot)
 
             logging.info('🔨 Updating Prometheus metrics')
             self._update_metrics(watched_validators, epoch, slot)

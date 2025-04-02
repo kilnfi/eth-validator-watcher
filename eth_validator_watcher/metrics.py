@@ -32,6 +32,8 @@ class PrometheusMetrics:
     eth_missed_attestations_count: Gauge
     eth_missed_consecutive_attestations_count: Gauge
     eth_slashed_validators_count: Gauge
+    eth_missed_duties_count: Gauge
+    eth_performed_duties_count: Gauge
     eth_block_proposals_head_total: Counter
     eth_missed_block_proposals_head_total: Counter
     eth_block_proposals_finalized_total: Counter
@@ -50,7 +52,7 @@ def compute_validator_metrics(validators: dict[int, WatchedValidator], slot: int
     dict[str, MetricsByLabel]
     """
     logging.info(f"📊 Computing metrics for {len(validators)} validators")
-    metrics = fast_compute_validator_metrics(validators)
+    metrics = fast_compute_validator_metrics(validators, slot)
 
     for _, v in validators.items():
         v.reset_blocks()
@@ -83,7 +85,8 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_missed_attestations_count=Gauge("eth_missed_attestations", "Missed attestations in the last epoch", ['scope', 'network']),
             eth_missed_consecutive_attestations_count=Gauge("eth_missed_consecutive_attestations", "Missed consecutive attestations in the last two epochs", ['scope', 'network']),
             eth_slashed_validators_count=Gauge("eth_slashed_validators", "Slashed validators", ['scope', 'network']),
-
+            eth_missed_duties_count=Gauge("eth_missed_duties", "Missed validator duties in last slot", ['scope', 'network']),
+            eth_performed_duties_count=Gauge("eth_performed_duties", "Performed validator duties in last slot", ['scope', 'network']),
             eth_block_proposals_head_total=Counter("eth_block_proposals_head_total", "Total block proposals at head", ['scope', 'network']),
             eth_missed_block_proposals_head_total=Counter("eth_missed_block_proposals_head_total", "Total missed block proposals at head", ['scope', 'network']),
             eth_block_proposals_finalized_total=Counter("eth_block_proposals_finalized_total", "Total finalized block proposals", ['scope', 'network']),
