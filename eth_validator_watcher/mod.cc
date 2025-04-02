@@ -27,6 +27,10 @@ struct Validator {
   float64_t ideal_consensus_reward = 0;
   float64_t actual_consensus_reward = 0;
 
+  // Updated data from the duties processing
+  uint64_t duties_last_slot = 0;
+  bool duties_attestation_seen = false;
+
   // Updated data from the blocks processing
   std::vector<uint64_t> missed_blocks;
   std::vector<uint64_t> missed_blocks_finalized;
@@ -54,6 +58,8 @@ struct MetricsByLabel {
   uint64_t optimal_target_count = 0;
   uint64_t optimal_head_count = 0;
   uint64_t validator_slashes = 0;
+  uint64_t missed_duties_count = 0;
+  uint64_t performed_duties_count = 0;
 
   float64_t ideal_consensus_reward = 0;
   float64_t actual_consensus_reward = 0;
@@ -84,7 +90,7 @@ namespace {
     }
   }
   
-  void process(std::size_t from, std::size_t to, const std::vector<Validator> &vals, std::map<std::string, MetricsByLabel> &out) {
+  void process(uint64_t slot, std::size_t from, std::size_t to, const std::vector<Validator> &vals, std::map<std::string, MetricsByLabel> &out) {
     for (std::size_t i = from; i < to; i++) {
       auto &v = vals[i];
 
@@ -108,6 +114,14 @@ namespace {
         m.optimal_source_count += int(v.suboptimal_source == false);
         m.optimal_target_count += int(v.suboptimal_target == false);
         m.optimal_head_count += int(v.suboptimal_head == false);
+
+        if (slot == v.duties_last_slot) {
+          if (v.duties_attestation_seen) {
+            m.performed_duties_count += 1;
+          } else {
+            m.missed_duties_count += 1;
+          }
+        }
 
         m.ideal_consensus_reward += v.ideal_consensus_reward;
         m.actual_consensus_reward += v.actual_consensus_reward;
@@ -157,6 +171,8 @@ namespace {
         m.optimal_target_count += metric.optimal_target_count;
         m.optimal_head_count += metric.optimal_head_count;
         m.validator_slashes += metric.validator_slashes;
+        m.missed_duties_count += metric.missed_duties_count;
+        m.performed_duties_count += metric.performed_duties_count;
 
         m.ideal_consensus_reward += metric.ideal_consensus_reward;
         m.actual_consensus_reward += metric.actual_consensus_reward;
@@ -197,6 +213,8 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("suboptimal_head", &Validator::suboptimal_head)
     .def_readwrite("ideal_consensus_reward", &Validator::ideal_consensus_reward)
     .def_readwrite("actual_consensus_reward", &Validator::actual_consensus_reward)
+    .def_readwrite("duties_last_slot", &Validator::duties_last_slot)
+    .def_readwrite("duties_attestation_seen", &Validator::duties_attestation_seen)
     .def_readwrite("missed_blocks", &Validator::missed_blocks)
     .def_readwrite("missed_blocks_finalized", &Validator::missed_blocks_finalized)
     .def_readwrite("proposed_blocks", &Validator::proposed_blocks)
@@ -213,6 +231,9 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("validator_status_count", &MetricsByLabel::validator_status_count)
     .def_readwrite("suboptimal_source_count", &MetricsByLabel::suboptimal_source_count)
     .def_readwrite("suboptimal_target_count", &MetricsByLabel::suboptimal_target_count)
+    .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)
+    .def_readwrite("missed_duties_count", &MetricsByLabel::missed_duties_count)
+    .def_readwrite("performed_duties_count", &MetricsByLabel::performed_duties_count)
     .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)
     .def_readwrite("optimal_source_count", &MetricsByLabel::optimal_source_count)
     .def_readwrite("optimal_target_count", &MetricsByLabel::optimal_target_count)
@@ -233,7 +254,7 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("details_future_blocks", &MetricsByLabel::details_future_blocks)
     .def_readwrite("details_missed_attestations", &MetricsByLabel::details_missed_attestations);
     
-  m.def("fast_compute_validator_metrics", [](const py::dict& pyvals) {
+  m.def("fast_compute_validator_metrics", [](const py::dict& pyvals, uint64_t slot) {
     std::vector<Validator> vals;
     vals.reserve(pyvals.size());
     for (auto& pyval: pyvals) {
@@ -247,10 +268,10 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     std::vector<std::map<std::string, MetricsByLabel>> thread_metrics(n);
 
     for (size_t i = 0; i < n; i++) {
-      threads.push_back(std::thread([i, chunk, &vals, &thread_metrics] {
+      threads.push_back(std::thread([slot, i, chunk, &vals, &thread_metrics] {
         std::size_t from = i * chunk;
         std::size_t to = std::min(from + chunk, vals.size());
-        process(from, to, vals, thread_metrics[i]);
+        process(slot, from, to, vals, thread_metrics[i]);
       }));
     }
 

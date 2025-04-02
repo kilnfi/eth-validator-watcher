@@ -151,3 +151,24 @@ class Rewards(BaseModel):
         total_rewards: list[TotalReward]
 
     data: Data
+
+
+class Committees(BaseModel):
+    class Committee(BaseModel):
+        index: int
+        slot: int
+        validators: list[int]
+
+    data: list[Committee]
+
+
+class Attestations(BaseModel):
+    class SignedAttestationData(BaseModel):
+        class AttestationData(BaseModel):
+            slot: int
+            index: int
+
+        aggregation_bits: str
+        data: AttestationData
+
+    data: list[SignedAttestationData]

@@ -15,7 +15,7 @@ class BeaconClock:
         self._genesis = genesis
         self._slot_duration = slot_duration
         self._slots_per_epoch = slots_per_epoch
-        self._lag_seconds = 4.0
+        self._lag_seconds = self._slot_duration + 4.0
         self._init_at = time.time()
 
         # Replay mode
