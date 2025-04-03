@@ -208,8 +208,11 @@ class ValidatorWatcher:
             previous_slot_committees = self._beacon.get_committees(slot - 1)
             # But we fetch attestations in the current slot (we expect
             # to find most of what we want for the previous slot).
+            # There can be no attestations if the block is entirely
+            # missed.
             current_attestations = self._beacon.get_attestations(slot)
-            process_duties(watched_validators, previous_slot_committees, current_attestations, slot)
+            if current_attestations:
+                process_duties(watched_validators, previous_slot_committees, current_attestations, slot)
 
             logging.info('🔨 Updating Prometheus metrics')
             self._update_metrics(watched_validators, epoch, slot)
