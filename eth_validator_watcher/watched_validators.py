@@ -102,6 +102,16 @@ class WatchedValidator:
         self._v.ideal_consensus_reward = ideal.source + ideal.target + ideal.head
         self._v.actual_consensus_reward = reward.source + reward.target + reward.head
 
+    def process_duties(self, slot: int, performed: bool):
+        """Processes a validator duty.
+
+        Parameters:
+            slot: slot for which there is or not an attestation for the validator
+            performed: whether or not it attested
+        """
+        self._v.duties_slot = slot
+        self._v.duties_performed_at_slot = performed
+
     def process_block(self, slot: int, has_block: bool):
         """Processes a block proposal.
 
