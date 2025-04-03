@@ -21,8 +21,16 @@ def hex_to_sparse_bitset(hex_string: str) -> set[int]:
     return set_bits
 
 
-def process_duties(watched_validators: WatchedValidators, previous_slot_committees: Committees, current_attestations: Attestations, slot_id: int):
+def process_duties(watched_validators: WatchedValidators, previous_slot_committees: Committees, current_attestations: Attestations, current_slot: int):
     """Process duties.
+
+    - the current slot contains attestations from the previous slot (and eventually older ones)
+    - a validator performed its duties if in the current slot it attested for the previous slot
+
+    This function feeds the watched validators with:
+
+    - the current slot (duties_slot),
+    - whether or not the validator attested in it for the previous slot (duties_performed_at_slot).
     """
     validator_duty_performed: dict[int, bool] = {}
 
@@ -37,22 +45,25 @@ def process_duties(watched_validators: WatchedValidators, previous_slot_committe
     for attestation in current_attestations.data:
         committee_index = attestation.data.index
         slot = attestation.data.slot
-        if slot != slot_id:
+        # Here we are interested in attestations against the previous
+        # slot.
+        if slot != current_slot - 1:
             continue
         bitsets = hex_to_sparse_bitset(attestation.aggregation_bits)
         for validator_idx_in_committee in bitsets:
+            if validator_idx_in_committee >= len(committees_lookup[committee_index]):
+                continue
             validator_index = committees_lookup[committee_index][validator_idx_in_committee]
             validator_duty_performed[validator_index] = True
 
     # Update validators
     for validator in validator_duty_performed:
         v = watched_validators.get_validator_by_index(validator)
-        # Here we keep both the last slot and the corresponding value,
+        # Here we keep both the current slot and the corresponding value,
         # this is to avoid iterating over the entire validator set: in
         # the compute metrics code we check the slot_id with the
         # currently being processed, if it matches we consider the
         # value up-to-date. If it doesn't, it means it corresponds to
         # its attestation from the previous epoch and the validator
         # didn't perform on this slot.
-        v.duties_last_slot = slot_id
-        v.duties_last_slot_attested = validator_duty_performed[validator]
+        v.process_duties(current_slot, validator_duty_performed[validator])

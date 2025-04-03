@@ -28,8 +28,8 @@ struct Validator {
   float64_t actual_consensus_reward = 0;
 
   // Updated data from the duties processing
-  uint64_t duties_last_slot = 0;
-  bool duties_attestation_seen = false;
+  uint64_t duties_slot = 0;
+  bool duties_performed_at_slot = false;
 
   // Updated data from the blocks processing
   std::vector<uint64_t> missed_blocks;
@@ -58,8 +58,8 @@ struct MetricsByLabel {
   uint64_t optimal_target_count = 0;
   uint64_t optimal_head_count = 0;
   uint64_t validator_slashes = 0;
-  uint64_t missed_duties_count = 0;
-  uint64_t performed_duties_count = 0;
+  uint64_t missed_duties_at_slot_count = 0;
+  uint64_t performed_duties_at_slot_count = 0;
 
   float64_t ideal_consensus_reward = 0;
   float64_t actual_consensus_reward = 0;
@@ -115,12 +115,9 @@ namespace {
         m.optimal_target_count += int(v.suboptimal_target == false);
         m.optimal_head_count += int(v.suboptimal_head == false);
 
-        if (slot == v.duties_last_slot) {
-          if (v.duties_attestation_seen) {
-            m.performed_duties_count += 1;
-          } else {
-            m.missed_duties_count += 1;
-          }
+        if (slot == v.duties_slot) {
+          m.performed_duties_at_slot_count += int(v.duties_performed_at_slot == true);
+          m.missed_duties_at_slot_count += int(v.duties_performed_at_slot == false);
         }
 
         m.ideal_consensus_reward += v.ideal_consensus_reward;
@@ -171,8 +168,8 @@ namespace {
         m.optimal_target_count += metric.optimal_target_count;
         m.optimal_head_count += metric.optimal_head_count;
         m.validator_slashes += metric.validator_slashes;
-        m.missed_duties_count += metric.missed_duties_count;
-        m.performed_duties_count += metric.performed_duties_count;
+        m.missed_duties_at_slot_count += metric.missed_duties_at_slot_count;
+        m.performed_duties_at_slot_count += metric.performed_duties_at_slot_count;
 
         m.ideal_consensus_reward += metric.ideal_consensus_reward;
         m.actual_consensus_reward += metric.actual_consensus_reward;
@@ -213,8 +210,8 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("suboptimal_head", &Validator::suboptimal_head)
     .def_readwrite("ideal_consensus_reward", &Validator::ideal_consensus_reward)
     .def_readwrite("actual_consensus_reward", &Validator::actual_consensus_reward)
-    .def_readwrite("duties_last_slot", &Validator::duties_last_slot)
-    .def_readwrite("duties_attestation_seen", &Validator::duties_attestation_seen)
+    .def_readwrite("duties_slot", &Validator::duties_slot)
+    .def_readwrite("duties_performed_at_slot", &Validator::duties_performed_at_slot)
     .def_readwrite("missed_blocks", &Validator::missed_blocks)
     .def_readwrite("missed_blocks_finalized", &Validator::missed_blocks_finalized)
     .def_readwrite("proposed_blocks", &Validator::proposed_blocks)
@@ -232,8 +229,8 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("suboptimal_source_count", &MetricsByLabel::suboptimal_source_count)
     .def_readwrite("suboptimal_target_count", &MetricsByLabel::suboptimal_target_count)
     .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)
-    .def_readwrite("missed_duties_count", &MetricsByLabel::missed_duties_count)
-    .def_readwrite("performed_duties_count", &MetricsByLabel::performed_duties_count)
+    .def_readwrite("missed_duties_at_slot_count", &MetricsByLabel::missed_duties_at_slot_count)
+    .def_readwrite("performed_duties_at_slot_count", &MetricsByLabel::performed_duties_at_slot_count)
     .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)
     .def_readwrite("optimal_source_count", &MetricsByLabel::optimal_source_count)
     .def_readwrite("optimal_target_count", &MetricsByLabel::optimal_target_count)

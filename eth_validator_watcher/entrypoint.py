@@ -128,8 +128,8 @@ class ValidatorWatcher:
             self._metrics.eth_missed_attestations_count.labels(label, network).set(m.missed_attestations)
             self._metrics.eth_missed_consecutive_attestations_count.labels(label, network).set(m.missed_consecutive_attestations)
             self._metrics.eth_slashed_validators_count.labels(label, network).set(m.validator_slashes)
-            self._metrics.eth_missed_duties_count.labels(label, network).set(m.missed_duties_count)
-            self._metrics.eth_performed_duties_count.labels(label, network).set(m.performed_duties_count)
+            self._metrics.eth_missed_duties_at_slot_count.labels(label, network).set(m.missed_duties_at_slot_count)
+            self._metrics.eth_performed_duties_at_slot_count.labels(label, network).set(m.performed_duties_at_slot_count)
 
             # Here we inc, it's fine since we previously reset the
             # counters on each run; we can't use set because those
@@ -202,7 +202,12 @@ class ValidatorWatcher:
             last_processed_finalized_slot = last_finalized_slot
 
             logging.info('🔨 Processing committees')
+            # Here we are looking at attestations in the current slot,
+            # which where for the previous slot, this is why we get
+            # the previous committees.
             previous_slot_committees = self._beacon.get_committees(slot - 1)
+            # But we fetch attestations in the current slot (we expect
+            # to find most of what we want for the previous slot).
             current_attestations = self._beacon.get_attestations(slot)
             process_duties(watched_validators, previous_slot_committees, current_attestations, slot)
 
