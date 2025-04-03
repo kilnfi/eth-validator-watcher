@@ -157,10 +157,16 @@ class Beacon:
         --------
         Attestations
         """
-        response = self._get(
-            f"{self._url}/eth/v2/beacon/blocks/{slot}/attestations", timeout=self._timeout_sec
-        )
-        response.raise_for_status()
+        try:
+            response = self._get(
+                f"{self._url}/eth/v2/beacon/blocks/{slot}/attestations", timeout=self._timeout_sec
+            )
+            response.raise_for_status()
+        except HTTPError as e:
+            if e.response.status_code == codes.not_found:
+                return None
+            # If we are here, it's an other error
+            raise
 
         return Attestations.model_validate_json(response.text)
 
