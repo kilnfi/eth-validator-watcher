@@ -78,6 +78,7 @@ class WatchedValidator:
         self._v.consensus_slashed = validator.validator.slashed
         self._v.consensus_index = validator.index
         self._v.consensus_status = validator.status
+        self._v.consensus_activation_epoch = validator.validator.activation_epoch
 
     def process_liveness(self, liveness: ValidatorsLivenessResponse.Data):
         """Processes liveness data.
