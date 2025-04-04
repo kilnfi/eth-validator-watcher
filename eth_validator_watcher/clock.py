@@ -12,6 +12,23 @@ class BeaconClock:
     """
 
     def __init__(self, genesis: int, slot_duration: int, slots_per_epoch: int, replay_start_at: int | None, replay_end_at: int | None) -> None:
+        """Initialize the BeaconClock.
+
+        Args:
+            genesis: int
+                Genesis timestamp of the beacon chain.
+            slot_duration: int
+                Duration of a slot in seconds.
+            slots_per_epoch: int
+                Number of slots in an epoch.
+            replay_start_at: int | None
+                Start timestamp for replay mode, or None for live mode.
+            replay_end_at: int | None
+                End timestamp for replay mode, or None for indefinite replay.
+
+        Returns:
+            None
+        """
         self._genesis = genesis
         self._slot_duration = slot_duration
         self._slots_per_epoch = slots_per_epoch

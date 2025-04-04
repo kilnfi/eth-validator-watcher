@@ -49,6 +49,15 @@ def beaconcha_validator_link(cfg: Config, validator: str) -> str:
 
 def beaconcha_slot_link(cfg: Config, slot: int) -> str:
     """Return a link to the beaconcha.in slot page.
+
+    Args:
+        cfg: Config
+            Configuration object containing network information.
+        slot: int
+            The slot number to link to.
+
+    Returns:
+        str: Formatted link to the slot's beaconcha.in page.
     """
     return f'<https://{cfg.network}.beaconcha.in/slot/{slot}|{slot}>'
 
@@ -67,6 +76,25 @@ def slack_send(cfg: Config, msg: str) -> None:
 
 def log_single_entry(cfg: Config, validator: str, registry: WatchedValidators, msg: str, emoji: str, slot: int, color: str) -> None:
     """Logs a single validator entry.
+
+    Args:
+        cfg: Config
+            Configuration object containing slack settings.
+        validator: str
+            Validator public key.
+        registry: WatchedValidators
+            Registry of validators being watched.
+        msg: str
+            Message to log.
+        emoji: str
+            Emoji to use in the log message.
+        slot: int
+            Slot number related to this log entry.
+        color: str
+            ANSI color code to use for console output.
+
+    Returns:
+        None
     """
     v = registry.get_validator_by_pubkey(validator)
 
@@ -86,7 +114,24 @@ def log_single_entry(cfg: Config, validator: str, registry: WatchedValidators, m
 
 
 def log_multiple_entries(cfg: Config, validators: list[str], registry: WatchedValidators, msg: str, emoji: str, color: str) -> None:
-    """Logs a multiple validator entries.
+    """Logs multiple validator entries.
+
+    Args:
+        cfg: Config
+            Configuration object containing slack settings.
+        validators: list[str]
+            List of validator public keys.
+        registry: WatchedValidators
+            Registry of validators being watched.
+        msg: str
+            Message to log.
+        emoji: str
+            Emoji to use in the log message.
+        color: str
+            ANSI color code to use for console output.
+
+    Returns:
+        None
     """
 
     impacted_labels = collections.defaultdict(int)
@@ -113,8 +158,21 @@ def log_multiple_entries(cfg: Config, validators: list[str], registry: WatchedVa
     slack_send(cfg, msg_slack)
 
 
-def log_details(cfg: Config, registry: WatchedValidators, metrics: MetricsByLabel, current_slot: int):
-    """Log details about watched validators
+def log_details(cfg: Config, registry: WatchedValidators, metrics: MetricsByLabel, current_slot: int) -> None:
+    """Log details about watched validators.
+
+    Args:
+        cfg: Config
+            Configuration object containing network and slack settings.
+        registry: WatchedValidators
+            Registry of validators being watched.
+        metrics: MetricsByLabel
+            Metrics collected for the validators.
+        current_slot: int
+            Current slot being processed.
+
+    Returns:
+        None
     """
     m = metrics.get(LABEL_SCOPE_WATCHED)
     if not m:

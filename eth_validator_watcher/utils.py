@@ -12,6 +12,17 @@ LABEL_SCOPE_NETWORK = "scope:network"
 
 def pct(a: int, b: int, inclusive: bool = False) -> float:
     """Helper function to calculate the percentage of a over b.
+
+    Args:
+        a: int
+            Numerator value.
+        b: int
+            Denominator value.
+        inclusive: bool
+            If True, uses b as total; if False, uses a+b as total.
+
+    Returns:
+        float: Percentage value (0-100.0).
     """
     total = a + b if not inclusive else b
     if total == 0:
