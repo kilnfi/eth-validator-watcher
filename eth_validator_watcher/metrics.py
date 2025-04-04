@@ -16,7 +16,13 @@ _metrics = None
 
 @dataclass
 class PrometheusMetrics:
-    """Define the Prometheus metrics.
+    """Define the Prometheus metrics for validator monitoring.
+
+    Args:
+        None
+
+    Returns:
+        None
     """
     eth_slot: Gauge
     eth_epoch: Gauge
@@ -43,13 +49,17 @@ class PrometheusMetrics:
 
 
 def compute_validator_metrics(validators: dict[int, WatchedValidator], slot: int) -> dict[str, MetricsByLabel]:
-    """Compute the metrics from a list of validators.
+    """Compute the metrics from a dictionary of validators.
 
-    Parameters:
-    validators: list[WatchedValidator]
+    Args:
+        validators: dict[int, WatchedValidator]
+            Dictionary of validator index to WatchedValidator objects.
+        slot: int
+            Current slot being processed.
 
     Returns:
-    dict[str, MetricsByLabel]
+        dict[str, MetricsByLabel]
+            Dictionary of metric names to computed metrics by label.
     """
     logging.info(f"📊 Computing metrics for {len(validators)} validators")
     metrics = fast_compute_validator_metrics(validators, slot)
@@ -61,11 +71,14 @@ def compute_validator_metrics(validators: dict[int, WatchedValidator], slot: int
 
 
 def get_prometheus_metrics() -> PrometheusMetrics:
-    """Get the Prometheus metrics.
+    """Get or initialize the Prometheus metrics singleton.
+
+    Args:
+        None
 
     Returns:
-    --------
-    PrometheusMetrics
+        PrometheusMetrics
+            The Prometheus metrics singleton instance.
     """
     global _metrics
 

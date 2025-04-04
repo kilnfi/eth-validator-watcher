@@ -6,7 +6,15 @@ from .watched_validators import WatchedValidators
 
 
 def hex_to_sparse_bitset(hex_string: str) -> set[int]:
-    """Convert a hex string to a set of bits indexes.
+    """Convert a hexadecimal string to a set of bit indices that are set to 1.
+
+    Args:
+        hex_string: str
+            Hexadecimal string to convert (with or without '0x' prefix).
+
+    Returns:
+        set[int]
+            Set containing the indices of bits that are set to 1 in the hexadecimal value.
     """
     clean_hex = hex_string.strip().replace('0x', '')
     num = int(clean_hex, 16)
@@ -22,15 +30,24 @@ def hex_to_sparse_bitset(hex_string: str) -> set[int]:
 
 
 def process_duties(watched_validators: WatchedValidators, previous_slot_committees: Committees, current_attestations: Attestations, current_slot: int):
-    """Process duties.
+    """Process validator attestation duties for the current slot.
 
-    - the current slot contains attestations from the previous slot (and eventually older ones)
-    - a validator performed its duties if in the current slot it attested for the previous slot
+    The current slot contains attestations from the previous slot (and potentially older ones).
+    A validator is considered to have performed its duties if in the current slot it attested
+    for the previous slot.
 
-    This function feeds the watched validators with:
+    Args:
+        watched_validators: WatchedValidators
+            Registry of validators being watched.
+        previous_slot_committees: Committees
+            Committee assignments for the previous slot.
+        current_attestations: Attestations
+            Attestations included in the current slot's block.
+        current_slot: int
+            The current slot being processed.
 
-    - the current slot (duties_slot),
-    - whether or not the validator attested in it for the previous slot (duties_performed_at_slot).
+    Returns:
+        None
     """
     validator_duty_performed: dict[int, bool] = {}
 

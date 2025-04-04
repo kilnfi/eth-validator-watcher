@@ -1,4 +1,4 @@
-"""Helper to fetch the ETH/USD"""
+"""Helper to fetch the ETH/USD price from Coinbase."""
 
 from cachetools import func
 from pydantic import parse_obj_as
@@ -12,11 +12,14 @@ URL = "https://api.exchange.coinbase.com/products/ETH-USD/trades"
 
 @func.ttl_cache(ttl=600)
 def get_current_eth_price() -> float:
-    """Get the current ETH price in USD.
+    """Get the current ETH price in USD from Coinbase.
+
+    Args:
+        None
 
     Returns:
-    --------
-    float
+        float
+            The current ETH price in USD, or 0.0 if fetching fails.
     """
     try:
         response = Session().get(URL, params=dict(limit=1))

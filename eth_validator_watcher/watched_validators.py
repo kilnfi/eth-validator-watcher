@@ -1,5 +1,4 @@
-"""Watched validators.
-"""
+"""Classes and functions for managing watched validators."""
 
 from typing import Optional
 
@@ -10,10 +9,15 @@ from .utils import LABEL_SCOPE_ALL_NETWORK, LABEL_SCOPE_WATCHED, LABEL_SCOPE_NET
 
 
 def normalized_public_key(pubkey: str) -> str:
-    """Normalize a public key.
+    """Normalize a validator public key by removing 0x prefix and lowercasing.
 
-    Parameters:
-        pubkey: Public key to normalize
+    Args:
+        pubkey: str
+            Public key to normalize.
+
+    Returns:
+        str
+            Normalized public key.
     """
     if pubkey.startswith('0x'):
         pubkey = pubkey[2:]
@@ -25,6 +29,12 @@ class WatchedValidator:
 
     This is a wrapper around the C++ validator object which holds the
     state of a validator.
+
+    Args:
+        None
+
+    Returns:
+        None
     """
 
     def __init__(self):
@@ -43,20 +53,38 @@ class WatchedValidator:
     @property
     def effective_balance(self) -> int:
         """Get the effective balance of the validator.
+
+        Args:
+            None
+
+        Returns:
+            int
+                The effective balance of the validator in Gwei.
         """
         return self._v.consensus_effective_balance
 
     @property
     def labels(self) -> list[str]:
         """Get the labels for the validator.
+
+        Args:
+            None
+
+        Returns:
+            list[str]
+                List of labels associated with this validator.
         """
         return self._v.labels
 
     def process_config(self, config: WatchedKeyConfig):
-        """Processes a new configuration.
+        """Process a new configuration for this validator.
 
-        Parameters:
-            config: New configuration
+        Args:
+            config: WatchedKeyConfig
+                New configuration for this validator.
+
+        Returns:
+            None
         """
         # Even if there is no label in the config, we consider the
         # validator as watched.  This method is only called for
@@ -68,10 +96,14 @@ class WatchedValidator:
         self._v.labels = labels
 
     def process_epoch(self, validator: Validators.DataItem):
-        """Processes a new epoch.
+        """Process validator state for a new epoch.
 
-        Parameters:
-            validator: Validator beacon state
+        Args:
+            validator: Validators.DataItem
+                Validator beacon state data.
+
+        Returns:
+            None
         """
         self._v.consensus_pubkey = validator.validator.pubkey
         self._v.consensus_effective_balance = validator.validator.effective_balance
@@ -97,11 +129,16 @@ class WatchedValidator:
             self._v.missed_attestation = not liveness.is_live
 
     def process_rewards(self, ideal: Rewards.Data.IdealReward, reward: Rewards.Data.TotalReward):
-        """Processes rewards data.
+        """Process validator rewards data.
 
-        Parameters:
-            ideal: Ideal rewards
-            reward: Actual rewards
+        Args:
+            ideal: Rewards.Data.IdealReward
+                Ideal rewards that could have been earned.
+            reward: Rewards.Data.TotalReward
+                Actual rewards earned by the validator.
+
+        Returns:
+            None
         """
         self._v.suboptimal_source = reward.source != ideal.source
         self._v.suboptimal_target = reward.target != ideal.target
@@ -111,11 +148,16 @@ class WatchedValidator:
         self._v.actual_consensus_reward = reward.source + reward.target + reward.head
 
     def process_duties(self, slot: int, performed: bool):
-        """Processes a validator duty.
+        """Process a validator attestation duty.
 
-        Parameters:
-            slot: slot for which there is or not an attestation for the validator
-            performed: whether or not it attested
+        Args:
+            slot: int
+                Slot for which there is or is not an attestation for the validator.
+            performed: bool
+                Whether or not the validator attested in this slot.
+
+        Returns:
+            None
         """
         self._v.duties_slot = slot
         self._v.duties_performed_at_slot = performed
@@ -149,15 +191,25 @@ class WatchedValidator:
             self._v.missed_blocks_finalized = self._v.missed_blocks_finalized + [slot]
 
     def process_future_block(self, slot: int):
-        """Processes a future block proposal.
+        """Process a future block proposal assignment.
 
-        Parameters:
-            slot: Slot of the block proposal
+        Args:
+            slot: int
+                Slot of the future block proposal.
+
+        Returns:
+            None
         """
         self._v.future_blocks_proposal = self._v.future_blocks_proposal + [slot]
 
     def reset_blocks(self):
-        """Reset the counters for the next run.
+        """Reset the block counters for the next run.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         self._v.missed_blocks = []
         self._v.missed_blocks_finalized = []
@@ -167,11 +219,17 @@ class WatchedValidator:
 
 
 class WatchedValidators:
-    """Wrapper around watched validators.
+    """Registry and manager for watched validators.
 
     Provides facilities to retrieve a validator by index or public
     key. This needs to be efficient both in terms of CPU and memory as
     there are about ~1 million validators on the network.
+
+    Args:
+        None
+
+    Returns:
+        None
     """
 
     def __init__(self):
@@ -224,10 +282,14 @@ class WatchedValidators:
         return self._validators
 
     def process_config(self, config: Config):
-        """Process a config update.
+        """Process a configuration update for watched validators.
 
-        Parameters:
-            config: Updated configuration
+        Args:
+            config: Config
+                Updated configuration containing watched keys.
+
+        Returns:
+            None
         """
         for item in config.watched_keys:
             index = self._pubkey_to_index.get(normalized_public_key(item.public_key), None)
@@ -239,11 +301,14 @@ class WatchedValidators:
         self.config_initialized = True
 
     def process_epoch(self, validators: Validators):
-        """Process a new epoch
+        """Process validator state data for a new epoch.
 
-        Parameters:
-            validators: New validator state for the epoch from the beaconchain.
-            liveness: Whether or not the validator attested in the previous epoch.
+        Args:
+            validators: Validators
+                New validator state for the epoch from the beacon chain.
+
+        Returns:
+            None
         """
         for item in validators.data:
             validator = self._validators.get(item.index)
@@ -255,11 +320,16 @@ class WatchedValidators:
             validator.process_epoch(item)
 
     def process_liveness(self, liveness: ValidatorsLivenessResponse, current_epoch: int):
-        """Process liveness data
+        """Process validator liveness data.
 
-        Parameters:
-            liveness: Liveness data from the beacon chain
-            epoch: Current epoch
+        Args:
+            liveness: ValidatorsLivenessResponse
+                Liveness data from the beacon chain.
+            current_epoch: int
+                Current epoch being processed.
+
+        Returns:
+            None
         """
         for item in liveness.data:
             validator = self._validators.get(item.index)
