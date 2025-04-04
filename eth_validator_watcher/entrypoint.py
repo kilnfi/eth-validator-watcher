@@ -1,5 +1,4 @@
-"""Draft entrypoint for the eth-validator-watcher v1.0.0.
-"""
+"""Main entrypoint module for the Ethereum Validator Watcher."""
 
 from pathlib import Path
 from prometheus_client import start_http_server
@@ -39,16 +38,24 @@ prometheus_metrics_thread_started = False
 
 
 class ValidatorWatcher:
-    """Ethereum Validator Watcher.
+    """Main class for the Ethereum Validator Watcher.
+
+    Args:
+        None
+
+    Returns:
+        None
     """
 
     def __init__(self, cfg_path: Path) -> None:
         """Initialize the Ethereum Validator Watcher.
 
         Args:
-        -----
-        cfg_path: Path
-            Path to the configuration file.
+            cfg_path: Path
+                Path to the configuration file.
+
+        Returns:
+            None
         """
         self._metrics = get_prometheus_metrics()
         self._metrics_started = False
@@ -76,7 +83,13 @@ class ValidatorWatcher:
         self._slot_hook = None
 
     def _reload_config(self) -> None:
-        """Reload the configuration file.
+        """Reload the configuration file and update beacon client if needed.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         try:
             if not self._cfg or self._cfg_path.stat().st_mtime != self._cfg_last_modified:
@@ -89,13 +102,18 @@ class ValidatorWatcher:
             self._beacon = Beacon(self._cfg.beacon_url, self._cfg.beacon_timeout_sec)
 
     def _update_metrics(self, watched_validators: WatchedValidators, epoch: int, slot: int) -> None:
-        """Update the Prometheus metrics with the watched validators.
+        """Update the Prometheus metrics with the watched validators data.
 
         Args:
-        -----
-        watched_validators: Watched validators.
-        epoch: Current epoch.
-        slot: Current slot.
+            watched_validators: WatchedValidators
+                Registry of validators being watched.
+            epoch: int
+                Current epoch.
+            slot: int
+                Current slot.
+
+        Returns:
+            None
         """
         network = self._cfg.network
 
@@ -148,7 +166,13 @@ class ValidatorWatcher:
             prometheus_metrics_thread_started = True
 
     def run(self) -> None:
-        """Run the Ethereum Validator Watcher.
+        """Run the Ethereum Validator Watcher main processing loop.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         watched_validators = WatchedValidators()
         epoch = self._clock.get_current_epoch()
@@ -247,7 +271,15 @@ def handler(
         show_default=True,
     ),
 ) -> None:
-    """Run the Ethereum Validator Watcher."""
+    """Command line handler to run the Ethereum Validator Watcher.
+
+    Args:
+        config: Optional[Path]
+            Path to the configuration file.
+
+    Returns:
+        None
+    """
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s %(levelname)-8s %(message)s'

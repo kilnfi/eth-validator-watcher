@@ -1,4 +1,4 @@
-"""Contains the models for the validator watcher."""
+"""Pydantic models for Ethereum validator watcher data structures."""
 
 from enum import StrEnum
 
@@ -6,6 +6,14 @@ from pydantic import BaseModel
 
 
 class Validators(BaseModel):
+    """Model for validator data from the beacon chain.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class DataItem(BaseModel):
         class StatusEnum(StrEnum):
             pendingInitialized = "pending_initialized"
@@ -33,6 +41,14 @@ class Validators(BaseModel):
 
 
 class Genesis(BaseModel):
+    """Model for beacon chain genesis data.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class Data(BaseModel):
         genesis_time: int
 
@@ -40,6 +56,14 @@ class Genesis(BaseModel):
 
 
 class Spec(BaseModel):
+    """Model for beacon chain specification data.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class Data(BaseModel):
         SECONDS_PER_SLOT: int
         SLOTS_PER_EPOCH: int
@@ -48,6 +72,14 @@ class Spec(BaseModel):
 
 
 class Header(BaseModel):
+    """Model for block header data from the beacon chain.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class Data(BaseModel):
         class Header(BaseModel):
             class Message(BaseModel):
@@ -61,6 +93,14 @@ class Header(BaseModel):
 
 
 class Block(BaseModel):
+    """Model for block data from the beacon chain.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class Data(BaseModel):
         class Message(BaseModel):
             class Body(BaseModel):
@@ -89,6 +129,14 @@ class Block(BaseModel):
 
 
 class ProposerDuties(BaseModel):
+    """Model for validator proposer duties data.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class Data(BaseModel):
         pubkey: str
         validator_index: int
@@ -99,6 +147,14 @@ class ProposerDuties(BaseModel):
 
 
 class ValidatorsLivenessResponse(BaseModel):
+    """Model for validator liveness data.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class Data(BaseModel):
         index: int
         is_live: bool
@@ -107,11 +163,27 @@ class ValidatorsLivenessResponse(BaseModel):
 
 
 class SlotWithStatus(BaseModel):
+    """Model for slot data with missed status.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     number: int
     missed: bool
 
 
 class CoinbaseTrade(BaseModel):
+    """Model for Coinbase trade data.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     time: str
     trade_id: int
     price: float
@@ -120,12 +192,28 @@ class CoinbaseTrade(BaseModel):
 
 
 class BlockIdentierType(StrEnum):
+    """Enumeration of block identifier types.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     HEAD = "head"
     GENESIS = "genesis"
     FINALIZED = "finalized"
 
 
 class Rewards(BaseModel):
+    """Model for validator reward data.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class Data(BaseModel):
         class IdealReward(BaseModel):
             effective_balance: int
@@ -146,6 +234,14 @@ class Rewards(BaseModel):
 
 
 class Committees(BaseModel):
+    """Model for committee assignment data.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class Data(BaseModel):
         index: int
         slot: int
@@ -155,6 +251,14 @@ class Committees(BaseModel):
 
 
 class Attestations(BaseModel):
+    """Model for attestation data from blocks.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     class SignedAttestationData(BaseModel):
         class AttestationData(BaseModel):
             slot: int

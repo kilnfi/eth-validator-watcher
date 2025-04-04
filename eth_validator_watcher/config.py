@@ -8,14 +8,26 @@ import yaml
 
 
 class WatchedKeyConfig(BaseModel):
-    """Configuration of a watched key.
+    """Configuration model for a watched validator key.
+
+    Args:
+        None
+
+    Returns:
+        None
     """
     public_key: str
     labels: Optional[list[str]] = None
 
 
 class Config(BaseSettings):
-    """Configuration of the Ethereum Validator Watcher.
+    """Configuration model for the Ethereum Validator Watcher.
+
+    Args:
+        None
+
+    Returns:
+        None
     """
     model_config = SettingsConfigDict(case_sensitive=True, env_prefix='eth_watcher_')
 
@@ -33,7 +45,14 @@ class Config(BaseSettings):
 
 
 def _default_config() -> Config:
-    """Returns the default configuration.
+    """Create and return the default configuration.
+
+    Args:
+        None
+
+    Returns:
+        Config
+            The default configuration instance.
     """
     return Config(
         network='mainnet',
@@ -45,15 +64,18 @@ def _default_config() -> Config:
 
 
 def load_config(config_file: str) -> Config:
-    """Loads the configuration file from environment and configfile.
+    """Load and merge configuration from environment variables and config file.
 
-    Environment variables have priority (can be used to set secrets
-    and override the config file).
-    Parameters:
-    config_file : path to the YAML configuration file
+    Environment variables have priority and can be used to set secrets
+    and override the config file values.
+
+    Args:
+        config_file: str
+            Path to the YAML or JSON configuration file.
 
     Returns:
-    The effective configuration used by the watcher
+        Config
+            The effective configuration used by the watcher.
     """
     with open(config_file, 'r') as fh:
         logging.info(f'⚙️ Parsing configuration file {config_file}')

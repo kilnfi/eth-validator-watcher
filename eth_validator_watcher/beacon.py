@@ -33,11 +33,16 @@ class Beacon:
     """Beacon node abstraction."""
 
     def __init__(self, url: str, timeout_sec: int) -> None:
-        """Beacon
+        """Initialize a Beacon instance.
 
-        Parameters:
-        url        : URL where the beacon can be reached
-        timeout_sec: timeout in seconds used to query the beacon
+        Args:
+            url: str
+                URL where the beacon can be reached.
+            timeout_sec: int
+                Timeout in seconds used to query the beacon.
+
+        Returns:
+            None
         """
         self._url = url
         self._timeout_sec = timeout_sec
@@ -81,7 +86,18 @@ class Beacon:
         retry=retry_if_exception_type(ChunkedEncodingError),
     )
     def _get_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
-        """Wrapper around requests.get() with retry on 404"""
+        """Wrapper around requests.get() with retry on 404.
+
+        Args:
+            *args: Any
+                Positional arguments to pass to requests.get().
+            **kwargs: Any
+                Keyword arguments to pass to requests.get().
+
+        Returns:
+            Response
+                The HTTP response.
+        """
         return self._http_retry_not_found.get(*args, **kwargs)
 
     @retry(
@@ -90,7 +106,18 @@ class Beacon:
         retry=retry_if_exception_type(ChunkedEncodingError),
     )
     def _get(self, *args: Any, **kwargs: Any) -> Response:
-        """Wrapper around requests.get()"""
+        """Wrapper around requests.get().
+
+        Args:
+            *args: Any
+                Positional arguments to pass to requests.get().
+            **kwargs: Any
+                Keyword arguments to pass to requests.get().
+
+        Returns:
+            Response
+                The HTTP response.
+        """
         return self._http.get(*args, **kwargs)
 
     @retry(
@@ -99,19 +126,54 @@ class Beacon:
         retry=retry_if_exception_type(ChunkedEncodingError),
     )
     def _post_retry_not_found(self, *args: Any, **kwargs: Any) -> Response:
-        """Wrapper around requests.get() with retry on 404"""
+        """Wrapper around requests.post() with retry on 404.
+
+        Args:
+            *args: Any
+                Positional arguments to pass to requests.post().
+            **kwargs: Any
+                Keyword arguments to pass to requests.post().
+
+        Returns:
+            Response
+                The HTTP response.
+        """
         return self._http_retry_not_found.post(*args, **kwargs)
 
     def get_url(self) -> str:
-        """Return the URL of the beacon."""
+        """Get the URL of the beacon node.
+
+        Args:
+            None
+
+        Returns:
+            str
+                The URL of the beacon node.
+        """
         return self._url
 
     def get_timeout_sec(self) -> int:
-        """Return the timeout in seconds used to query the beacon."""
+        """Get the timeout in seconds used to query the beacon.
+
+        Args:
+            None
+
+        Returns:
+            int
+                The timeout in seconds.
+        """
         return self._timeout_sec
 
     def get_genesis(self) -> Genesis:
-        """Get genesis data."""
+        """Get beacon chain genesis data.
+
+        Args:
+            None
+
+        Returns:
+            Genesis
+                The beacon chain genesis data.
+        """
         response = self._get_retry_not_found(
             f"{self._url}/eth/v1/beacon/genesis", timeout=self._timeout_sec
         )
@@ -121,7 +183,15 @@ class Beacon:
         return Genesis.model_validate_json(response.text)
 
     def get_spec(self) -> Spec:
-        """Get spec data."""
+        """Get beacon chain specification data.
+
+        Args:
+            None
+
+        Returns:
+            Spec
+                The beacon chain specification data.
+        """
         response = self._get_retry_not_found(
             f"{self._url}/eth/v1/config/spec", timeout=self._timeout_sec
         )
@@ -131,14 +201,15 @@ class Beacon:
         return Spec.model_validate_json(response.text)
 
     def get_committees(self, slot: int) -> Committees:
-        """Get committees.
+        """Get beacon chain committees for a specific slot.
 
-        Parameters:
-        slot: Slot corresponding to the committees to retrieve
+        Args:
+            slot: int
+                Slot corresponding to the committees to retrieve.
 
         Returns:
-        --------
-        Committees
+            Committees
+                The committee assignments for the specified slot.
         """
         response = self._get(
             f"{self._url}/eth/v1/beacon/states/{slot}/committees?slot={slot}", timeout=self._timeout_sec
@@ -148,14 +219,15 @@ class Beacon:
         return Committees.model_validate_json(response.text)
 
     def get_attestations(self, slot: int) -> Attestations:
-        """Get Attestations
+        """Get attestations from a specific block.
 
-        Parameters:
-        slot: Slot corresponding to the block in which attestations are present.
+        Args:
+            slot: int
+                Slot corresponding to the block in which attestations are present.
 
         Returns:
-        --------
-        Attestations
+            Attestations
+                The attestations from the specified block, or None if the block doesn't exist.
         """
         try:
             response = self._get(
@@ -171,11 +243,19 @@ class Beacon:
         return Attestations.model_validate_json(response.text)
 
     def get_header(self, block_identifier: Union[BlockIdentierType, int]) -> Header:
-        """Get a header.
+        """Get a block header.
 
-        Parameters:
-        block_identifier: Block identifier or slot corresponding to the block to
-                          retrieve
+        Args:
+            block_identifier: Union[BlockIdentierType, int]
+                Block identifier or slot corresponding to the block to retrieve.
+
+        Returns:
+            Header
+                The block header for the specified block.
+
+        Raises:
+            NoBlockError: If the block does not exist.
+            HTTPError: For other HTTP errors.
         """
         try:
             response = self._get(
@@ -192,9 +272,15 @@ class Beacon:
         return Header.model_validate_json(response.text)
 
     def get_proposer_duties(self, epoch: int) -> ProposerDuties:
-        """Maybe get proposer duties
+        """Get proposer duties for a specific epoch.
 
-        epoch: Epoch corresponding to the proposer duties to retrieve
+        Args:
+            epoch: int
+                Epoch corresponding to the proposer duties to retrieve.
+
+        Returns:
+            ProposerDuties
+                The proposer duties for the specified epoch.
         """
         response = self._get_retry_not_found(
             f"{self._url}/eth/v1/validator/duties/proposer/{epoch}", timeout=self._timeout_sec
@@ -205,6 +291,16 @@ class Beacon:
         return ProposerDuties.model_validate_json(response.text)
 
     def get_validators(self, slot: int) -> Validators:
+        """Get validator information for a specific slot.
+
+        Args:
+            slot: int
+                Slot for which to retrieve validator information.
+
+        Returns:
+            Validators
+                The validator information for the specified slot.
+        """
         response = self._get_retry_not_found(
             f"{self._url}/eth/v1/beacon/states/{slot}/validators", timeout=self._timeout_sec
         )
@@ -214,10 +310,15 @@ class Beacon:
         return Validators.model_validate_json(response.text)
 
     def get_rewards(self, epoch: int) -> Rewards:
-        """Get rewards.
+        """Get attestation rewards for a specific epoch.
 
-        Parameters:
-        epoch: Epoch corresponding to the rewards to retrieve.
+        Args:
+            epoch: int
+                Epoch corresponding to the rewards to retrieve.
+
+        Returns:
+            Rewards
+                The attestation rewards for the specified epoch.
         """
         response = self._post_retry_not_found(
             f"{self._url}/eth/v1/beacon/rewards/attestations/{epoch}",
@@ -230,10 +331,17 @@ class Beacon:
         return Rewards.model_validate_json(response.text)
 
     def get_validators_liveness(self, epoch: int, indexes: list[int]) -> ValidatorsLivenessResponse:
-        """Get validators liveness.
+        """Get validators liveness information for a specific epoch.
 
-        Parameters:
-        epoch: Epoch corresponding to the validators liveness to retrieve
+        Args:
+            epoch: int
+                Epoch corresponding to the validators liveness to retrieve.
+            indexes: list[int]
+                List of validator indexes to check liveness for.
+
+        Returns:
+            ValidatorsLivenessResponse
+                The liveness information for the specified validators.
         """
         response = self._post_retry_not_found(
             f"{self._url}/eth/v1/validator/liveness/{epoch}",
