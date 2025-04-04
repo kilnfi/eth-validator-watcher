@@ -83,9 +83,11 @@ class WatchedValidator:
     def process_liveness(self, liveness: ValidatorsLivenessResponse.Data, current_epoch: int):
         """Processes liveness data.
 
-        Parameters:
-        liveness: Validator liveness data
-        current_epoch: Current epoch
+        Args:
+            liveness: ValidatorsLivenessResponse.Data
+                Validator liveness data.
+            current_epoch: int
+                Current epoch.
         """
         # Because we ask for the liveness of the previous epoch, we
         # need to dismiss validators that weren't activated yet at
@@ -121,9 +123,11 @@ class WatchedValidator:
     def process_block(self, slot: int, has_block: bool):
         """Processes a block proposal.
 
-        Parameters:
-            slot: Slot of the block proposal
-            missed: Whether the block was missed
+        Args:
+            slot: int
+                Slot of the block proposal.
+            has_block: bool
+                Whether the block was found (True) or missed (False).
         """
         if has_block:
             self._v.proposed_blocks = self._v.proposed_blocks + [slot]
@@ -133,9 +137,11 @@ class WatchedValidator:
     def process_block_finalized(self, slot: int, has_block: bool):
         """Processes a finalized block proposal.
 
-        Parameters:
-            slot: Slot of the block proposal
-            missed: Whether the block was missed
+        Args:
+            slot: int
+                Slot of the block proposal.
+            has_block: bool
+                Whether the block was found (True) or missed (False).
         """
         if has_block:
             self._v.proposed_blocks_finalized = self._v.proposed_blocks_finalized + [slot]
@@ -177,16 +183,24 @@ class WatchedValidators:
     def get_validator_by_index(self, index: int) -> Optional[WatchedValidator]:
         """Get a validator by index.
 
-        Parameters:
-            index: Index of the validator to retrieve
+        Args:
+            index: int
+                Index of the validator to retrieve.
+
+        Returns:
+            Optional[WatchedValidator]: The validator with the given index, or None if not found.
         """
         return self._validators.get(index)
 
     def get_validator_by_pubkey(self, pubkey: str) -> Optional[WatchedValidator]:
         """Get a validator by public key.
 
-        Parameters:
-            pubkey: Public key of the validator to retrieve
+        Args:
+            pubkey: str
+                Public key of the validator to retrieve.
+
+        Returns:
+            Optional[WatchedValidator]: The validator with the given public key, or None if not found.
         """
         index = self._pubkey_to_index.get(normalized_public_key(pubkey))
         if index is None:
@@ -194,11 +208,19 @@ class WatchedValidators:
         return self._validators.get(index)
 
     def get_indexes(self) -> list[int]:
-        """Get all validator indexes."""
+        """Get all validator indexes.
+
+        Returns:
+            list[int]: A list of all validator indices in the registry.
+        """
         return list(self._validators.keys())
 
     def get_validators(self) -> dict[int, WatchedValidator]:
-        """Iterate over all validators."""
+        """Get all validators in the registry.
+
+        Returns:
+            dict[int, WatchedValidator]: A dictionary mapping validator indices to WatchedValidator objects.
+        """
         return self._validators
 
     def process_config(self, config: Config):
