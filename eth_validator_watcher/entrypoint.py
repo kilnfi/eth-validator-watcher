@@ -177,7 +177,7 @@ class ValidatorWatcher:
             if validators_liveness is None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS):
                 logging.info('🔨 Processing validator liveness')
                 validators_liveness = self._beacon.get_validators_liveness(epoch - 1, watched_validators.get_indexes())
-                watched_validators.process_liveness(validators_liveness)
+                watched_validators.process_liveness(validators_liveness, epoch)
 
             has_block = self._beacon.has_block_at_slot(slot)
 

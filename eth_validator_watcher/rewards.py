@@ -6,6 +6,15 @@ from .watched_validators import WatchedValidators
 
 def process_rewards(validators: WatchedValidators, rewards: Rewards) -> None:
     """Processes rewards for all validators.
+
+    Args:
+        validators: WatchedValidators
+            The registry of validators being watched.
+        rewards: Rewards
+            The rewards data to process.
+
+    Returns:
+        None
     """
     ideal_by_eb: dict[int, Rewards.Data.IdealReward] = {}
     for ideal_reward in rewards.data.ideal_rewards:

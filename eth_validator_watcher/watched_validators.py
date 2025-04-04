@@ -80,14 +80,19 @@ class WatchedValidator:
         self._v.consensus_status = validator.status
         self._v.consensus_activation_epoch = validator.validator.activation_epoch
 
-    def process_liveness(self, liveness: ValidatorsLivenessResponse.Data):
+    def process_liveness(self, liveness: ValidatorsLivenessResponse.Data, current_epoch: int):
         """Processes liveness data.
 
         Parameters:
         liveness: Validator liveness data
+        current_epoch: Current epoch
         """
-        self._v.previous_missed_attestation = self._v.missed_attestation
-        self._v.missed_attestation = not liveness.is_live
+        # Because we ask for the liveness of the previous epoch, we
+        # need to dismiss validators that weren't activated yet at
+        # that time to prevent false positive.
+        if (current_epoch - 1) >= self._v.consensus_activation_epoch:
+            self._v.previous_missed_attestation = self._v.missed_attestation
+            self._v.missed_attestation = not liveness.is_live
 
     def process_rewards(self, ideal: Rewards.Data.IdealReward, reward: Rewards.Data.TotalReward):
         """Processes rewards data.
@@ -227,13 +232,14 @@ class WatchedValidators:
 
             validator.process_epoch(item)
 
-    def process_liveness(self, liveness: ValidatorsLivenessResponse):
+    def process_liveness(self, liveness: ValidatorsLivenessResponse, current_epoch: int):
         """Process liveness data
 
         Parameters:
             liveness: Liveness data from the beacon chain
+            epoch: Current epoch
         """
         for item in liveness.data:
             validator = self._validators.get(item.index)
             if validator:
-                validator.process_liveness(item)
+                validator.process_liveness(item, current_epoch)

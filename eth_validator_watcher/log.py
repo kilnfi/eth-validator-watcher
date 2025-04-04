@@ -20,13 +20,29 @@ COLOR_RESET = "\x1b[0m"
 
 
 def shorten_validator(validator_pubkey: str) -> str:
-    """Shorten a validator name
+    """Shorten a validator name.
+
+    Args:
+        validator_pubkey: str
+            The validator public key to shorten.
+
+    Returns:
+        str: Shortened validator public key (first 10 characters).
     """
     return f"{validator_pubkey[:10]}"
 
 
 def beaconcha_validator_link(cfg: Config, validator: str) -> str:
     """Return a link to the beaconcha.in validator page.
+
+    Args:
+        cfg: Config
+            Configuration object containing network information.
+        validator: str
+            Validator public key.
+
+    Returns:
+        str: Formatted link to the validator's beaconcha.in page.
     """
     return f'<https://{cfg.network}.beaconcha.in/validator/{validator}|{shorten_validator(validator)}>'
 
