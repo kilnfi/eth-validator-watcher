@@ -37,3 +37,6 @@ Thumbs.db
 # Pybind specific
 *.so
 
+
+# Agent
+CLAUDE.md
