@@ -44,6 +44,7 @@ struct Validator {
   bool consensus_slashed = false;
   uint64_t consensus_index = 0;
   std::string consensus_status;
+  uint64_t consensus_activation_epoch = 0;
 };
 
 // Same, flat structure approach. This is used to aggregate data from
@@ -221,7 +222,8 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("consensus_effective_balance", &Validator::consensus_effective_balance)
     .def_readwrite("consensus_slashed", &Validator::consensus_slashed)
     .def_readwrite("consensus_index", &Validator::consensus_index)
-    .def_readwrite("consensus_status", &Validator::consensus_status);
+    .def_readwrite("consensus_status", &Validator::consensus_status)
+    .def_readwrite("consensus_activation_epoch", &Validator::consensus_activation_epoch);
 
   py::class_<MetricsByLabel>(m, "MetricsByLabel")
     .def(py::init<>())

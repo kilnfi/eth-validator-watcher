@@ -22,6 +22,7 @@ class Validators(BaseModel):
             pubkey: str
             effective_balance: int
             slashed: bool
+            activation_epoch: int
 
         index: int
         status: StatusEnum

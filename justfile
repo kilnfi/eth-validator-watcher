@@ -11,6 +11,7 @@ lint:
 
 # Local development
 dev:
+    uv pip install -e .
     uv run eth-validator-watcher --config etc/config.dev.yaml
 
 # Build docker image
