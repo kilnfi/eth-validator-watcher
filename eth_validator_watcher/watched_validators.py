@@ -107,6 +107,7 @@ class WatchedValidator:
         """
         self._v.consensus_pubkey = validator.validator.pubkey
         self._v.consensus_effective_balance = validator.validator.effective_balance
+        self._v.weight = validator.validator.effective_balance / 32_000_000_000
         self._v.consensus_slashed = validator.validator.slashed
         self._v.consensus_index = validator.index
         self._v.consensus_status = validator.status

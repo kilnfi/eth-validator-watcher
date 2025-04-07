@@ -45,6 +45,10 @@ struct Validator {
   uint64_t consensus_index = 0;
   std::string consensus_status;
   uint64_t consensus_activation_epoch = 0;
+
+  // This is the weight of the validator compared to a 32 ETH 0x01
+  // validator.
+  float64_t weight = 0;
 };
 
 // Same, flat structure approach. This is used to aggregate data from
@@ -61,12 +65,16 @@ struct MetricsByLabel {
   uint64_t optimal_head_count = 0;
   uint64_t validator_slashes = 0;
   uint64_t missed_duties_at_slot_count = 0;
+  float64_t missed_duties_at_slot_scaled_count = 0.0f;
   uint64_t performed_duties_at_slot_count = 0;
+  float64_t performed_duties_at_slot_scaled_count = 0.0f;
 
   float64_t ideal_consensus_reward = 0;
   float64_t actual_consensus_reward = 0;
-  uint64_t missed_attestations = 0;
-  uint64_t missed_consecutive_attestations = 0;
+  uint64_t missed_attestations_count = 0;
+  float64_t missed_attestations_scaled_count = 0.0f;
+  uint64_t missed_consecutive_attestations_count = 0;
+  float64_t missed_consecutive_attestations_scaled_count = 0.0f;
 
   uint64_t proposed_blocks = 0;
   uint64_t missed_blocks = 0;
@@ -82,7 +90,6 @@ struct MetricsByLabel {
 };
 
 namespace {
-
   void process_details(const std::string &validator, std::vector<uint64_t> slots, std::vector<std::pair<uint64_t, std::string>> *out) {
     for (const auto& slot: slots) {
       if (out->size() >= kMaxLogging) {
@@ -100,7 +107,7 @@ namespace {
         MetricsByLabel & m = out[label];
 
         m.validator_status_count[v.consensus_status] += 1;
-        m.validator_status_scaled_count[v.consensus_status] += static_cast<double>(static_cast<double>(v.consensus_effective_balance) / static_cast<double>(32 * 1e9));
+        m.validator_status_scaled_count[v.consensus_status] += 1.0 * v.weight;
 
         m.validator_slashes += (v.consensus_slashed == true);
 
@@ -120,14 +127,18 @@ namespace {
 
         if (slot == v.duties_slot) {
           m.performed_duties_at_slot_count += int(v.duties_performed_at_slot == true);
+          m.performed_duties_at_slot_scaled_count += int(v.duties_performed_at_slot == true) * v.weight;
           m.missed_duties_at_slot_count += int(v.duties_performed_at_slot == false);
+          m.missed_duties_at_slot_scaled_count += int(v.duties_performed_at_slot == false) * v.weight;
         }
 
         m.ideal_consensus_reward += v.ideal_consensus_reward;
         m.actual_consensus_reward += v.actual_consensus_reward;
 
-        m.missed_attestations += int(v.missed_attestation == true);
-        m.missed_consecutive_attestations += int(v.previous_missed_attestation == true);
+        m.missed_attestations_count += int(v.missed_attestation == true);
+        m.missed_attestations_scaled_count += int(v.missed_attestation == true) * v.weight;
+        m.missed_consecutive_attestations_count += int(v.previous_missed_attestation == true && v.missed_attestation == true);
+        m.missed_consecutive_attestations_scaled_count += int(v.previous_missed_attestation == true && v.missed_attestation == true) * v.weight;
 
         m.proposed_blocks += v.proposed_blocks.size();
         m.missed_blocks += v.missed_blocks.size();
@@ -175,12 +186,16 @@ namespace {
         m.optimal_head_count += metric.optimal_head_count;
         m.validator_slashes += metric.validator_slashes;
         m.missed_duties_at_slot_count += metric.missed_duties_at_slot_count;
+        m.missed_duties_at_slot_scaled_count += metric.missed_duties_at_slot_scaled_count;
         m.performed_duties_at_slot_count += metric.performed_duties_at_slot_count;
+        m.performed_duties_at_slot_scaled_count += metric.performed_duties_at_slot_scaled_count;
 
         m.ideal_consensus_reward += metric.ideal_consensus_reward;
         m.actual_consensus_reward += metric.actual_consensus_reward;
-        m.missed_attestations += metric.missed_attestations;
-        m.missed_consecutive_attestations += metric.missed_consecutive_attestations;
+        m.missed_attestations_count += metric.missed_attestations_count;
+        m.missed_attestations_scaled_count += metric.missed_attestations_scaled_count;
+        m.missed_consecutive_attestations_count += metric.missed_consecutive_attestations_count;
+        m.missed_consecutive_attestations_scaled_count += metric.missed_consecutive_attestations_scaled_count;
 
         m.proposed_blocks += metric.proposed_blocks;
         m.missed_blocks += metric.missed_blocks;
@@ -228,7 +243,8 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("consensus_slashed", &Validator::consensus_slashed)
     .def_readwrite("consensus_index", &Validator::consensus_index)
     .def_readwrite("consensus_status", &Validator::consensus_status)
-    .def_readwrite("consensus_activation_epoch", &Validator::consensus_activation_epoch);
+    .def_readwrite("consensus_activation_epoch", &Validator::consensus_activation_epoch)
+    .def_readwrite("weight", &Validator::weight);
 
   py::class_<MetricsByLabel>(m, "MetricsByLabel")
     .def(py::init<>())
@@ -238,7 +254,9 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("suboptimal_target_count", &MetricsByLabel::suboptimal_target_count)
     .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)
     .def_readwrite("missed_duties_at_slot_count", &MetricsByLabel::missed_duties_at_slot_count)
+    .def_readwrite("missed_duties_at_slot_scaled_count", &MetricsByLabel::missed_duties_at_slot_scaled_count)
     .def_readwrite("performed_duties_at_slot_count", &MetricsByLabel::performed_duties_at_slot_count)
+    .def_readwrite("performed_duties_at_slot_scaled_count", &MetricsByLabel::performed_duties_at_slot_scaled_count)
     .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)
     .def_readwrite("optimal_source_count", &MetricsByLabel::optimal_source_count)
     .def_readwrite("optimal_target_count", &MetricsByLabel::optimal_target_count)
@@ -246,8 +264,10 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("validator_slashes", &MetricsByLabel::validator_slashes)
     .def_readwrite("ideal_consensus_reward", &MetricsByLabel::ideal_consensus_reward)
     .def_readwrite("actual_consensus_reward", &MetricsByLabel::actual_consensus_reward)
-    .def_readwrite("missed_attestations", &MetricsByLabel::missed_attestations)
-    .def_readwrite("missed_consecutive_attestations", &MetricsByLabel::missed_consecutive_attestations)
+    .def_readwrite("missed_attestations_count", &MetricsByLabel::missed_attestations_count)
+    .def_readwrite("missed_attestations_scaled_count", &MetricsByLabel::missed_attestations_scaled_count)
+    .def_readwrite("missed_consecutive_attestations_count", &MetricsByLabel::missed_consecutive_attestations_count)
+    .def_readwrite("missed_consecutive_attestations_scaled_count", &MetricsByLabel::missed_consecutive_attestations_scaled_count)
     .def_readwrite("proposed_blocks", &MetricsByLabel::proposed_blocks)
     .def_readwrite("missed_blocks", &MetricsByLabel::missed_blocks)
     .def_readwrite("proposed_blocks_finalized", &MetricsByLabel::proposed_blocks_finalized)
