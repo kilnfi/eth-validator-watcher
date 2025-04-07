@@ -145,11 +145,15 @@ class ValidatorWatcher:
             self._metrics.eth_actual_consensus_rewards_gwei.labels(label, network).set(m.actual_consensus_reward)
             self._metrics.eth_consensus_rewards_rate.labels(label, network).set(pct(m.actual_consensus_reward, m.ideal_consensus_reward, True))
 
-            self._metrics.eth_missed_attestations_count.labels(label, network).set(m.missed_attestations)
-            self._metrics.eth_missed_consecutive_attestations_count.labels(label, network).set(m.missed_consecutive_attestations)
+            self._metrics.eth_missed_attestations_count.labels(label, network).set(m.missed_attestations_count)
+            self._metrics.eth_missed_attestations_scaled_count.labels(label, network).set(m.missed_attestations_scaled_count)
+            self._metrics.eth_missed_consecutive_attestations_count.labels(label, network).set(m.missed_consecutive_attestations_count)
+            self._metrics.eth_missed_consecutive_attestations_scaled_count.labels(label, network).set(m.missed_consecutive_attestations_scaled_count)
             self._metrics.eth_slashed_validators_count.labels(label, network).set(m.validator_slashes)
             self._metrics.eth_missed_duties_at_slot_count.labels(label, network).set(m.missed_duties_at_slot_count)
+            self._metrics.eth_missed_duties_at_slot_scaled_count.labels(label, network).set(m.missed_duties_at_slot_scaled_count)
             self._metrics.eth_performed_duties_at_slot_count.labels(label, network).set(m.performed_duties_at_slot_count)
+            self._metrics.eth_performed_duties_at_slot_scaled_count.labels(label, network).set(m.performed_duties_at_slot_scaled_count)
 
             # Here we inc, it's fine since we previously reset the
             # counters on each run; we can't use set because those

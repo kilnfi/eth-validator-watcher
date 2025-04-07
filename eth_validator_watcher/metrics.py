@@ -52,7 +52,6 @@ class PrometheusMetrics:
     eth_missed_consecutive_attestations_count: Gauge
     eth_missed_consecutive_attestations_scaled_count: Gauge
     eth_slashed_validators_count: Gauge
-    eth_slashed_validators_scaled_count: Gauge
     eth_missed_duties_at_slot_count: Gauge
     eth_missed_duties_at_slot_scaled_count: Gauge
     eth_performed_duties_at_slot_count: Gauge
@@ -120,7 +119,6 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_missed_consecutive_attestations_count=Gauge("eth_missed_consecutive_attestations", "Missed consecutive attestations in the last two epochs", ['scope', 'network']),
             eth_missed_consecutive_attestations_scaled_count=Gauge("eth_missed_consecutive_attestations_scaled", "Stake-scaled missed consecutive attestations in the last two epochs", ['scope', 'network']),
             eth_slashed_validators_count=Gauge("eth_slashed_validators", "Slashed validators", ['scope', 'network']),
-            eth_slashed_validators_scaled_count=Gauge("eth_slashed_validators_scaled", "Stake-scaled slashed validators", ['scope', 'network']),
             eth_missed_duties_at_slot_count=Gauge("eth_missed_duties_at_slot", "Missed validator duties in last slot", ['scope', 'network']),
             eth_missed_duties_at_slot_scaled_count=Gauge("eth_missed_duties_at_slot_scaled", "Stake-scaled missed validator duties in last slot", ['scope', 'network']),
             eth_performed_duties_at_slot_count=Gauge("eth_performed_duties_at_slot", "Performed validator duties in last slot", ['scope', 'network']),
