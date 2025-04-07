@@ -134,7 +134,7 @@ class ValidatorWatcher:
                 value = m.validator_status_count.get(status, 0)
                 self._metrics.eth_validator_status_count.labels(label, status, network).set(value)
                 scaled_value = m.validator_status_scaled_count.get(status, 0.0)
-                self._metrics.eth_validator_status_scaled_count.labels(label, status, network).set(value)
+                self._metrics.eth_validator_status_scaled_count.labels(label, status, network).set(scaled_value)
 
         for label, m in metrics.items():
             self._metrics.eth_suboptimal_sources_rate.labels(label, network).set(pct(m.suboptimal_source_count, m.optimal_source_count))
