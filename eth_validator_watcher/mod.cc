@@ -51,6 +51,7 @@ struct Validator {
 // all validators by labels.
 struct MetricsByLabel {
   std::map<std::string, uint64_t> validator_status_count;
+  std::map<std::string, double> validator_status_scaled_count;
   
   uint64_t suboptimal_source_count = 0;
   uint64_t suboptimal_target_count = 0;
@@ -99,6 +100,7 @@ namespace {
         MetricsByLabel & m = out[label];
 
         m.validator_status_count[v.consensus_status] += 1;
+        m.validator_status_scaled_count[v.consensus_status] += static_cast<double>(static_cast<double>(v.consensus_effective_balance) / static_cast<double>(32 * 1e9));
 
         m.validator_slashes += (v.consensus_slashed == true);
 
@@ -160,6 +162,9 @@ namespace {
 
         for (const auto& [status, count]: metric.validator_status_count) {
           m.validator_status_count[status] += count;
+        }
+        for (const auto& [status, count]: metric.validator_status_scaled_count) {
+          m.validator_status_scaled_count[status] += count;
         }
 
         m.suboptimal_source_count += metric.suboptimal_source_count;
@@ -228,6 +233,7 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
   py::class_<MetricsByLabel>(m, "MetricsByLabel")
     .def(py::init<>())
     .def_readwrite("validator_status_count", &MetricsByLabel::validator_status_count)
+    .def_readwrite("validator_status_scaled_count", &MetricsByLabel::validator_status_scaled_count)
     .def_readwrite("suboptimal_source_count", &MetricsByLabel::suboptimal_source_count)
     .def_readwrite("suboptimal_target_count", &MetricsByLabel::suboptimal_target_count)
     .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)
