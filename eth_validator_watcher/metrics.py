@@ -18,6 +18,12 @@ _metrics = None
 class PrometheusMetrics:
     """Define the Prometheus metrics for validator monitoring.
 
+    We sometimes have two declinations of the same metric, one for the
+    base validator, and one for the stake-scaled validator. Example:
+
+    eth_validator_status_count (base validator metric, absolute)
+    eth_validator_status_scaled_count (stake-scaled validator metric, relative)
+
     Args:
         None
 
@@ -28,18 +34,31 @@ class PrometheusMetrics:
     eth_epoch: Gauge
     eth_current_price_dollars: Gauge
 
+    # The scaled version is multiplied by EB/32.
     eth_validator_status_count: Gauge
+    eth_validator_status_scaled_count: Gauge
+
+    # Those are already stake-scaled
     eth_suboptimal_sources_rate: Gauge
     eth_suboptimal_targets_rate: Gauge
     eth_suboptimal_heads_rate: Gauge
     eth_consensus_rewards_rate: Gauge
     eth_ideal_consensus_rewards_gwei: Gauge
     eth_actual_consensus_rewards_gwei: Gauge
+
+    # The scaled version is multiplied by EB/32.
     eth_missed_attestations_count: Gauge
+    eth_missed_attestations_scaled_count: Gauge
     eth_missed_consecutive_attestations_count: Gauge
+    eth_missed_consecutive_attestations_scaled_count: Gauge
     eth_slashed_validators_count: Gauge
+    eth_slashed_validators_scaled_count: Gauge
     eth_missed_duties_at_slot_count: Gauge
+    eth_missed_duties_at_slot_scaled_count: Gauge
     eth_performed_duties_at_slot_count: Gauge
+    eth_performed_duties_at_slot_scaled_count: Gauge
+
+    # Those are already stake-scaled
     eth_block_proposals_head_total: Counter
     eth_missed_block_proposals_head_total: Counter
     eth_block_proposals_finalized_total: Counter
@@ -89,6 +108,7 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_current_price_dollars=Gauge("eth_current_price_dollars", "Current price of ETH in USD", ["network"]),
 
             eth_validator_status_count=Gauge("eth_validator_status_count", "Validator status count sampled every epoch", ['scope', 'status', 'network']),
+            eth_validator_status_scaled_count=Gauge("eth_validator_status_scaled_count", "Stake-scaled validator status count sampled every epoch", ['scope', 'status', 'network']),
             eth_suboptimal_sources_rate=Gauge("eth_suboptimal_sources_rate", "Suboptimal sources rate sampled every epoch", ['scope', 'network']),
             eth_suboptimal_targets_rate=Gauge("eth_suboptimal_targets_rate", "Suboptimal targets rate sampled every epoch", ['scope', 'network']),
             eth_suboptimal_heads_rate=Gauge("eth_suboptimal_heads_rate", "Suboptimal heads rate sampled every epoch", ['scope', 'network']),
@@ -96,10 +116,15 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_actual_consensus_rewards_gwei=Gauge("eth_actual_consensus_rewards_gwei", "Actual consensus rewards sampled every epoch", ['scope', 'network']),
             eth_consensus_rewards_rate=Gauge("eth_consensus_rewards_rate", "Consensus rewards rate sampled every epoch", ['scope', 'network']),
             eth_missed_attestations_count=Gauge("eth_missed_attestations", "Missed attestations in the last epoch", ['scope', 'network']),
+            eth_missed_attestations_scaled_count=Gauge("eth_missed_attestations_scaled", "Stake-scaled missed attestations in the last epoch", ['scope', 'network']),
             eth_missed_consecutive_attestations_count=Gauge("eth_missed_consecutive_attestations", "Missed consecutive attestations in the last two epochs", ['scope', 'network']),
+            eth_missed_consecutive_attestations_scaled_count=Gauge("eth_missed_consecutive_attestations_scaled", "Stake-scaled missed consecutive attestations in the last two epochs", ['scope', 'network']),
             eth_slashed_validators_count=Gauge("eth_slashed_validators", "Slashed validators", ['scope', 'network']),
+            eth_slashed_validators_scaled_count=Gauge("eth_slashed_validators_scaled", "Stake-scaled slashed validators", ['scope', 'network']),
             eth_missed_duties_at_slot_count=Gauge("eth_missed_duties_at_slot", "Missed validator duties in last slot", ['scope', 'network']),
+            eth_missed_duties_at_slot_scaled_count=Gauge("eth_missed_duties_at_slot_scaled", "Stake-scaled missed validator duties in last slot", ['scope', 'network']),
             eth_performed_duties_at_slot_count=Gauge("eth_performed_duties_at_slot", "Performed validator duties in last slot", ['scope', 'network']),
+            eth_performed_duties_at_slot_scaled_count=Gauge("eth_performed_duties_at_slot_scaled", "Stake-scaled performed validator duties in last slot", ['scope', 'network']),
             eth_block_proposals_head_total=Counter("eth_block_proposals_head_total", "Total block proposals at head", ['scope', 'network']),
             eth_missed_block_proposals_head_total=Counter("eth_missed_block_proposals_head_total", "Total missed block proposals at head", ['scope', 'network']),
             eth_block_proposals_finalized_total=Counter("eth_block_proposals_finalized_total", "Total finalized block proposals", ['scope', 'network']),
