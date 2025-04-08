@@ -2,8 +2,8 @@ _default:
     @just --list --unsorted
 
 # Run unit tests
-test:
-    uv run pytest --exitfirst
+test specific_test='':
+    uv run pytest --exitfirst -v -k '{{ specific_test }}' --tb=short
 
 # Run linter
 lint:
