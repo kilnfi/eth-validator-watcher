@@ -3,7 +3,7 @@ _default:
 
 # Run unit tests
 test:
-    uv run pytest
+    uv run pytest --exitfirst
 
 # Run linter
 lint:
