@@ -109,7 +109,7 @@ class SepoliaTestCase(VCRTestCase):
     def test_sepolia_validator_status(self, slot: int):
         """Verifies the validator statuses are exposed by scopes.
         """
-        if slot != 5493883:
+        if slot != 7363592:
             return
 
         def test_for_label(
@@ -136,8 +136,45 @@ class SepoliaTestCase(VCRTestCase):
             self.assertEqual(self.metrics[f'eth_validator_status_count{{network="sepolia",scope="{label}",status="withdrawal_done"}}'], float(withdrawal_done))
 
         test_for_label("scope:watched", active_ongoing=100)
-        test_for_label("scope:all-network", active_ongoing=1771, withdrawal_possible=200, withdrawal_done=2)
-        test_for_label("scope:network", active_ongoing=1671, withdrawal_possible=200, withdrawal_done=2)
+        test_for_label("scope:all-network", active_ongoing=1781, withdrawal_possible=200, withdrawal_done=6)
+        test_for_label("scope:network", active_ongoing=1681, withdrawal_possible=200, withdrawal_done=6)
+        test_for_label("operator:kiln", active_ongoing=100)
+        test_for_label("vc:prysm-validator-1", active_ongoing=50)
+        test_for_label("vc:teku-validator-1", active_ongoing=50)
+
+    @sepolia_test("config.sepolia_replay_2_slots.yaml")
+    def test_sepolia_validator_scaled_status(self, slot: int):
+        """Verifies the validator statuses are exposed by scopes.
+        """
+        if slot != 7363592:
+            return
+
+        def test_for_label(
+                label: str,
+                pending_initialized: int = 0,
+                pending_queued: int = 0,
+                active_ongoing: int = 0,
+                active_exiting: int = 0,
+                active_slashed: int = 0,
+                exited_unslashed: int = 0,
+                exited_slashed: int = 0,
+                withdrawal_possible: int = 0,
+                withdrawal_done: int = 0,
+        ) -> None:
+
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="pending_initialized"}}'], float(pending_initialized))
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="pending_queued"}}'], float(pending_queued))
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="active_ongoing"}}'], float(active_ongoing))
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="active_exiting"}}'], float(active_exiting))
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="active_slashed"}}'], float(active_slashed))
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="exited_unslashed"}}'], float(exited_unslashed))
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="exited_slashed"}}'], float(exited_slashed))
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="withdrawal_possible"}}'], float(withdrawal_possible))
+            self.assertEqual(self.metrics[f'eth_validator_status_scaled_count{{network="sepolia",scope="{label}",status="withdrawal_done"}}'], float(withdrawal_done))
+
+        test_for_label("scope:watched", active_ongoing=100)
+        test_for_label("scope:all-network", active_ongoing=1785.09375, withdrawal_possible=150, withdrawal_done=0)
+        test_for_label("scope:network", active_ongoing=1685.09375, withdrawal_possible=150, withdrawal_done=0)
         test_for_label("operator:kiln", active_ongoing=100)
         test_for_label("vc:prysm-validator-1", active_ongoing=50)
         test_for_label("vc:teku-validator-1", active_ongoing=50)
@@ -146,27 +183,53 @@ class SepoliaTestCase(VCRTestCase):
     def test_sepolia_missed_attestation(self, slot: int):
         """Verifies attestation misses
         """
-        if slot != 5493883:
+        if slot != 7363592:
             return
 
         self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="operator:kiln"}'], 0.0)
         self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="vc:prysm-validator-1"}'], 0.0)
         self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="vc:teku-validator-1"}'], 0.0)
         self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:watched"}'], 0.0)
-        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:all-network"}'], 350.0)
-        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:network"}'], 350.0)
+        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:all-network"}'], 101.0)
+        self.assertEqual(self.metrics['eth_missed_attestations{network="sepolia",scope="scope:network"}'], 101.0)
+
+        self.assertEqual(self.metrics['eth_missed_attestations_scaled{network="sepolia",scope="operator:kiln"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_attestations_scaled{network="sepolia",scope="vc:prysm-validator-1"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_attestations_scaled{network="sepolia",scope="vc:teku-validator-1"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_attestations_scaled{network="sepolia",scope="scope:watched"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_attestations_scaled{network="sepolia",scope="scope:all-network"}'], 100.9375)
+        self.assertEqual(self.metrics['eth_missed_attestations_scaled{network="sepolia",scope="scope:network"}'], 100.9375)
+
+    @sepolia_test("config.sepolia.yaml")
+    def test_sepolia_missed_consecutive_attestation(self, slot: int):
+        """Verifies consecutive attestation misses
+        """
+        if slot != 7363686:
+            return
+
+        self.assertEqual(self.metrics['eth_missed_consecutive_attestations{network="sepolia",scope="operator:kiln"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_consecutive_attestations{network="sepolia",scope="vc:prysm-validator-1"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_consecutive_attestations{network="sepolia",scope="vc:teku-validator-1"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_consecutive_attestations{network="sepolia",scope="scope:watched"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_consecutive_attestations{network="sepolia",scope="scope:all-network"}'], 101.0)
+        self.assertEqual(self.metrics['eth_missed_consecutive_attestations{network="sepolia",scope="scope:network"}'], 101.0)
 
     @sepolia_test("config.sepolia.yaml")
     def test_sepolia_blocks(self, slot: int):
         """Verifies block proposals and misses.
         """
-        if slot != 5493975:
+        if slot != 7363612:
             return
 
-        self.assertEqual(self.metrics['eth_block_proposals_head_total{network="sepolia",scope="operator:kiln"}'], 6.0)
+        self.assertEqual(self.metrics['eth_block_proposals_head_total{network="sepolia",scope="operator:kiln"}'], 2.0)
         self.assertEqual(self.metrics['eth_missed_block_proposals_head_total{network="sepolia",scope="operator:kiln"}'], 0.0)
-        self.assertEqual(self.metrics['eth_block_proposals_finalized_total{network="sepolia",scope="operator:kiln"}'], 2.0)
+        self.assertEqual(self.metrics['eth_block_proposals_finalized_total{network="sepolia",scope="operator:kiln"}'], 0.0)
         self.assertEqual(self.metrics['eth_missed_block_proposals_finalized_total{network="sepolia",scope="operator:kiln"}'], 0.0)
+
+        self.assertEqual(self.metrics['eth_block_proposals_head_total{network="sepolia",scope="scope:all-network"}'], 20.0)
+        self.assertEqual(self.metrics['eth_missed_block_proposals_head_total{network="sepolia",scope="scope:all-network"}'], 1.0)
+        self.assertEqual(self.metrics['eth_block_proposals_finalized_total{network="sepolia",scope="scope:all-network"}'], 0.0)
+        self.assertEqual(self.metrics['eth_missed_block_proposals_finalized_total{network="sepolia",scope="scope:all-network"}'], 0.0)
 
     @sepolia_test("config.sepolia.yaml")
     def test_sepolia_full(self, slot: int):
