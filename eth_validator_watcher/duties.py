@@ -69,7 +69,7 @@ def process_duties(watched_validators: WatchedValidators, previous_slot_committe
         bitsets = hex_to_sparse_bitset(attestation.aggregation_bits)
         for validator_idx_in_committee in bitsets:
             validators_at_committee = committees_lookup.get(committee_index)
-            if not validators_at_committee or validator_idx_in_committee >= len(validator_idx_in_committee):
+            if not validators_at_committee or validator_idx_in_committee >= len(validators_at_committee):
                 continue
             validator_index = validators_at_committee[validator_idx_in_committee]
             validator_duty_performed[validator_index] = True
