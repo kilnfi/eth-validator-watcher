@@ -68,13 +68,14 @@ def process_duties(watched_validators: WatchedValidators, previous_slot_committe
             continue
         bitsets = hex_to_sparse_bitset(attestation.aggregation_bits)
         for validator_idx_in_committee in bitsets:
-            if validator_idx_in_committee >= len(committees_lookup[committee_index]):
+            validators_at_committee = committees_lookup.get(committee_index)
+            if not validators_at_committee or validator_idx_in_committee >= len(validator_idx_in_committee):
                 continue
-            validator_index = committees_lookup[committee_index][validator_idx_in_committee]
+            validator_index = validators_at_committee[validator_idx_in_committee]
             validator_duty_performed[validator_index] = True
 
     # Update validators
-    for validator in validator_duty_performed:
+    for validator, ok in validator_duty_performed.items():
         v = watched_validators.get_validator_by_index(validator)
         # Here we keep both the current slot and the corresponding value,
         # this is to avoid iterating over the entire validator set: in
@@ -83,4 +84,4 @@ def process_duties(watched_validators: WatchedValidators, previous_slot_committe
         # value up-to-date. If it doesn't, it means it corresponds to
         # its attestation from the previous epoch and the validator
         # didn't perform on this slot.
-        v.process_duties(current_slot, validator_duty_performed[validator])
+        v.process_duties(current_slot, ok)

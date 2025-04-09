@@ -1,0 +1,48 @@
+site_name: Ethereum Validator Watcher
+site_description: A monitoring tool for Ethereum validators
+site_url: https://github.com/kilnfi/eth-validator-watcher
+repo_name: kilnfi/eth-validator-watcher
+repo_url: https://github.com/kilnfi/eth-validator-watcher
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    primary: orange
+    accent: orange
+  logo: img/Kiln_Logo-Transparent-Dark.svg
+  favicon: img/Kiln_Logo-Transparent-Dark.svg
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.expand
+    - navigation.indexes
+    - content.code.copy
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed
+  - pymdownx.critic
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - admonition
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [eth_validator_watcher]
+          options:
+            show_source: false
+            show_root_heading: true
+            heading_level: 3
+
+nav:
+  - Overview: index.md
+  - Getting Started: getting-started.md
+  - API Reference: api-reference.md
