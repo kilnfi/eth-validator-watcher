@@ -244,7 +244,7 @@ class ValidatorWatcher:
             # missed.
             current_attestations = self._beacon.get_attestations(slot)
             if current_attestations:
-                process_duties(watched_validators, previous_slot_committees, current_attestations, slot - 1)
+                process_duties(watched_validators, previous_slot_committees, current_attestations, slot)
 
             logging.info('🔨 Updating Prometheus metrics')
             self._update_metrics(watched_validators, epoch, slot)

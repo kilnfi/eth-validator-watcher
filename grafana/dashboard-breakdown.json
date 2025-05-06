@@ -21,7 +21,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.0.0"
+      "version": "11.5.1"
     },
     {
       "type": "panel",
@@ -76,7 +76,6 @@
       }
     ]
   },
-  "description": "",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -111,10 +110,6 @@
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
       "description": "",
       "gridPos": {
         "h": 9,
@@ -132,7 +127,7 @@
         "content": "\n- [open an issue](https://github.com/kilnfi/eth-validator-watcher/issues/new)\n- [github repository](https://github.com/kilnfi/eth-validator-watcher)\n- [beaconcha.in](https://beaconcha.in/)\n- [bageth.xyz](https://www.bageth.xyz/)\n- [etherscan.io](https://etherscan.io/)",
         "mode": "markdown"
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.5.1",
       "title": "Quick Links",
       "type": "text"
     },
@@ -183,12 +178,13 @@
           "values": false
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -197,11 +193,12 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max by (scope) (eth_validator_status_count{status=~\"active_ongoing|active_exiting\", scope!=\"scope:all-network\", scope=~\"${breakdown}.*\", network=\"${network}\"})",
+          "expr": "max by (scope) (eth_validator_status${scale}_count{status=~\"active_ongoing|active_exiting\", scope!=\"scope:all-network\", scope=~\"${breakdown}:.*\", network=\"${network}\"})",
           "format": "time_series",
           "hide": false,
+          "instant": true,
           "legendFormat": "{{scope}}",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -256,12 +253,13 @@
           "values": false
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -269,10 +267,11 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
+          "exemplar": false,
           "expr": "max by (scope) (eth_future_block_proposals{scope=~\"${breakdown}:.*\", scope!=\"scope:all-network\", network=\"${network}\"})",
-          "instant": false,
+          "instant": true,
           "legendFormat": "{{ scope }}",
-          "range": true,
+          "range": false,
           "refId": "Proposals"
         }
       ],
@@ -318,10 +317,16 @@
       "id": 77,
       "options": {
         "displayMode": "basic",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 40,
         "minVizWidth": 0,
-        "namePlacement": "top",
+        "namePlacement": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
@@ -334,7 +339,7 @@
         "sizing": "auto",
         "valueMode": "text"
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -402,6 +407,7 @@
             "axisPlacement": "right",
             "axisSoftMin": 0,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -464,11 +470,13 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -503,8 +511,7 @@
             "scaleDistribution": {
               "type": "linear"
             }
-          },
-          "fieldMinMax": false
+          }
         },
         "overrides": []
       },
@@ -548,11 +555,11 @@
           "yHistogram": false
         },
         "yAxis": {
-          "axisPlacement": "hidden",
+          "axisPlacement": "left",
           "reverse": false
         }
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -603,6 +610,7 @@
             "axisPlacement": "right",
             "axisSoftMin": 0,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -654,7 +662,7 @@
         "x": 0,
         "y": 23
       },
-      "id": 86,
+      "id": 109,
       "options": {
         "legend": {
           "calcs": [],
@@ -663,11 +671,13 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -675,14 +685,14 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (eth_missed_attestations{scope=~\"${breakdown}:.*\", scope!=\"scope:all-network\", network=\"${network}\"})",
+          "expr": "max by (scope) (eth_duties_rate${scale}{scope=~\"${breakdown}:.*\", scope!=\"scope:all-network\", network=\"${network}\"}) * 100.0",
           "instant": false,
           "legendFormat": "{{ scope }}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Missed Attestations Per Epoch",
+      "title": "Real-time duties",
       "type": "timeseries"
     },
     {
@@ -705,6 +715,7 @@
             "axisPlacement": "right",
             "axisSoftMin": 0,
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -752,8 +763,113 @@
       },
       "gridPos": {
         "h": 10,
-        "w": 12,
+        "w": 6,
         "x": 12,
+        "y": 23
+      },
+      "id": 86,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "maxHeight": 600,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "max by (scope) (eth_missed_attestations${scale}{scope=~\"${breakdown}:.*\", scope!=\"scope:all-network\", network=\"${network}\"})",
+          "instant": false,
+          "legendFormat": "{{ scope }}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Missed Attestations Per Epoch",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": true,
+            "axisLabel": "",
+            "axisPlacement": "right",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 18,
         "y": 23
       },
       "id": 87,
@@ -765,11 +881,13 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -777,7 +895,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "max by (scope) (eth_missed_consecutive_attestations{scope=~\"${breakdown}:.*\", scope!=\"scope:all-network\", network=\"${network}\"})",
+          "expr": "max by (scope) (eth_missed_consecutive_attestations${scale}{scope=~\"${breakdown}:.*\", scope!=\"scope:all-network\", network=\"${network}\"})",
           "instant": false,
           "legendFormat": "{{ scope }}",
           "range": true,
@@ -840,10 +958,16 @@
       "id": 103,
       "options": {
         "displayMode": "basic",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 40,
         "minVizWidth": 0,
-        "namePlacement": "top",
+        "namePlacement": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
@@ -856,7 +980,7 @@
         "sizing": "auto",
         "valueMode": "text"
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -931,10 +1055,16 @@
       "id": 104,
       "options": {
         "displayMode": "basic",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 40,
         "minVizWidth": 0,
-        "namePlacement": "top",
+        "namePlacement": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
@@ -947,7 +1077,7 @@
         "sizing": "auto",
         "valueMode": "text"
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -1022,10 +1152,16 @@
       "id": 105,
       "options": {
         "displayMode": "basic",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "maxVizHeight": 300,
         "minVizHeight": 40,
         "minVizWidth": 0,
-        "namePlacement": "top",
+        "namePlacement": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
@@ -1038,7 +1174,7 @@
         "sizing": "auto",
         "valueMode": "text"
       },
-      "pluginVersion": "11.0.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -1091,6 +1227,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1149,12 +1286,13 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -1193,6 +1331,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1251,12 +1390,13 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -1295,6 +1435,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1353,12 +1494,13 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "10.2.0",
+      "pluginVersion": "11.5.1",
       "targets": [
         {
           "datasource": {
@@ -1381,7 +1523,7 @@
     }
   ],
   "refresh": "12s",
-  "schemaVersion": 39,
+  "schemaVersion": 40,
   "tags": [],
   "templating": {
     "list": [
@@ -1392,9 +1534,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(eth_future_block_proposals,network)",
-        "hide": 0,
         "includeAll": false,
-        "multi": false,
         "name": "network",
         "options": [],
         "query": {
@@ -1404,8 +1544,6 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
         "type": "query"
       },
       {
@@ -1415,10 +1553,7 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(eth_validator_status_count,scope)",
-        "hide": 0,
         "includeAll": false,
-        "label": "",
-        "multi": false,
         "name": "breakdown",
         "options": [],
         "query": {
@@ -1428,17 +1563,40 @@
         },
         "refresh": 1,
         "regex": "/(?<text>.*):.*/",
-        "skipUrlSync": false,
         "sort": 1,
         "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "_scaled",
+          "value": "_scaled"
+        },
+        "description": "Scaling validator by stake amount (i.e: 2048 ETH validator counts as 64) or by validator count.",
+        "includeAll": true,
+        "label": "Scale Validator By",
+        "name": "scale",
+        "options": [
+          {
+            "selected": true,
+            "text": "stake amount",
+            "value": "_scaled"
+          },
+          {
+            "selected": false,
+            "text": "validator count",
+            "value": ""
+          }
+        ],
+        "query": "stake amount : _scaled,validator count :  ",
+        "type": "custom"
       }
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-3h",
     "to": "now"
   },
-  "timeRangeUpdatedDuringEditOrView": false,
   "timepicker": {
     "refresh_intervals": [
       "12s",
@@ -1453,6 +1611,6 @@
   "timezone": "utc",
   "title": "Ethereum Kiln Breakdown",
   "uid": "aa3b3d43-e0f9-445a-be20-856c00610e08",
-  "version": 2,
+  "version": 6,
   "weekStart": "monday"
 }
