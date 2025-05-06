@@ -1,6 +1,6 @@
 [project]
 name = "eth-validator-watcher"
-version = "1.0.0-beta.4"
+version = "1.0.0-beta.6"
 description = "Ethereum Validator Watcher"
 authors = [
     {name = "Manu NALEPA", email = "emmanuel.nalepa@kiln.fi"},
@@ -31,7 +31,8 @@ dev = [
     "pytest>=7.3.1",
     "pytest-cov>=4.0.0",
     "requests-mock>=1.10.0",
-    "freezegun>=1.2.2"
+    "freezegun>=1.2.2",
+    "flake8>=7.2.0"
 ]
 
 [build-system]
