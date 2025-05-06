@@ -56,6 +56,8 @@ class PrometheusMetrics:
     eth_missed_duties_at_slot_scaled_count: Gauge
     eth_performed_duties_at_slot_count: Gauge
     eth_performed_duties_at_slot_scaled_count: Gauge
+    eth_duties_rate: Gauge
+    eth_duties_rate_scaled: Gauge
 
     # Those are already stake-scaled
     eth_block_proposals_head_total: Counter
@@ -123,6 +125,8 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_missed_duties_at_slot_scaled_count=Gauge("eth_missed_duties_at_slot_scaled", "Stake-scaled missed validator duties in last slot", ['scope', 'network']),
             eth_performed_duties_at_slot_count=Gauge("eth_performed_duties_at_slot", "Performed validator duties in last slot", ['scope', 'network']),
             eth_performed_duties_at_slot_scaled_count=Gauge("eth_performed_duties_at_slot_scaled", "Stake-scaled performed validator duties in last slot", ['scope', 'network']),
+            eth_duties_rate=Gauge("eth_duties_rate", "Duties rate in last slot", ['scope', 'network']),
+            eth_duties_rate_scaled=Gauge("eth_duties_rate_scaled", "Stake-scaled duties rate in last slot", ['scope', 'network']),
             eth_block_proposals_head_total=Counter("eth_block_proposals_head_total", "Total block proposals at head", ['scope', 'network']),
             eth_missed_block_proposals_head_total=Counter("eth_missed_block_proposals_head_total", "Total missed block proposals at head", ['scope', 'network']),
             eth_block_proposals_finalized_total=Counter("eth_block_proposals_finalized_total", "Total finalized block proposals", ['scope', 'network']),

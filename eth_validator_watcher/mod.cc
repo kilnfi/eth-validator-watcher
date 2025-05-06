@@ -68,6 +68,8 @@ struct MetricsByLabel {
   float64_t missed_duties_at_slot_scaled_count = 0.0f;
   uint64_t performed_duties_at_slot_count = 0;
   float64_t performed_duties_at_slot_scaled_count = 0.0f;
+  float64_t duties_rate = 0.0f;
+  float64_t duties_rate_scaled = 0.0f;
 
   float64_t ideal_consensus_reward = 0;
   float64_t actual_consensus_reward = 0;
@@ -190,6 +192,17 @@ namespace {
         m.performed_duties_at_slot_count += metric.performed_duties_at_slot_count;
         m.performed_duties_at_slot_scaled_count += metric.performed_duties_at_slot_scaled_count;
 
+        // Recompute this on each batch so that we don't need an extra
+        // pass at the end across all labels. This is a cheap
+        // operation so it's fine.
+        if (m.performed_duties_at_slot_count != 0 || m.missed_duties_at_slot_count != 0) {
+          m.duties_rate = float64_t(m.performed_duties_at_slot_count) / float64_t(m.performed_duties_at_slot_count + m.missed_duties_at_slot_count);
+          m.duties_rate_scaled = float64_t(m.performed_duties_at_slot_scaled_count) / float64_t(m.performed_duties_at_slot_scaled_count + m.missed_duties_at_slot_scaled_count);
+        } else {
+          m.duties_rate = 1.0f;
+          m.duties_rate_scaled = 1.0f;
+        }
+
         m.ideal_consensus_reward += metric.ideal_consensus_reward;
         m.actual_consensus_reward += metric.actual_consensus_reward;
         m.missed_attestations_count += metric.missed_attestations_count;
@@ -257,6 +270,8 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("missed_duties_at_slot_scaled_count", &MetricsByLabel::missed_duties_at_slot_scaled_count)
     .def_readwrite("performed_duties_at_slot_count", &MetricsByLabel::performed_duties_at_slot_count)
     .def_readwrite("performed_duties_at_slot_scaled_count", &MetricsByLabel::performed_duties_at_slot_scaled_count)
+    .def_readwrite("duties_rate", &MetricsByLabel::duties_rate)
+    .def_readwrite("duties_rate_scaled", &MetricsByLabel::duties_rate_scaled)
     .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)
     .def_readwrite("optimal_source_count", &MetricsByLabel::optimal_source_count)
     .def_readwrite("optimal_target_count", &MetricsByLabel::optimal_target_count)
