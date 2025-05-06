@@ -154,6 +154,8 @@ class ValidatorWatcher:
             self._metrics.eth_missed_duties_at_slot_scaled_count.labels(label, network).set(m.missed_duties_at_slot_scaled_count)
             self._metrics.eth_performed_duties_at_slot_count.labels(label, network).set(m.performed_duties_at_slot_count)
             self._metrics.eth_performed_duties_at_slot_scaled_count.labels(label, network).set(m.performed_duties_at_slot_scaled_count)
+            self._metrics.eth_duties_rate.labels(label, network).set(m.duties_rate)
+            self._metrics.eth_duties_rate_scaled.labels(label, network).set(m.duties_rate_scaled)
 
             # Here we inc, it's fine since we previously reset the
             # counters on each run; we can't use set because those
@@ -231,10 +233,10 @@ class ValidatorWatcher:
                 last_processed_finalized_slot += 1
             last_processed_finalized_slot = last_finalized_slot
 
-            logging.info('🔨 Processing committees')
+            logging.info('🔨 Processing committees for previous slot')
             # Here we are looking at attestations in the current slot,
-            # which where for the previous slot, this is why we get
-            # the previous committees.
+            # which were for the previous slot, this is why we get the
+            # previous committees.
             previous_slot_committees = self._beacon.get_committees(slot - 1)
             # But we fetch attestations in the current slot (we expect
             # to find most of what we want for the previous slot).
@@ -242,7 +244,7 @@ class ValidatorWatcher:
             # missed.
             current_attestations = self._beacon.get_attestations(slot)
             if current_attestations:
-                process_duties(watched_validators, previous_slot_committees, current_attestations, slot)
+                process_duties(watched_validators, previous_slot_committees, current_attestations, slot - 1)
 
             logging.info('🔨 Updating Prometheus metrics')
             self._update_metrics(watched_validators, epoch, slot)
