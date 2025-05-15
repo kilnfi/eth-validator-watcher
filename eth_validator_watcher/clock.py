@@ -32,7 +32,11 @@ class BeaconClock:
         self._genesis = genesis
         self._slot_duration = slot_duration
         self._slots_per_epoch = slots_per_epoch
-        self._lag_seconds = self._slot_duration + 4.0
+
+        # Current slot is being built, waiting 4 seconds on the last
+        # slot with some extra time to ensure we have the data for the
+        # slot (attestations).
+        self._lag_seconds = 2 * self._slot_duration + 4
         self._init_at = time.time()
 
         # Replay mode
@@ -53,7 +57,7 @@ class BeaconClock:
         if self._replay_start_at is not None:
             return self._replay_start_at + self._replay_elapsed_
 
-        return time.time()
+        return time.time() - self._lag_seconds
 
     def get_current_epoch(self) -> int:
         """Get the current epoch.
@@ -85,7 +89,7 @@ class BeaconClock:
         --------
         int: Current slot.
         """
-        return int((self.now() - self._lag_seconds - self._genesis) // self._slot_duration)
+        return int((self.now() - self._genesis) // self._slot_duration)
 
     def maybe_wait_for_slot(self, slot: int) -> None:
         """Wait until the given slot is reached.
