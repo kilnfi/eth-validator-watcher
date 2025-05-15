@@ -226,7 +226,7 @@ class SepoliaTestCase(VCRTestCase):
         self.assertEqual(self.metrics['eth_block_proposals_finalized_total{network="sepolia",scope="operator:kiln"}'], 0.0)
         self.assertEqual(self.metrics['eth_missed_block_proposals_finalized_total{network="sepolia",scope="operator:kiln"}'], 0.0)
 
-        self.assertEqual(self.metrics['eth_block_proposals_head_total{network="sepolia",scope="scope:all-network"}'], 20.0)
+        self.assertEqual(self.metrics['eth_block_proposals_head_total{network="sepolia",scope="scope:all-network"}'], 18.0)
         self.assertEqual(self.metrics['eth_missed_block_proposals_head_total{network="sepolia",scope="scope:all-network"}'], 1.0)
         self.assertEqual(self.metrics['eth_block_proposals_finalized_total{network="sepolia",scope="scope:all-network"}'], 0.0)
         self.assertEqual(self.metrics['eth_missed_block_proposals_finalized_total{network="sepolia",scope="scope:all-network"}'], 0.0)

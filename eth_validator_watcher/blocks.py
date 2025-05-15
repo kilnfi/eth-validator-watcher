@@ -18,7 +18,7 @@ def process_block(validators: WatchedValidators, schedule: ProposerSchedule, slo
     Returns:
         None
     """
-    validator_index = schedule.get_head_proposer(slot_id)
+    validator_index = schedule.get_proposer(slot_id)
     if validator_index is None:
         return
 
@@ -45,7 +45,7 @@ def process_finalized_block(validators: WatchedValidators, schedule: ProposerSch
     Returns:
         None
     """
-    validator_index = schedule.get_finalized_proposer(slot_id)
+    validator_index = schedule.get_proposer(slot_id)
     if validator_index is None:
         return
 

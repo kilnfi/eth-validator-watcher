@@ -197,7 +197,7 @@ class ValidatorWatcher:
             logging.info(f'🔨 Processing slot {slot}')
 
             last_finalized_slot = self._beacon.get_header(BlockIdentierType.FINALIZED).data.header.message.slot
-            self._schedule.update(self._beacon, slot, last_processed_finalized_slot, last_finalized_slot)
+            self._schedule.update(self._beacon, slot)
 
             if beacon_validators is None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
                 logging.info(f'🔨 Processing epoch {epoch}')
@@ -254,7 +254,7 @@ class ValidatorWatcher:
                 self._reload_config()
                 watched_validators.process_config(self._cfg)
 
-            self._schedule.clear(slot, last_processed_finalized_slot)
+            self._schedule.clear(last_processed_finalized_slot)
             self._clock.maybe_wait_for_slot(slot + 1)
 
             if self._slot_hook:
