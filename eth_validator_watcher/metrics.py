@@ -37,6 +37,8 @@ class PrometheusMetrics:
     # The scaled version is multiplied by EB/32.
     eth_validator_status_count: Gauge
     eth_validator_status_scaled_count: Gauge
+    eth_validator_type_count: Gauge
+    eth_validator_type_scaled_count: Gauge
 
     # Those are already stake-scaled
     eth_suboptimal_sources_rate: Gauge
@@ -110,6 +112,8 @@ def get_prometheus_metrics() -> PrometheusMetrics:
 
             eth_validator_status_count=Gauge("eth_validator_status_count", "Validator status count sampled every epoch", ['scope', 'status', 'network']),
             eth_validator_status_scaled_count=Gauge("eth_validator_status_scaled_count", "Stake-scaled validator status count sampled every epoch", ['scope', 'status', 'network']),
+            eth_validator_type_count=Gauge("eth_validator_type_count", "Validator type count sampled every epoch", ['scope', 'type', 'network']),
+            eth_validator_type_scaled_count=Gauge("eth_validator_type_scaled_count", "Stake-scaled validator type count sampled every epoch", ['scope', 'type', 'network']),
             eth_suboptimal_sources_rate=Gauge("eth_suboptimal_sources_rate", "Suboptimal sources rate sampled every epoch", ['scope', 'network']),
             eth_suboptimal_targets_rate=Gauge("eth_suboptimal_targets_rate", "Suboptimal targets rate sampled every epoch", ['scope', 'network']),
             eth_suboptimal_heads_rate=Gauge("eth_suboptimal_heads_rate", "Suboptimal heads rate sampled every epoch", ['scope', 'network']),
