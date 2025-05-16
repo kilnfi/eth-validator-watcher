@@ -31,6 +31,7 @@ class Validators(BaseModel):
             effective_balance: int
             slashed: bool
             activation_epoch: int
+            withdrawal_credentials: str
 
         index: int
         status: StatusEnum
@@ -268,3 +269,50 @@ class Attestations(BaseModel):
         data: AttestationData
 
     data: list[SignedAttestationData]
+
+
+class PendingDeposits(BaseModel):
+    """Model for pending deposit data.
+        Args:
+                None
+        Returns:
+                None
+        """
+
+    class PendingDepositData(BaseModel):
+        pubkey: str
+        withdrawal_credentials: str
+        amount: int
+        slot: int
+
+    data: list[PendingDepositData]
+
+
+class PendingConsolidations(BaseModel):
+    """Model for pending consolidation data.
+
+    Args:
+        None
+    Returns:
+        None
+    """
+    class PendingConsolidationData(BaseModel):
+        source_index: int
+        target_index: int
+
+    data: list[PendingConsolidationData]
+
+
+class PendingWithdrawals(BaseModel):
+    """Model for pending withdrawal data.
+        
+    Args:
+        None
+    Returns:
+        None
+    """
+    class PendingWithdrawalData(BaseModel):
+        validator_index: int
+        amount: int
+
+    data: list[PendingWithdrawalData]

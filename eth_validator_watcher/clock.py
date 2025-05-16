@@ -33,10 +33,10 @@ class BeaconClock:
         self._slot_duration = slot_duration
         self._slots_per_epoch = slots_per_epoch
 
-        # Current slot is being built, waiting 4 seconds on the last
+        # Current slot is being built, waiting 8 seconds on the last
         # slot with some extra time to ensure we have the data for the
         # slot (attestations).
-        self._lag_seconds = self._slot_duration + 4
+        self._lag_seconds = self._slot_duration + 8
         self._init_at = time.time()
 
         # Replay mode

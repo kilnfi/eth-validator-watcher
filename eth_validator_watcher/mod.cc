@@ -44,6 +44,7 @@ struct Validator {
   bool consensus_slashed = false;
   uint64_t consensus_index = 0;
   std::string consensus_status;
+  uint64_t consensus_type = 0;
   uint64_t consensus_activation_epoch = 0;
 
   // This is the weight of the validator compared to a 32 ETH 0x01
@@ -56,7 +57,9 @@ struct Validator {
 struct MetricsByLabel {
   std::map<std::string, uint64_t> validator_status_count;
   std::map<std::string, double> validator_status_scaled_count;
-  
+  std::map<int, uint64_t> validator_type_count;
+  std::map<int, uint64_t> validator_type_scaled_count;
+
   uint64_t suboptimal_source_count = 0;
   uint64_t suboptimal_target_count = 0;
   uint64_t suboptimal_head_count = 0;
@@ -110,6 +113,8 @@ namespace {
 
         m.validator_status_count[v.consensus_status] += 1;
         m.validator_status_scaled_count[v.consensus_status] += 1.0 * v.weight;
+        m.validator_type_count[v.consensus_type] += 1;
+        m.validator_type_scaled_count[v.consensus_type] += 1.0 * v.weight;
 
         m.validator_slashes += (v.consensus_slashed == true);
 
@@ -178,6 +183,12 @@ namespace {
         }
         for (const auto& [status, count]: metric.validator_status_scaled_count) {
           m.validator_status_scaled_count[status] += count;
+        }
+        for (const auto& [type, count]: metric.validator_type_count) {
+          m.validator_type_count[type] += count;
+        }
+        for (const auto& [type, count]: metric.validator_type_scaled_count) {
+          m.validator_type_scaled_count[type] += count;
         }
 
         m.suboptimal_source_count += metric.suboptimal_source_count;
@@ -258,12 +269,15 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     .def_readwrite("consensus_index", &Validator::consensus_index)
     .def_readwrite("consensus_status", &Validator::consensus_status)
     .def_readwrite("consensus_activation_epoch", &Validator::consensus_activation_epoch)
+    .def_readwrite("consensus_type", &Validator::consensus_type)
     .def_readwrite("weight", &Validator::weight);
 
   py::class_<MetricsByLabel>(m, "MetricsByLabel")
     .def(py::init<>())
     .def_readwrite("validator_status_count", &MetricsByLabel::validator_status_count)
     .def_readwrite("validator_status_scaled_count", &MetricsByLabel::validator_status_scaled_count)
+    .def_readwrite("validator_type_count", &MetricsByLabel::validator_type_count)
+    .def_readwrite("validator_type_scaled_count", &MetricsByLabel::validator_type_scaled_count)
     .def_readwrite("suboptimal_source_count", &MetricsByLabel::suboptimal_source_count)
     .def_readwrite("suboptimal_target_count", &MetricsByLabel::suboptimal_target_count)
     .def_readwrite("suboptimal_head_count", &MetricsByLabel::suboptimal_head_count)

@@ -14,6 +14,9 @@ from .models import (
     Committees,
     Genesis,
     Header,
+    PendingConsolidations,
+    PendingDeposits,
+    PendingWithdrawals,
     ProposerDuties,
     Rewards,
     Spec,
@@ -352,6 +355,60 @@ class Beacon:
         response.raise_for_status()
 
         return ValidatorsLivenessResponse.model_validate_json(response.text)
+
+    def get_pending_deposits(self) -> PendingDeposits:
+        """Get beacon chain pending deposits.
+
+        Args:
+            None
+
+        Returns:
+            PendingDeposits
+                The beacon chain pending deposits.
+        """
+        response = self._get_retry_not_found(
+            f"{self._url}/eth/v1/beacon/states/head/pending_deposits", timeout=self._timeout_sec
+        )
+
+        response.raise_for_status()
+
+        return PendingDeposits.model_validate_json(response.text)
+
+    def get_pending_consolidations(self) -> PendingConsolidations:
+        """Get beacon chain pending consolidations.
+
+        Args:
+            None
+
+        Returns:
+            PendingConsolidations
+                The beacon chain pending consolidations.
+        """
+        response = self._get_retry_not_found(
+            f"{self._url}/eth/v1/beacon/states/head/pending_consolidations", timeout=self._timeout_sec
+        )
+
+        response.raise_for_status()
+
+        return PendingConsolidations.model_validate_json(response.text)
+
+    def get_pending_withdrawals(self) -> PendingWithdrawals:
+        """Get beacon chain pending withdrawals.
+
+        Args:
+            None
+
+        Returns:
+            PendingWithdrawals
+                The beacon chain pending withdrawals.
+        """
+        response = self._get_retry_not_found(
+            f"{self._url}/eth/v1/beacon/states/head/pending_partial_withdrawals", timeout=self._timeout_sec
+        )
+
+        response.raise_for_status()
+
+        return PendingWithdrawals.model_validate_json(response.text)
 
     def has_block_at_slot(self, block_identifier: BlockIdentierType | int) -> bool:
         """Returns the slot of a block identifier if it exists.

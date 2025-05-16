@@ -34,9 +34,17 @@ class PrometheusMetrics:
     eth_epoch: Gauge
     eth_current_price_dollars: Gauge
 
+    # Queues
+    eth_pending_deposits_count: Gauge
+    eth_pending_deposits_value: Gauge
+    eth_pending_consolidations_count: Gauge
+    eth_pending_withdrawals_count: Gauge
+
     # The scaled version is multiplied by EB/32.
     eth_validator_status_count: Gauge
     eth_validator_status_scaled_count: Gauge
+    eth_validator_type_count: Gauge
+    eth_validator_type_scaled_count: Gauge
 
     # Those are already stake-scaled
     eth_suboptimal_sources_rate: Gauge
@@ -108,8 +116,15 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_epoch=Gauge("eth_epoch", "Current epoch", ["network"]),
             eth_current_price_dollars=Gauge("eth_current_price_dollars", "Current price of ETH in USD", ["network"]),
 
+            eth_pending_deposits_count=Gauge("eth_pending_deposits_count", "Pending deposits count sampled every epoch", ['network']),
+            eth_pending_deposits_value=Gauge("eth_pending_deposits_value", "Pending deposits value sampled every epoch", ['network']),
+            eth_pending_consolidations_count=Gauge("eth_pending_consolidations_count", "Pending consolidations count sampled every epoch", ['network']),
+            eth_pending_withdrawals_count=Gauge("eth_pending_withdrawals_count", "Pending withdrawals count sampled every epoch", ['network']),
+
             eth_validator_status_count=Gauge("eth_validator_status_count", "Validator status count sampled every epoch", ['scope', 'status', 'network']),
             eth_validator_status_scaled_count=Gauge("eth_validator_status_scaled_count", "Stake-scaled validator status count sampled every epoch", ['scope', 'status', 'network']),
+            eth_validator_type_count=Gauge("eth_validator_type_count", "Validator type count sampled every epoch", ['scope', 'type', 'network']),
+            eth_validator_type_scaled_count=Gauge("eth_validator_type_scaled_count", "Stake-scaled validator type count sampled every epoch", ['scope', 'type', 'network']),
             eth_suboptimal_sources_rate=Gauge("eth_suboptimal_sources_rate", "Suboptimal sources rate sampled every epoch", ['scope', 'network']),
             eth_suboptimal_targets_rate=Gauge("eth_suboptimal_targets_rate", "Suboptimal targets rate sampled every epoch", ['scope', 'network']),
             eth_suboptimal_heads_rate=Gauge("eth_suboptimal_heads_rate", "Suboptimal heads rate sampled every epoch", ['scope', 'network']),

@@ -19,6 +19,11 @@ from .metrics import get_prometheus_metrics, compute_validator_metrics
 from .models import BlockIdentierType, Validators
 from .proposer_schedule import ProposerSchedule
 from .rewards import process_rewards
+from .queues import (
+    get_pending_deposits,
+    get_pending_consolidations,
+    get_pending_withdrawals,
+)
 from .utils import (
     SLOT_FOR_CONFIG_RELOAD,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
@@ -101,7 +106,15 @@ class ValidatorWatcher:
         if self._beacon is None or self._beacon.get_url() != self._cfg.beacon_url or self._beacon.get_timeout_sec() != self._cfg.beacon_timeout_sec:
             self._beacon = Beacon(self._cfg.beacon_url, self._cfg.beacon_timeout_sec)
 
-    def _update_metrics(self, watched_validators: WatchedValidators, epoch: int, slot: int) -> None:
+    def _update_metrics(
+            self,
+            watched_validators: WatchedValidators,
+            epoch: int,
+            slot: int,
+            pending_deposits: tuple[int, int],
+            pending_consolidations: int,
+            pending_withdrawals: int,
+    ) -> None:
         """Update the Prometheus metrics with the watched validators data.
 
         Args:
@@ -111,6 +124,12 @@ class ValidatorWatcher:
                 Current epoch.
             slot: int
                 Current slot.
+            pending_deposits: tuple[int, int]
+                Number of pending deposits and their total value.
+            pending_consolidations: int
+                Number of pending consolidations.
+            pending_withdrawals: int
+                Number of pending withdrawals.
 
         Returns:
             None
@@ -120,6 +139,13 @@ class ValidatorWatcher:
         self._metrics.eth_epoch.labels(network).set(epoch)
         self._metrics.eth_slot.labels(network).set(slot)
         self._metrics.eth_current_price_dollars.labels(network).set(get_current_eth_price())
+
+        # Queues
+
+        self._metrics.eth_pending_deposits_count.labels(network).set(pending_deposits[0])
+        self._metrics.eth_pending_deposits_value.labels(network).set(pending_deposits[1])
+        self._metrics.eth_pending_consolidations_count.labels(network).set(pending_consolidations)
+        self._metrics.eth_pending_withdrawals_count.labels(network).set(pending_withdrawals)
 
         # We iterate once on the validator set to optimize CPU as
         # there is a log of entries here, this makes code here a bit
@@ -135,6 +161,12 @@ class ValidatorWatcher:
                 self._metrics.eth_validator_status_count.labels(label, status, network).set(value)
                 scaled_value = m.validator_status_scaled_count.get(status, 0.0)
                 self._metrics.eth_validator_status_scaled_count.labels(label, status, network).set(scaled_value)
+
+            for consensus_type in [0, 1, 2]:
+                value = m.validator_type_count.get(consensus_type, 0)
+                self._metrics.eth_validator_type_count.labels(label, consensus_type, network).set(value)
+                scaled_value = m.validator_type_scaled_count.get(consensus_type, 0.0)
+                self._metrics.eth_validator_type_scaled_count.labels(label, consensus_type, network).set(scaled_value)
 
         for label, m in metrics.items():
             self._metrics.eth_suboptimal_sources_rate.labels(label, network).set(pct(m.suboptimal_source_count, m.optimal_source_count))
@@ -190,6 +222,9 @@ class ValidatorWatcher:
         validators_liveness = None
         rewards = None
         last_processed_finalized_slot = None
+        pending_deposits = None
+        pending_consolidations = None
+        pending_withdrawals = None
 
         slack_send(self._cfg, f'🚀 *Ethereum Validator Watcher* started on {self._cfg.network}, watching {len(self._cfg.watched_keys)} validators')
 
@@ -205,6 +240,18 @@ class ValidatorWatcher:
                 watched_validators.process_epoch(beacon_validators)
                 if not watched_validators.config_initialized:
                     watched_validators.process_config(self._cfg)
+
+            if pending_deposits is None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
+                logging.info('🔨 Fetching pending deposits')
+                pending_deposits = get_pending_deposits(self._beacon)
+
+            if pending_consolidations is None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
+                logging.info('🔨 Fetching pending consolidations')
+                pending_consolidations = get_pending_consolidations(self._beacon)
+
+            if pending_withdrawals is None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
+                logging.info('🔨 Fetching pending withdrawals')
+                pending_withdrawals = get_pending_withdrawals(self._beacon)
 
             if validators_liveness is None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS):
                 logging.info('🔨 Processing validator liveness')
@@ -247,7 +294,7 @@ class ValidatorWatcher:
                 process_duties(watched_validators, previous_slot_committees, current_attestations, slot)
 
             logging.info('🔨 Updating Prometheus metrics')
-            self._update_metrics(watched_validators, epoch, slot)
+            self._update_metrics(watched_validators, epoch, slot, pending_deposits, pending_consolidations, pending_withdrawals)
 
             if (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_CONFIG_RELOAD):
                 logging.info('🔨 Processing configuration update')

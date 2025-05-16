@@ -16,6 +16,9 @@ from eth_validator_watcher.models import (
     Rewards,
     Committees,
     Attestations,
+    PendingDeposits,
+    PendingWithdrawals,
+    PendingConsolidations,
 )
 from tests import assets
 
@@ -282,6 +285,119 @@ class BeaconTestCase(unittest.TestCase):
             m.get(f"{self.beacon_url}/eth/v1/beacon/headers/{BlockIdentierType.HEAD}", json=data)
             b = Beacon(self.beacon_url, self.timeout)
             self.assertTrue(b.has_block_at_slot(BlockIdentierType.HEAD))
+
+    def test_get_pending_deposits(self) -> None:
+        """Test get_pending_deposits() returns pending deposit data."""
+        deposits_data = {
+            "data": [
+                {
+                    "pubkey": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                    "withdrawal_credentials": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+                    "amount": 32000000000,
+                    "slot": 4996400
+                },
+                {
+                    "pubkey": "0x2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef",
+                    "withdrawal_credentials": "0xbcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890a",
+                    "amount": 32000000000,
+                    "slot": 4996500
+                }
+            ]
+        }
+        with Mocker() as m:
+            m.get(f"{self.beacon_url}/eth/v1/beacon/states/head/pending_deposits", json=deposits_data)
+            b = Beacon(self.beacon_url, self.timeout)
+            result = b.get_pending_deposits()
+            self.assertIsInstance(result, PendingDeposits)
+            self.assertEqual(len(result.data), 2)
+            self.assertEqual(result.data[0].pubkey, "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef")
+            self.assertEqual(result.data[0].withdrawal_credentials, "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890")
+            self.assertEqual(result.data[0].amount, 32000000000)
+            self.assertEqual(result.data[0].slot, 4996400)
+            self.assertEqual(result.data[1].pubkey, "0x2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef2345678901abcdef")
+            self.assertEqual(result.data[1].withdrawal_credentials, "0xbcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890a")
+            self.assertEqual(result.data[1].amount, 32000000000)
+            self.assertEqual(result.data[1].slot, 4996500)
+
+    def test_get_pending_withdrawals(self) -> None:
+        """Test get_pending_withdrawals() returns pending withdrawal data."""
+        withdrawals_data = {
+            "data": [
+                {
+                    "validator_index": 42,
+                    "amount": 1000000000
+                },
+                {
+                    "validator_index": 43,
+                    "amount": 2000000000
+                }
+            ]
+        }
+        with Mocker() as m:
+            m.get(f"{self.beacon_url}/eth/v1/beacon/states/head/pending_partial_withdrawals", json=withdrawals_data)
+            b = Beacon(self.beacon_url, self.timeout)
+            result = b.get_pending_withdrawals()
+            self.assertIsInstance(result, PendingWithdrawals)
+            self.assertEqual(len(result.data), 2)
+            self.assertEqual(result.data[0].validator_index, 42)
+            self.assertEqual(result.data[0].amount, 1000000000)
+            self.assertEqual(result.data[1].validator_index, 43)
+            self.assertEqual(result.data[1].amount, 2000000000)
+
+    def test_get_pending_consolidations(self) -> None:
+        """Test get_pending_consolidations() returns pending consolidation data."""
+        consolidations_data = {
+            "data": [
+                {
+                    "source_index": 100,
+                    "target_index": 200
+                },
+                {
+                    "source_index": 101,
+                    "target_index": 201
+                }
+            ]
+        }
+        with Mocker() as m:
+            m.get(f"{self.beacon_url}/eth/v1/beacon/states/head/pending_consolidations", json=consolidations_data)
+            b = Beacon(self.beacon_url, self.timeout)
+            result = b.get_pending_consolidations()
+            self.assertIsInstance(result, PendingConsolidations)
+            self.assertEqual(len(result.data), 2)
+            self.assertEqual(result.data[0].source_index, 100)
+            self.assertEqual(result.data[0].target_index, 200)
+            self.assertEqual(result.data[1].source_index, 101)
+            self.assertEqual(result.data[1].target_index, 201)
+
+    def test_get_pending_deposits_empty(self) -> None:
+        """Test get_pending_deposits() returns empty data when no pending deposits."""
+        empty_data = {"data": []}
+        with Mocker() as m:
+            m.get(f"{self.beacon_url}/eth/v1/beacon/states/head/pending_deposits", json=empty_data)
+            b = Beacon(self.beacon_url, self.timeout)
+            result = b.get_pending_deposits()
+            self.assertIsInstance(result, PendingDeposits)
+            self.assertEqual(len(result.data), 0)
+
+    def test_get_pending_withdrawals_empty(self) -> None:
+        """Test get_pending_withdrawals() returns empty data when no pending withdrawals."""
+        empty_data = {"data": []}
+        with Mocker() as m:
+            m.get(f"{self.beacon_url}/eth/v1/beacon/states/head/pending_partial_withdrawals", json=empty_data)
+            b = Beacon(self.beacon_url, self.timeout)
+            result = b.get_pending_withdrawals()
+            self.assertIsInstance(result, PendingWithdrawals)
+            self.assertEqual(len(result.data), 0)
+
+    def test_get_pending_consolidations_empty(self) -> None:
+        """Test get_pending_consolidations() returns empty data when no pending consolidations."""
+        empty_data = {"data": []}
+        with Mocker() as m:
+            m.get(f"{self.beacon_url}/eth/v1/beacon/states/head/pending_consolidations", json=empty_data)
+            b = Beacon(self.beacon_url, self.timeout)
+            result = b.get_pending_consolidations()
+            self.assertIsInstance(result, PendingConsolidations)
+            self.assertEqual(len(result.data), 0)
 
 
 if __name__ == "__main__":

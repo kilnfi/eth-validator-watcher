@@ -112,6 +112,7 @@ class WatchedValidator:
         self._v.consensus_index = validator.index
         self._v.consensus_status = validator.status
         self._v.consensus_activation_epoch = validator.validator.activation_epoch
+        self._v.consensus_type = int(validator.validator.withdrawal_credentials[2:4], 16)
 
     def process_liveness(self, liveness: ValidatorsLivenessResponse.Data, current_epoch: int):
         """Processes liveness data.
