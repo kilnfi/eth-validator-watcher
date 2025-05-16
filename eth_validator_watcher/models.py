@@ -286,3 +286,18 @@ class PendingDeposits(BaseModel):
         slot: int
 
     data: list[PendingDepositData]
+
+
+class PendingConsolidations(BaseModel):
+    """Model for pending consolidation data.
+
+    Args:
+        None
+    Returns:
+        None
+    """
+    class PendingConsolidationData(BaseModel):
+        source_index: int
+        target_index: int
+
+    data: list[PendingConsolidationData]
