@@ -262,9 +262,9 @@ class Attestations(BaseModel):
     class SignedAttestationData(BaseModel):
         class AttestationData(BaseModel):
             slot: int
-            index: int
 
         aggregation_bits: str
+        committee_bits: str
         data: AttestationData
 
     data: list[SignedAttestationData]

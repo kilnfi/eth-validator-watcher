@@ -1,6 +1,6 @@
 import unittest
 
-from eth_validator_watcher.duties import hex_to_sparse_bitset
+from eth_validator_watcher.duties import bitfield_to_bitstring
 
 
 class HexBitsTestCase(unittest.TestCase):
@@ -8,32 +8,9 @@ class HexBitsTestCase(unittest.TestCase):
 
     def test_hex_to_sparse_bitset_zero(self) -> None:
         """Test hex_to_sparse_bitset() with a zero hex value."""
-        result = hex_to_sparse_bitset("0x00")
-        self.assertEqual(result, set())
-
-    def test_hex_to_sparse_bitset_with_prefix(self) -> None:
-        """Test hex_to_sparse_bitset() with 0x prefix."""
-        # 0000 0101
-        result = hex_to_sparse_bitset("0x05")
-        self.assertEqual(result, {5, 7})
-
-    def test_hex_to_sparse_bitset_without_prefix(self) -> None:
-        """Test hex_to_sparse_bitset() without 0x prefix."""
-        # 0000 0101
-        result = hex_to_sparse_bitset("05")
-        self.assertEqual(result, {5, 7})
-
-    def test_hex_to_sparse_bitset_complex(self) -> None:
-        """Test hex_to_sparse_bitset() with a complex hex value."""
-        # 1010 0101
-        result = hex_to_sparse_bitset("0xA5")
-        self.assertEqual(result, {0, 2, 5, 7})
-
-    def test_hex_to_sparse_bitset_multi_byte(self) -> None:
-        """Test hex_to_sparse_bitset() with a multi-byte hex value."""
-        # 0001 0010 0011 0100
-        result = hex_to_sparse_bitset("0x1234")
-        self.assertEqual(result, {3, 6, 10, 11, 13})
+        result = bitfield_to_bitstring("0x0000064814008019", False)
+        indices = {i for i, bit in enumerate(result) if bit == "1"}
+        self.assertEqual(indices, {17, 18, 27, 30, 34, 36, 55, 56, 59, 60})
 
 
 if __name__ == "__main__":

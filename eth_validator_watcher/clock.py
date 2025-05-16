@@ -36,7 +36,7 @@ class BeaconClock:
         # Current slot is being built, waiting 4 seconds on the last
         # slot with some extra time to ensure we have the data for the
         # slot (attestations).
-        self._lag_seconds = 2 * self._slot_duration + 4
+        self._lag_seconds = self._slot_duration + 4
         self._init_at = time.time()
 
         # Replay mode

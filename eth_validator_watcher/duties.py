@@ -1,3 +1,5 @@
+import logging
+
 from .models import (
     Attestations,
     Committees,
@@ -5,36 +7,75 @@ from .models import (
 from .watched_validators import WatchedValidators
 
 
-def hex_to_sparse_bitset(hex_string: str) -> set[int]:
-    """Convert a hexadecimal string to a set of bit indices that are set to 1.
+def bitfield_to_bitstring(ssz: str, strip_length: bool) -> str:
+    """Helper to decode an SSZ Bitvector[64].
 
-    Args:
-        hex_string: str
-            Hexadecimal string to convert (with or without '0x' prefix).
-
-    Returns:
-        set[int]
-            Set containing the indices of bits that are set to 1 in the hexadecimal value.
+    This is a bit tricky since we need to have MSB representation
+    while Python is LSB oriented. We extract each successive byte from
+    the hex representation (2 hex digits per byte), convert to binary
+    representation (LSB), pad it, then reverse it to be MSB.
     """
-    clean_hex = hex_string.strip().replace('0x', '')
-    num = int(clean_hex, 16)
-    set_bits = set()
-    total_bits = len(clean_hex) * 4
+    ssz = ssz.replace('0x', '')
+    
+    assert len(ssz) % 2 == 0
 
-    for i in range(total_bits):
-        bit_pos = total_bits - 1 - i
-        if num & (1 << i):
-            set_bits.add(bit_pos)
+    bitstr = ''
 
-    return set_bits
+    for i in range(int(len(ssz) / 2)):
+        bin_repr_lsb = bin(int(ssz[i*2:(i+1)*2], 16)).replace('0b', '')
+        bin_repr_lsb_padded = bin_repr_lsb.rjust(8, '0')
+        bin_repr_msb = ''.join(reversed(bin_repr_lsb_padded))
+        bitstr += bin_repr_msb
+
+    # Bitlists's last bit set to 1 marks the end of the field, we need
+    # to strip it to have the final set.
+    if strip_length:
+        bitstr = bitstr[0:bitstr.rfind('1')]
+
+    return bitstr
 
 
 def process_duties(watched_validators: WatchedValidators, previous_slot_committees: Committees, current_attestations: Attestations, current_slot: int):
     """Process validator attestation duties for the current slot.
 
-    The current slot contains attestations from the previous slot (and potentially older ones).
-    A validator is considered to have performed its duties if in the current slot it attested
-    for the previous slot.
+    The current slot contains attestations from the previous slot (and
+    potentially older ones).  A validator is considered to have
+    performed its duties if in the current slot it attested for the
+    previous slot.
+
+    The format is a bit tricky to get right here: attestations are
+    aggregated per committees and each committee handles a subset of
+    validators, there are 64 committees.
+
+    Each attestation is composed of two bitfields:
+
+    - committee_bits: 64 entries are present, if set to 1 there are
+      attestations for validators inside this committee,
+    - aggregation_bits: length of this bitfield is the SUM(len) of
+      validators in active committees.
+
+    This works well because there is usually way less "attestation
+    flavors" on a specific flow, most of the network will vote for the
+    same thing under normal condition, so there is usually one entry
+    with most committee bits sets and aggregation bits. There may be
+    4-5 different flavors, but most of the time this is less than the
+    64 committees so this format is efficient.
+
+    This is defined in the consensus specs as follows:
+
+    ```
+    def get_attesting_indices(state: BeaconState, attestation: Attestation) -> Set[ValidatorIndex]:
+        output: Set[ValidatorIndex] = set()
+        committee_indices = get_committee_indices(attestation.committee_bits)
+        committee_offset = 0
+        for index in committee_indices:
+            committee = get_beacon_committee(state, attestation.data.slot, index)
+            committee_attesters = set(
+                index for i, index in enumerate(committee) if attestation.aggregation_bits[committee_offset + i])
+             output = output.union(committee_attesters)
+             committee_offset += len(committee)
+        return output
+    ```
 
     Args:
         watched_validators: WatchedValidators
@@ -58,21 +99,27 @@ def process_duties(watched_validators: WatchedValidators, previous_slot_committe
         for v in committee.validators:
             validator_duty_performed[v] = False
 
-    # Check if the validator has attested
     for attestation in current_attestations.data:
-        committee_index = attestation.data.index
-        slot = attestation.data.slot
         # Here we are interested in attestations against the previous
-        # slot.
+        # slot, we dismiss whatever is for a prior slot. The goal of
+        # this metric is to have a real-time view of optimal
+        # performances.
+        slot = attestation.data.slot
         if slot != current_slot - 1:
             continue
-        bitsets = hex_to_sparse_bitset(attestation.aggregation_bits)
-        for validator_idx_in_committee in bitsets:
-            validators_at_committee = committees_lookup.get(committee_index)
-            if not validators_at_committee or validator_idx_in_committee >= len(validators_at_committee):
-                continue
-            validator_index = validators_at_committee[validator_idx_in_committee]
-            validator_duty_performed[validator_index] = True
+
+        committee_indices = bitfield_to_bitstring(attestation.committee_bits, False)
+        aggregation_bits = bitfield_to_bitstring(attestation.aggregation_bits, True)
+
+        committee_offset = 0
+        for index, exists in enumerate(committee_indices):
+            validators_in_committee = committees_lookup[index]
+            if exists == "1":
+                for i in range(len(validators_in_committee)):
+                    if aggregation_bits[committee_offset + i] == "1":
+                        validator_index = validators_in_committee[i]
+                        validator_duty_performed[validator_index] = True
+                committee_offset += len(validators_in_committee)
 
     # Update validators
     for validator, ok in validator_duty_performed.items():
