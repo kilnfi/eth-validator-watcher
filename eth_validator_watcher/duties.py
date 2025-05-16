@@ -113,8 +113,8 @@ def process_duties(watched_validators: WatchedValidators, previous_slot_committe
 
         committee_offset = 0
         for index, exists in enumerate(committee_indices):
-            validators_in_committee = committees_lookup[index]
             if exists == "1":
+                validators_in_committee = committees_lookup[index]
                 for i in range(len(validators_in_committee)):
                     if aggregation_bits[committee_offset + i] == "1":
                         validator_index = validators_in_committee[i]
