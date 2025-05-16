@@ -14,6 +14,11 @@ dev:
     uv pip install -e .
     uv run eth-validator-watcher --config etc/config.dev.yaml
 
+# Local development
+dev-hoodi:
+    uv pip install -e .
+    uv run eth-validator-watcher --config etc/config.hoodi.yaml
+
 # Build docker image
 docker:
     docker build -t eth-validator-watcher .

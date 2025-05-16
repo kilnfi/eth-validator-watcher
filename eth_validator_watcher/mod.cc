@@ -192,17 +192,6 @@ namespace {
         m.performed_duties_at_slot_count += metric.performed_duties_at_slot_count;
         m.performed_duties_at_slot_scaled_count += metric.performed_duties_at_slot_scaled_count;
 
-        // Recompute this on each batch so that we don't need an extra
-        // pass at the end across all labels. This is a cheap
-        // operation so it's fine.
-        if (m.performed_duties_at_slot_count != 0 || m.missed_duties_at_slot_count != 0) {
-          m.duties_rate = float64_t(m.performed_duties_at_slot_count) / float64_t(m.performed_duties_at_slot_count + m.missed_duties_at_slot_count);
-          m.duties_rate_scaled = float64_t(m.performed_duties_at_slot_scaled_count) / float64_t(m.performed_duties_at_slot_scaled_count + m.missed_duties_at_slot_scaled_count);
-        } else {
-          m.duties_rate = 1.0f;
-          m.duties_rate_scaled = 1.0f;
-        }
-
         m.ideal_consensus_reward += metric.ideal_consensus_reward;
         m.actual_consensus_reward += metric.actual_consensus_reward;
         m.missed_attestations_count += metric.missed_attestations_count;
@@ -228,6 +217,18 @@ namespace {
         }
       }
     }
+
+    // Compute the duties rate once per label.
+    for (auto& [label, o]: *out) {
+      const float64_t total = o.missed_duties_at_slot_count + o.performed_duties_at_slot_count;
+      const float64_t total_scaled = o.missed_duties_at_slot_scaled_count + o.performed_duties_at_slot_scaled_count;
+
+      // Here we assume that if we don't have any duties process, the
+      // duties were performed.
+      o.duties_rate = total ? float64_t(o.performed_duties_at_slot_count) / total : 1.0f;
+      o.duties_rate_scaled = total_scaled ? float64_t(o.performed_duties_at_slot_scaled_count) / total_scaled : 1.0f;
+    }
+    
   }
 
 } // anonymous namespace

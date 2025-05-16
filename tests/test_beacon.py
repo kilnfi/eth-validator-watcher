@@ -120,6 +120,7 @@ class BeaconTestCase(unittest.TestCase):
             "data": [
                 {
                     "aggregation_bits": "0x01",
+                    "committee_bits": "0x02",
                     "data": {
                         "slot": 4996300,
                         "index": 1
