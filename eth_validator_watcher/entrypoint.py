@@ -136,6 +136,12 @@ class ValidatorWatcher:
                 scaled_value = m.validator_status_scaled_count.get(status, 0.0)
                 self._metrics.eth_validator_status_scaled_count.labels(label, status, network).set(scaled_value)
 
+            for consensus_type in [0, 1, 2]:
+                value = m.validator_type_count.get(consensus_type, 0)
+                self._metrics.eth_validator_type_count.labels(label, consensus_type, network).set(value)
+                scaled_value = m.validator_type_scaled_count.get(consensus_type, 0.0)
+                self._metrics.eth_validator_type_scaled_count.labels(label, consensus_type, network).set(scaled_value)
+
         for label, m in metrics.items():
             self._metrics.eth_suboptimal_sources_rate.labels(label, network).set(pct(m.suboptimal_source_count, m.optimal_source_count))
             self._metrics.eth_suboptimal_targets_rate.labels(label, network).set(pct(m.suboptimal_target_count, m.optimal_target_count))
