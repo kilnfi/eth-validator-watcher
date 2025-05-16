@@ -14,6 +14,7 @@ from .models import (
     Committees,
     Genesis,
     Header,
+    PendingConsolidations,
     PendingDeposits,
     ProposerDuties,
     Rewards,
@@ -371,6 +372,24 @@ class Beacon:
         response.raise_for_status()
 
         return PendingDeposits.model_validate_json(response.text)
+
+    def get_pending_consolidations(self) -> PendingConsolidations:
+        """Get beacon chain pending consolidations.
+
+        Args:
+            None
+
+        Returns:
+            PendingConsolidations
+                The beacon chain pending consolidations.
+        """
+        response = self._get_retry_not_found(
+            f"{self._url}/eth/v1/beacon/states/head/pending_consolidations", timeout=self._timeout_sec
+        )
+
+        response.raise_for_status()
+
+        return PendingConsolidations.model_validate_json(response.text)
 
     def has_block_at_slot(self, block_identifier: BlockIdentierType | int) -> bool:
         """Returns the slot of a block identifier if it exists.

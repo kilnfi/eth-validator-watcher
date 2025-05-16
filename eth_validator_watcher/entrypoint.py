@@ -19,7 +19,10 @@ from .metrics import get_prometheus_metrics, compute_validator_metrics
 from .models import BlockIdentierType, Validators
 from .proposer_schedule import ProposerSchedule
 from .rewards import process_rewards
-from .queues import get_pending_deposits
+from .queues import (
+    get_pending_deposits,
+    get_pending_consolidations,
+)
 from .utils import (
     SLOT_FOR_CONFIG_RELOAD,
     SLOT_FOR_MISSED_ATTESTATIONS_PROCESS,
@@ -107,7 +110,8 @@ class ValidatorWatcher:
             watched_validators: WatchedValidators,
             epoch: int,
             slot: int,
-            pending_deposits: tuple[int, int]
+            pending_deposits: tuple[int, int],
+            pending_consolidations: int
     ) -> None:
         """Update the Prometheus metrics with the watched validators data.
 
@@ -120,6 +124,8 @@ class ValidatorWatcher:
                 Current slot.
             pending_deposits: tuple[int, int]
                 Number of pending deposits and their total value.
+            pending_consolidations: int
+                Number of pending consolidations.
 
         Returns:
             None
@@ -134,6 +140,7 @@ class ValidatorWatcher:
 
         self._metrics.eth_pending_deposits_count.labels(network).set(pending_deposits[0])
         self._metrics.eth_pending_deposits_value.labels(network).set(pending_deposits[1])
+        self._metrics.eth_pending_consolidations_count.labels(network).set(pending_consolidations)
 
         # We iterate once on the validator set to optimize CPU as
         # there is a log of entries here, this makes code here a bit
@@ -211,6 +218,7 @@ class ValidatorWatcher:
         rewards = None
         last_processed_finalized_slot = None
         pending_deposits = None
+        pending_consolidations = None
 
         slack_send(self._cfg, f'🚀 *Ethereum Validator Watcher* started on {self._cfg.network}, watching {len(self._cfg.watched_keys)} validators')
 
@@ -230,6 +238,10 @@ class ValidatorWatcher:
             if pending_deposits is None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
                 logging.info('🔨 Fetching pending deposits')
                 pending_deposits = get_pending_deposits(self._beacon)
+
+            if pending_consolidations is None or (slot % self._spec.data.SLOTS_PER_EPOCH == 0):
+                logging.info('🔨 Fetching pending consolidations')
+                pending_consolidations = get_pending_consolidations(self._beacon)
 
             if validators_liveness is None or (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_MISSED_ATTESTATIONS_PROCESS):
                 logging.info('🔨 Processing validator liveness')
@@ -272,7 +284,7 @@ class ValidatorWatcher:
                 process_duties(watched_validators, previous_slot_committees, current_attestations, slot)
 
             logging.info('🔨 Updating Prometheus metrics')
-            self._update_metrics(watched_validators, epoch, slot)
+            self._update_metrics(watched_validators, epoch, slot, pending_deposits, pending_consolidations)
 
             if (slot % self._spec.data.SLOTS_PER_EPOCH == SLOT_FOR_CONFIG_RELOAD):
                 logging.info('🔨 Processing configuration update')
