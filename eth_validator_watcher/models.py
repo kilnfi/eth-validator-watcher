@@ -31,6 +31,7 @@ class Validators(BaseModel):
             effective_balance: int
             slashed: bool
             activation_epoch: int
+            withdrawal_credentials: str
 
         index: int
         status: StatusEnum
