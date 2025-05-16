@@ -269,3 +269,20 @@ class Attestations(BaseModel):
         data: AttestationData
 
     data: list[SignedAttestationData]
+
+
+class PendingDeposits(BaseModel):
+    """Model for pending deposit data.
+        Args:
+                None
+        Returns:
+                None
+        """
+
+    class PendingDepositData(BaseModel):
+        pubkey: str
+        withdrawal_credentials: str
+        amount: int
+        slot: int
+
+    data: list[PendingDepositData]
