@@ -1,5 +1,3 @@
-import logging
-
 from .models import (
     Attestations,
     Committees,
@@ -16,13 +14,13 @@ def bitfield_to_bitstring(ssz: str, strip_length: bool) -> str:
     representation (LSB), pad it, then reverse it to be MSB.
     """
     ssz = ssz.replace('0x', '')
-    
+
     assert len(ssz) % 2 == 0
 
     bitstr = ''
 
     for i in range(int(len(ssz) / 2)):
-        bin_repr_lsb = bin(int(ssz[i*2:(i+1)*2], 16)).replace('0b', '')
+        bin_repr_lsb = bin(int(ssz[i * 2:(i + 1) * 2], 16)).replace('0b', '')
         bin_repr_lsb_padded = bin_repr_lsb.rjust(8, '0')
         bin_repr_msb = ''.join(reversed(bin_repr_lsb_padded))
         bitstr += bin_repr_msb
