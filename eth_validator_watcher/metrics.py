@@ -38,6 +38,7 @@ class PrometheusMetrics:
     eth_pending_deposits_count: Gauge
     eth_pending_deposits_value: Gauge
     eth_pending_consolidations_count: Gauge
+    eth_pending_withdrawals_count: Gauge
 
     # The scaled version is multiplied by EB/32.
     eth_validator_status_count: Gauge
@@ -118,6 +119,7 @@ def get_prometheus_metrics() -> PrometheusMetrics:
             eth_pending_deposits_count=Gauge("eth_pending_deposits_count", "Pending deposits count sampled every epoch", ['network']),
             eth_pending_deposits_value=Gauge("eth_pending_deposits_value", "Pending deposits value sampled every epoch", ['network']),
             eth_pending_consolidations_count=Gauge("eth_pending_consolidations_count", "Pending consolidations count sampled every epoch", ['network']),
+            eth_pending_withdrawals_count=Gauge("eth_pending_withdrawals_count", "Pending withdrawals count sampled every epoch", ['network']),
 
             eth_validator_status_count=Gauge("eth_validator_status_count", "Validator status count sampled every epoch", ['scope', 'status', 'network']),
             eth_validator_status_scaled_count=Gauge("eth_validator_status_scaled_count", "Stake-scaled validator status count sampled every epoch", ['scope', 'status', 'network']),

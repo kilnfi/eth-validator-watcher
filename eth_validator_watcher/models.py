@@ -301,3 +301,18 @@ class PendingConsolidations(BaseModel):
         target_index: int
 
     data: list[PendingConsolidationData]
+
+
+class PendingWithdrawals(BaseModel):
+    """Model for pending withdrawal data.
+        
+    Args:
+        None
+    Returns:
+        None
+    """
+    class PendingWithdrawalData(BaseModel):
+        validator_index: int
+        amount: int
+
+    data: list[PendingWithdrawalData]
