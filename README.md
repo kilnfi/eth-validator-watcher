@@ -1,7 +1,5 @@
 # Ethereum Validator Watcher
 
-**This is a preview of the new version of the Ethereum Validator Watcher.**
-
 ![kiln-logo](docs/img/Kiln_Logo-Transparent-Dark.svg)
 
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
@@ -31,16 +29,13 @@ perform:
 # Description
 
 **Ethereum Validator Watcher** monitors the Ethereum beacon chain in
-real-time and notifies you when any of your validators:
+real-time and provides metrics around when one of your validator:
 
-- are going to propose a block in the next two epochs
-- missed a block proposal at head
-- missed a block proposal at finalized
+- is going to propose a block (in the next two epochs)
+- missed a block proposal
 - did not optimally attest
 - missed an attestation
 - missed two attestations in a row
-- proposed a block with the wrong fee recipient
-- has exited
 - got slashed
 - did not had ideal source, target or head reward
 
@@ -53,7 +48,6 @@ It also exports some general metrics such as:
 - the ETH/USD conversion rate
 - the number of your queued validators
 - the number of your active validators
-- the number of your exited validators
 - the number of the network queued validators
 - the number of the network active validators
 - the entry queue duration estimation
