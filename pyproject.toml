@@ -22,6 +22,7 @@ dependencies = [
     "cachetools>=5.3.3",
     "pybind11>=2.12.0",
     "vcrpy>=6.0.1",
+    "pytest-timeout>=2.4.0",
 ]
 
 [project.optional-dependencies]

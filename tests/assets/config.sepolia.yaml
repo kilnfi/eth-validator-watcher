@@ -3,8 +3,8 @@ beacon_timeout_sec: 720
 network: sepolia
 metrics_port: 8000
 
-#replay_start_at_ts: 1744096730
-#replay_end_at_ts: 1744097880
+replay_start_at_ts: 1747989420
+replay_end_at_ts: 1747989960
 
 watched_keys:
   - public_key: '989fa046d04b41fc95a04dabb7ab8b64e84afaa85c0aa49e1c6878d7b2814094402d62ae42dfbf3ac72e6770ee0926a8'
