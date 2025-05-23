@@ -305,7 +305,7 @@ class PendingConsolidations(BaseModel):
 
 class PendingWithdrawals(BaseModel):
     """Model for pending withdrawal data.
-        
+
     Args:
         None
     Returns:
