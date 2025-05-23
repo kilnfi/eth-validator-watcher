@@ -201,7 +201,8 @@ class BeaconTestCase(unittest.TestCase):
                         "pubkey": "0xabcdef1234567890",
                         "effective_balance": 32000000000,
                         "slashed": False,
-                        "activation_epoch": 100
+                        "activation_epoch": 100,
+                        "withdrawal_credentials": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
                     }
                 }
             ]
@@ -216,6 +217,7 @@ class BeaconTestCase(unittest.TestCase):
             self.assertEqual(result.data[0].status, "active_ongoing")
             self.assertEqual(result.data[0].validator.effective_balance, 32000000000)
             self.assertFalse(result.data[0].validator.slashed)
+            self.assertEqual(result.data[0].validator.withdrawal_credentials, "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890")
 
     def test_get_rewards(self) -> None:
         """Test get_rewards() returns reward data."""
