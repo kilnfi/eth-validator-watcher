@@ -9,7 +9,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "ethereum-validator-watcher.matchLabels" . | nindent 8 }}
+      {{- include "ethereum-validator-watcher.selectorLabels" . | nindent 8 }}
   podMetricsEndpoints:
   - port: metrics
     {{- if .Values.podMonitor.interval }}
@@ -23,11 +23,11 @@ spec:
     scheme: {{ .Values.podMonitor.scheme }}
     {{- end }}
     {{- if .Values.podMonitor.tlsConfig }}
-    tlsConfig:
+    tlsConfig: 
       {{- toYaml .Values.podMonitor.tlsConfig | nindent 6 }}
     {{- end }}
     {{- if .Values.podMonitor.relabelings }}
-    relabelings:
+    relabelings: 
       {{ toYaml .Values.podMonitor.relabelings | nindent 6 }}
     {{- end }}
 {{- end }}
