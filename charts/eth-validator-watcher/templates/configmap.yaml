@@ -1,13 +1,9 @@
-{{- if .Values.config.watchedKeys }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "ethereum-validator-watcher.fullname" . }}
+  name: {{ include "ethereum-validator-watcher.fullname" . }}-config
   labels:
     {{- include "ethereum-validator-watcher.labels" . | nindent 4 }}
 data:
-  watched-keys.txt: |
-  {{- range .Values.config.watchedKeys }}
-  {{- . | nindent 4 }}
-  {{- end }}
-{{- end }}
+  config.yaml: |-
+    {{ .Values.config | nindent 4 }}

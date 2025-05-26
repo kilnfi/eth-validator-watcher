@@ -31,34 +31,32 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Common labels
+*/}}
+{{- define "ethereum-validator-watcher.labels" -}}
+helm.sh/chart: {{ include "ethereum-validator-watcher.chart" . }}
+{{ include "ethereum-validator-watcher.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "ethereum-validator-watcher.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "ethereum-validator-watcher.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "ethereum-validator-watcher.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
 {{- default (include "ethereum-validator-watcher.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
-
-{{/*
-Common labels
-*/}}
-{{- define "ethereum-validator-watcher.labels" -}}
-app.kubernetes.io/name: {{ include "ethereum-validator-watcher.name" . }}
-helm.sh/chart: {{ include "ethereum-validator-watcher.chart" . }}
-app.kubernetes.io/instance: ethereum-validator-watcher
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-{{- end -}}
-
-{{/*
-Selector labels
-*/}}
-{{- define "ethereum-validator-watcher.matchLabels" -}}
-app.kubernetes.io/name: {{ include "ethereum-validator-watcher.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
