@@ -13,12 +13,6 @@
   "__requires": [
     {
       "type": "panel",
-      "id": "bargauge",
-      "name": "Bar gauge",
-      "version": ""
-    },
-    {
-      "type": "panel",
       "id": "gauge",
       "name": "Gauge",
       "version": ""
@@ -27,7 +21,13 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.5.1"
+      "version": "11.5.2"
+    },
+    {
+      "type": "panel",
+      "id": "piechart",
+      "name": "Pie chart",
+      "version": ""
     },
     {
       "type": "datasource",
@@ -127,7 +127,7 @@
         "content": "\n- [open an issue](https://github.com/kilnfi/eth-validator-watcher/issues/new)\n- [github repository](https://github.com/kilnfi/eth-validator-watcher)\n- [beaconcha.in](https://beaconcha.in/)\n- [bageth.xyz](https://www.bageth.xyz/)\n- [etherscan.io](https://etherscan.io/)",
         "mode": "markdown"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "title": "Quick Links",
       "type": "text"
     },
@@ -181,7 +181,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -189,10 +189,12 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
+          "exemplar": false,
           "expr": "max(eth_epoch{network=\"${network}\"})",
           "hide": false,
+          "instant": true,
           "legendFormat": "__auto",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -210,7 +212,9 @@
           "color": {
             "mode": "thresholds"
           },
+          "fieldMinMax": false,
           "mappings": [],
+          "noValue": "-",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -249,7 +253,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -313,7 +317,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -329,6 +333,71 @@
       ],
       "title": "Epoch completion",
       "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "id": 39,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": true,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "max(eth_current_price_dollars{network=\"${network}\"})",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ETH price",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -358,7 +427,7 @@
       "gridPos": {
         "h": 5,
         "w": 4,
-        "x": 16,
+        "x": 20,
         "y": 1
       },
       "id": 35,
@@ -380,7 +449,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -388,78 +457,13 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "(max(eth_validator_status_count{scope=\"scope:network\", status=\"pending_queued\", network=\"${network}\"} or vector(0)) / 8) * (12*32)",
+          "expr": "((max(eth_pending_deposits_value{network=\"$network\"}) / 1e9) * (12*32)) / 256",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
       "title": "Entry Queue Time",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "light-green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "currencyUSD"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 4,
-        "x": 20,
-        "y": 1
-      },
-      "id": 39,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": true,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "max(eth_current_price_dollars{network=\"${network}\"})",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "ETH price",
       "type": "stat"
     },
     {
@@ -525,7 +529,7 @@
         "textMode": "value_and_name",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -589,7 +593,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
+        "w": 5,
         "x": 4,
         "y": 7
       },
@@ -611,7 +615,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -684,7 +688,7 @@
       "gridPos": {
         "h": 12,
         "w": 4,
-        "x": 8,
+        "x": 9,
         "y": 7
       },
       "id": 77,
@@ -703,7 +707,7 @@
         "showThresholdMarkers": false,
         "sizing": "auto"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -761,8 +765,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 12,
+        "w": 5,
+        "x": 13,
         "y": 7
       },
       "id": 79,
@@ -784,7 +788,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -820,88 +824,96 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
-          "fieldMinMax": false,
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "mappings": [],
-          "min": 0,
           "thresholds": {
-            "mode": "percentage",
+            "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "orange",
-                "value": 85
-              },
-              {
-                "color": "yellow",
-                "value": 90
-              },
-              {
-                "color": "green",
-                "value": 95
+                "color": "red",
+                "value": 80
               }
             ]
-          },
-          "unit": "percent"
+          }
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 16,
+        "h": 6,
+        "w": 6,
+        "x": 18,
         "y": 7
       },
-      "id": 68,
+      "id": 103,
       "options": {
-        "displayMode": "basic",
         "legend": {
           "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": false
         },
-        "maxVizHeight": 184,
-        "minVizHeight": 19,
-        "minVizWidth": 0,
-        "namePlacement": "top",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "eth_pending_deposits_count{network=\"$network\"}",
+          "format": "time_series",
+          "instant": false,
+          "legendFormat": "Deposits",
+          "range": true,
+          "refId": "A",
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "100.0 - sum(avg_over_time(eth_suboptimal_heads_rate{scope=\"scope:network\", network=\"${network}\"}[$__interval]))",
-          "format": "time_series",
-          "hide": false,
-          "instant": true,
-          "interval": "",
-          "legendFormat": "network",
-          "range": false,
-          "refId": "IDEAL"
+          }
         },
         {
           "datasource": {
@@ -909,16 +921,29 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "100.0 - sum(avg_over_time(eth_suboptimal_heads_rate{scope=\"scope:watched\", network=\"${network}\"}[$__interval]))",
+          "expr": "eth_pending_consolidations_count{network=\"$network\"}",
           "hide": false,
           "instant": false,
-          "legendFormat": "watched",
+          "legendFormat": "Consolidations",
           "range": true,
-          "refId": "A"
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "eth_pending_withdrawals_count{network=\"$network\"}",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "Withdrawals",
+          "range": true,
+          "refId": "C"
         }
       ],
-      "title": "Head Votes",
-      "type": "bargauge"
+      "title": "Operations",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -936,7 +961,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "yellow",
+                "color": "red",
                 "value": null
               }
             ]
@@ -951,7 +976,7 @@
         "x": 0,
         "y": 11
       },
-      "id": 96,
+      "id": 95,
       "options": {
         "colorMode": "background",
         "graphMode": "area",
@@ -970,7 +995,7 @@
         "textMode": "value_and_name",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -979,7 +1004,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max(eth_validator_status${scale}_count{status=~\"pending_queued\", scope=\"scope:all-network\", network=\"${network}\"} or vector(0)) ",
+          "expr": "max(eth_slashed_validators{scope=\"scope:all-network\", network=\"${network}\"} or vector(0))",
           "hide": false,
           "instant": false,
           "legendFormat": "network",
@@ -992,7 +1017,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "max(eth_validator_status${scale}_count{status=~\"pending_queued\", scope=\"scope:watched\", network=\"${network}\"} or vector(0))",
+          "expr": "max(eth_slashed_validators{scope=\"scope:watched\", network=\"${network}\"} or vector(0))",
           "hide": false,
           "instant": false,
           "legendFormat": "watched",
@@ -1000,7 +1025,7 @@
           "refId": "B"
         }
       ],
-      "title": "Queued Validators",
+      "title": "Slashed Validators",
       "type": "stat"
     },
     {
@@ -1029,8 +1054,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 12,
+        "w": 5,
+        "x": 13,
         "y": 11
       },
       "id": 5,
@@ -1052,7 +1077,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1094,111 +1119,6 @@
           "color": {
             "mode": "thresholds"
           },
-          "fieldMinMax": false,
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 85
-              },
-              {
-                "color": "yellow",
-                "value": 90
-              },
-              {
-                "color": "green",
-                "value": 95
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 16,
-        "y": 11
-      },
-      "id": 97,
-      "options": {
-        "displayMode": "basic",
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "maxVizHeight": 184,
-        "minVizHeight": 19,
-        "minVizWidth": 0,
-        "namePlacement": "top",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
-      },
-      "pluginVersion": "11.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "100.0 - sum(avg_over_time(eth_suboptimal_sources_rate{scope=\"scope:network\", network=\"${network}\"}[$__interval]))",
-          "format": "time_series",
-          "hide": false,
-          "instant": true,
-          "interval": "",
-          "legendFormat": "network",
-          "range": false,
-          "refId": "IDEAL"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "100.0 - sum(avg_over_time(eth_suboptimal_sources_rate{scope=\"scope:watched\", network=\"${network}\"}[$__interval]))",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "watched",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Source Votes",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1219,7 +1139,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 4,
+        "w": 5,
         "x": 4,
         "y": 13
       },
@@ -1242,7 +1162,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1278,6 +1198,146 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 13
+      },
+      "id": 102,
+      "options": {
+        "displayLabels": [
+          "name"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by (type) (eth_validator_type${scale}_count{scope=\"scope:watched\"})",
+          "instant": false,
+          "legendFormat": "0x0{{type}}",
+          "range": true,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "title": "Watched Validator Types",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 13
+      },
+      "id": 101,
+      "options": {
+        "displayLabels": [
+          "name"
+        ],
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "max by (type) (eth_validator_type${scale}_count{scope=\"scope:all-network\"})",
+          "instant": false,
+          "legendFormat": "0x0{{type}}",
+          "range": true,
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "title": "Network Validator Types",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -1289,12 +1349,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "yellow",
                 "value": null
               }
             ]
           },
-          "unit": "short"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -1304,7 +1364,7 @@
         "x": 0,
         "y": 15
       },
-      "id": 95,
+      "id": 96,
       "options": {
         "colorMode": "background",
         "graphMode": "area",
@@ -1323,7 +1383,7 @@
         "textMode": "value_and_name",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1332,28 +1392,15 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max(eth_slashed_validators{scope=\"scope:all-network\", network=\"${network}\"} or vector(0))",
+          "expr": "max(eth_pending_deposits_value{network=\"${network}\"}) / (32*1e9)",
           "hide": false,
           "instant": false,
           "legendFormat": "network",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "max(eth_slashed_validators{scope=\"scope:watched\", network=\"${network}\"} or vector(0))",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "watched",
-          "range": true,
-          "refId": "B"
         }
       ],
-      "title": "Slashed Validators",
+      "title": "Queued Validators",
       "type": "stat"
     },
     {
@@ -1382,8 +1429,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 12,
+        "w": 5,
+        "x": 13,
         "y": 15
       },
       "id": 99,
@@ -1405,7 +1452,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1435,111 +1482,6 @@
       ],
       "title": "Block Proposed",
       "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "fieldMinMax": false,
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "percentage",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 85
-              },
-              {
-                "color": "yellow",
-                "value": 90
-              },
-              {
-                "color": "green",
-                "value": 95
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 16,
-        "y": 15
-      },
-      "id": 98,
-      "options": {
-        "displayMode": "basic",
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "maxVizHeight": 184,
-        "minVizHeight": 19,
-        "minVizWidth": 0,
-        "namePlacement": "top",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
-      },
-      "pluginVersion": "11.5.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "100.0 - sum(avg_over_time(eth_suboptimal_targets_rate{scope=\"scope:network\", network=\"${network}\"}[$__interval]))",
-          "format": "time_series",
-          "hide": false,
-          "instant": true,
-          "interval": "",
-          "legendFormat": "network",
-          "range": false,
-          "refId": "IDEAL"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "100.0 - sum(avg_over_time(eth_suboptimal_targets_rate{scope=\"scope:watched\", network=\"${network}\"}[$__interval]))",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "watched",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Target Votes",
-      "type": "bargauge"
     },
     {
       "collapsed": false,
@@ -1572,7 +1514,7 @@
             "axisGridShow": true,
             "axisLabel": "",
             "axisPlacement": "right",
-            "axisSoftMin": 0,
+            "axisSoftMin": -4,
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
@@ -1589,7 +1531,7 @@
               "fill": "solid"
             },
             "lineWidth": 1,
-            "pointSize": 5,
+            "pointSize": 2,
             "scaleDistribution": {
               "type": "linear"
             },
@@ -1603,6 +1545,7 @@
               "mode": "off"
             }
           },
+          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1621,18 +1564,20 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 15,
-        "w": 12,
+        "h": 9,
+        "w": 8,
         "x": 0,
         "y": 20
       },
       "id": 86,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "list",
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
           "placement": "bottom",
-          "showLegend": true
+          "showLegend": false
         },
         "tooltip": {
           "hideZeros": false,
@@ -1641,7 +1586,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1739,12 +1684,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 12,
-        "x": 12,
+        "h": 9,
+        "w": 8,
+        "x": 8,
         "y": 20
       },
-      "id": 85,
+      "id": 88,
       "options": {
         "legend": {
           "calcs": [],
@@ -1759,7 +1704,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1767,7 +1712,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "max(eth_suboptimal_heads_rate{scope=\"scope:network\", network=\"${network}\"})",
+          "expr": "max(increase(eth_missed_block_proposals_finalized_total{scope=\"scope:network\", network=\"${network}\"}[24h]))",
           "instant": false,
           "legendFormat": "scope:network",
           "range": true,
@@ -1779,7 +1724,8 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "max(eth_suboptimal_heads_rate{scope=\"scope:watched\", network=\"${network}\"})",
+          "exemplar": false,
+          "expr": "max(increase(eth_missed_block_proposals_finalized_total{scope=\"scope:watched\", network=\"${network}\"}[24h]))",
           "hide": false,
           "instant": false,
           "legendFormat": "scope:watched",
@@ -1787,7 +1733,7 @@
           "refId": "B"
         }
       ],
-      "title": "Untimely or bad head vote (%)",
+      "title": "Missed blocks last 24H (count)",
       "type": "timeseries"
     },
     {
@@ -1843,7 +1789,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1855,10 +1802,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 12,
-        "x": 12,
-        "y": 25
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 20
       },
       "id": 83,
       "options": {
@@ -1875,7 +1822,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1959,7 +1906,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1971,10 +1919,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 12,
-        "x": 12,
-        "y": 30
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 26
       },
       "id": 84,
       "options": {
@@ -1991,7 +1939,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2076,7 +2024,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2088,10 +2037,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 8,
         "x": 0,
-        "y": 35
+        "y": 29
       },
       "id": 100,
       "options": {
@@ -2108,7 +2057,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2193,7 +2142,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2205,10 +2155,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 8,
         "x": 8,
-        "y": 35
+        "y": 29
       },
       "id": 87,
       "options": {
@@ -2225,7 +2175,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2310,7 +2260,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2322,12 +2273,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 6,
         "w": 8,
         "x": 16,
-        "y": 35
+        "y": 32
       },
-      "id": 88,
+      "id": 85,
       "options": {
         "legend": {
           "calcs": [],
@@ -2342,7 +2293,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -2350,7 +2301,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "max(increase(eth_missed_block_proposals_finalized_total{scope=\"scope:network\", network=\"${network}\"}[24h]))",
+          "expr": "max(eth_suboptimal_heads_rate{scope=\"scope:network\", network=\"${network}\"})",
           "instant": false,
           "legendFormat": "scope:network",
           "range": true,
@@ -2362,8 +2313,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "exemplar": false,
-          "expr": "max(increase(eth_missed_block_proposals_finalized_total{scope=\"scope:watched\", network=\"${network}\"}[24h]))",
+          "expr": "max(eth_suboptimal_heads_rate{scope=\"scope:watched\", network=\"${network}\"})",
           "hide": false,
           "instant": false,
           "legendFormat": "scope:watched",
@@ -2371,7 +2321,7 @@
           "refId": "B"
         }
       ],
-      "title": "Missed blocks last 24H (count)",
+      "title": "Untimely or bad head vote (%)",
       "type": "timeseries"
     }
   ],
@@ -2427,7 +2377,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {
@@ -2443,7 +2393,7 @@
   },
   "timezone": "utc",
   "title": "Ethereum Kiln Overview",
-  "uid": "acc6771c-f2fb-4735-b747-6eb197064745",
-  "version": 30,
+  "uid": "acc6771c-f2fb-4735-b747-6eb197064746",
+  "version": 13,
   "weekStart": "monday"
 }

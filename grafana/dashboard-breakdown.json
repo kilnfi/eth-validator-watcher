@@ -21,7 +21,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "11.5.1"
+      "version": "11.5.2"
     },
     {
       "type": "panel",
@@ -127,7 +127,7 @@
         "content": "\n- [open an issue](https://github.com/kilnfi/eth-validator-watcher/issues/new)\n- [github repository](https://github.com/kilnfi/eth-validator-watcher)\n- [beaconcha.in](https://beaconcha.in/)\n- [bageth.xyz](https://www.bageth.xyz/)\n- [etherscan.io](https://etherscan.io/)",
         "mode": "markdown"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "title": "Quick Links",
       "type": "text"
     },
@@ -184,7 +184,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -259,7 +259,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -339,7 +339,7 @@
         "sizing": "auto",
         "valueMode": "text"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -476,7 +476,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -559,7 +559,7 @@
           "reverse": false
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -677,7 +677,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -692,7 +692,7 @@
           "refId": "A"
         }
       ],
-      "title": "Real-time duties",
+      "title": "Attestation Rate (real-time)",
       "type": "timeseries"
     },
     {
@@ -782,7 +782,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -797,7 +797,7 @@
           "refId": "A"
         }
       ],
-      "title": "Missed Attestations Per Epoch",
+      "title": "Missed Attestations Per Epoch (with 1 epoch delay)",
       "type": "timeseries"
     },
     {
@@ -887,7 +887,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -902,7 +902,7 @@
           "refId": "A"
         }
       ],
-      "title": "Consecutive Missed Attestations Per Epoch",
+      "title": "Consecutive Missed Attestations Per Epoch (with 1 epoch delay)",
       "type": "timeseries"
     },
     {
@@ -980,7 +980,7 @@
         "sizing": "auto",
         "valueMode": "text"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1077,7 +1077,7 @@
         "sizing": "auto",
         "valueMode": "text"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1174,7 +1174,7 @@
         "sizing": "auto",
         "valueMode": "text"
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1292,7 +1292,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1396,7 +1396,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1500,7 +1500,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.5.1",
+      "pluginVersion": "11.5.2",
       "targets": [
         {
           "datasource": {
@@ -1610,7 +1610,7 @@
   },
   "timezone": "utc",
   "title": "Ethereum Kiln Breakdown",
-  "uid": "aa3b3d43-e0f9-445a-be20-856c00610e08",
-  "version": 6,
+  "uid": "aa3b3d43-e0f9-445a-be20-856c00620e08",
+  "version": 4,
   "weekStart": "monday"
 }
