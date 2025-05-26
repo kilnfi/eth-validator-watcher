@@ -26,34 +26,6 @@ perform:
 
 ![breakdown-dashboard](docs/img/watcher-breakdown.png)
 
-# Description
-
-**Ethereum Validator Watcher** monitors the Ethereum beacon chain in
-real-time and provides metrics around when one of your validator:
-
-- is going to propose a block (in the next two epochs)
-- missed a block proposal
-- did not optimally attest
-- missed an attestation
-- missed two attestations in a row
-- got slashed
-- did not had ideal source, target or head reward
-
-It also exports some general metrics such as:
-
-- your USD assets under management
-- the total staking market cap
-- the epoch and slot
-- the number or total slashed validators
-- the ETH/USD conversion rate
-- the number of your queued validators
-- the number of your active validators
-- the number of the network queued validators
-- the number of the network active validators
-- the entry queue duration estimation
-
-The Prometheus endpoint is automatically exposed on port 8000.
-
 ## Command line options
 
 ```
