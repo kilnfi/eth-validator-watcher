@@ -321,27 +321,30 @@ PYBIND11_MODULE(eth_validator_watcher_ext, m) {
     std::size_t chunk = (vals.size() / n) + 1;
     std::vector<std::thread> threads;
     std::vector<std::map<std::string, MetricsByLabel>> thread_metrics(n);
-
-    for (size_t i = 0; i < n; i++) {
-      threads.push_back(std::thread([slot, i, chunk, &vals, &thread_metrics] {
-        std::size_t from = i * chunk;
-        std::size_t to = std::min(from + chunk, vals.size());
-        process(slot, from, to, vals, thread_metrics[i]);
-      }));
-    }
-
-    for (auto& thread: threads) {
-      thread.join();
-    }
-
     std::map<std::string, MetricsByLabel> metrics;
-    merge(thread_metrics, &metrics);
+
+    {
+      py::gil_scoped_release release;
+      for (size_t i = 0; i < n; i++) {
+        threads.push_back(std::thread([slot, i, chunk, &vals, &thread_metrics] {
+            std::size_t from = i * chunk;
+            std::size_t to = std::min(from + chunk, vals.size());
+            process(slot, from, to, vals, thread_metrics[i]);
+        }));
+      }
+
+      for (auto& thread: threads) {
+        thread.join();
+      }
+
+      merge(thread_metrics, &metrics);
+    }
 
     py::dict pymetrics;
     for (const auto& [label, metric]: metrics) {
       pymetrics[py::str(label)] = metric;
     }
- 
+
     return pymetrics;
   });
 }
