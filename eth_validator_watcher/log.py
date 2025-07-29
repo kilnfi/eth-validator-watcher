@@ -106,7 +106,7 @@ def log_single_entry(cfg: Config, validator: str, registry: WatchedValidators, m
             label_msg_slack = f' ({", ".join([f"`{label}`" for label in labels])})'
             label_msg_shell = f' ({", ".join(labels)})'
 
-    msg_shell = f'{color}{emoji} Validator {shorten_validator(validator)}{label_msg_shell} {msg}{COLOR_RESET}'
+    msg_shell = f'{color}{emoji} Validator {shorten_validator(validator)}{label_msg_shell} {msg} on slot={slot}{COLOR_RESET}'
     logging.info(msg_shell)
 
     msg_slack = f'{emoji} Validator {beaconcha_validator_link(cfg, validator)}{label_msg_slack} {msg} on slot {beaconcha_slot_link(cfg, slot)}'
