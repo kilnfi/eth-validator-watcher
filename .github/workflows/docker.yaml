@@ -4,19 +4,19 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'eth_validator_watcher/*.py'
+      - 'eth_validator_watcher/**'
       - 'Dockerfile'
       - 'pyproject.toml'
-      - ".github/workflows/docker.yaml"
+      - '.github/workflows/docker.yaml'
     tags:
       - "v*"
   pull_request:
     branches:  ["main"]
     paths:
-      - 'eth_validator_watcher/*.py'
+      - 'eth_validator_watcher/**'
       - 'Dockerfile'
       - 'pyproject.toml'
-      - ".github/workflows/docker.yaml"
+      - '.github/workflows/docker.yaml'
 
 permissions:
   contents: read
@@ -26,13 +26,9 @@ jobs:
   docker-build-push:
     runs-on: ubuntu-latest
     steps:
-      - name: "git:checkout"
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: "docker:meta"
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
           flavor: latest=true
@@ -42,18 +38,16 @@ jobs:
             type=semver,pattern={{version}}
       - name: "docker:login:ghcr.io"
         if: github.ref_type == 'tag'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
       - name: "docker:buildx"
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: "docker:build-push"
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
-          context: .
-          file: Dockerfile
           push: ${{ github.ref_type == 'tag' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
