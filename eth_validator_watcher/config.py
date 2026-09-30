@@ -80,12 +80,13 @@ def load_config(config_file: str) -> Config:
     with open(config_file, 'r') as fh:
         logging.info(f'⚙️ Parsing configuration file {config_file}')
 
-        # We support json for large configuration files (500 MiB)
-        # which can take time to parse with PyYAML.
+        # CLoader is PyYAML's full (unsafe) loader. The watcher config only
+        # contains plain mappings/lists/scalars, so parse it with the safe
+        # C loader: same speed, no arbitrary object construction.
         if config_file.endswith('.json'):
             config = json.load(fh)
         else:
-            config = yaml.load(fh, Loader=yaml.CLoader) or dict()
+            config = yaml.load(fh, Loader=yaml.CSafeLoader) or dict()
 
         logging.info('⚙️ Validating configuration file')
         from_default = _default_config().model_dump()
